@@ -1,10 +1,10 @@
 # 인공지능 파트
 
-## example code
-  - 동작 못시켜봄
+### Example_code folder
   - tflearn 에서 에러 ( 버전 차이 ? )
+  - 기본적인 감정을 포함한 데이터
 
-## Face_Recognition
+### Face_Recognition folder
   - 얼굴인식 모듈
   
 ### 진행중인 방법
