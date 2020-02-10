@@ -1,0 +1,17 @@
+﻿<Window x:Class="CLIENT_wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CLIENT_wpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="503.538" Width="987.839"
+        Loaded="Window_Loaded" Closing="Window_Closing">
+    <Grid Margin="-4,0,3.6,0">
+        <Image x:Name="image" Height="411" Margin="16,10,6,0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+        <Button x:Name="button" Content="SHOW" HorizontalAlignment="Left" Margin="583,443,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click"/>
+        <TextBox x:Name="tx" HorizontalAlignment="Left" Height="23" Margin="809,214,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="662,443,0,0" VerticalAlignment="Top" Width="75" Click="CLICK_CONNECT"/>
+
+    </Grid>
+</Window>
