@@ -19,7 +19,7 @@ using System.Net.Sockets;
 using System.Windows.Threading;
 using System.Threading;
 
-
+using System.Runtime.InteropServices;
 
 namespace CLIENT_wpf
 {
@@ -32,20 +32,28 @@ namespace CLIENT_wpf
         const int BUF_LEN = 65540;
         const int PACK_SIZE = 4096;
         const int ENCODE_QUALITY = 80;
+        const int frameWidth = 640;
+        const int frameHeight = 480;
+        const String SERV_IP = "127.0.0.1";
+        const int SERV_PORT = 9000;
 
+        int ID;
+        int PORT;
 
         VideoCapture cap;
         WriteableBitmap wb;
-        const int frameWidth = 640;
-        const int frameHeight = 480;
-        bool loop = false;
+
         Socket sock = null;
 
+        bool loop = false;
 
         Thread t;
         Thread T_msg_recv;
         bool t_loop = true;
-        
+
+        [DllImport("test.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void test();
+
 
         public MainWindow()
         {
@@ -55,9 +63,35 @@ namespace CLIENT_wpf
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("프로세스 시작");
+            /*
+            String BASE = "#ABC:33,CDD:47";
+
+
+            var parts = BASE.Split(',');
+            Console.WriteLine("배열의 갯수 : "+parts.Length);
+            Console.WriteLine(parts[0]+"\n"+parts[1] + "\n" + BASE.Substring(5));
+
+            Console.WriteLine(Tokenized(parts[1],":") +"\n"+ Tokenized(parts[0], ":"));
+           */
+
+            test();
+            
+            /*
             t = new Thread(ok);
             t.Start();
+            */
+        }
+
+        private int Tokenized(String BASE,String TARGET)
+        {
+            int index;
+            index = BASE.IndexOf(TARGET);
+            String sub_str = BASE.Substring(index+1);
+            if (int.TryParse(sub_str, out index))
+                return index;
+            
+            Console.WriteLine("Tokenize error - /Base : " + BASE +" /Sub string : "+sub_str+" /Index : "+index);
+            return -1;
             
         }
 
@@ -95,9 +129,12 @@ namespace CLIENT_wpf
         }
         private void Release_thread(Thread t)
         {
+            if (t == null)
+                return;
             t.Interrupt();
             t.Abort();
         }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (!InitWebCamera())
@@ -140,7 +177,7 @@ namespace CLIENT_wpf
             else
                 //MessageBox.Show("CONNECT OK");
 
-            T_msg_recv = new Thread(THREAD_RECV);
+            T_msg_recv = new Thread(THREAD_MSG_RECV);
             T_msg_recv.Start();
 
         }
@@ -150,11 +187,13 @@ namespace CLIENT_wpf
             sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             try
             {
-                sock.Connect("127.0.0.1", 9000);
+                sock.Connect(SERV_IP, SERV_PORT);
+                Console.WriteLine("최초 연결 성공");
                 return true;
             }
             catch
             {
+                Console.WriteLine("최초 연결 실패");
                 return false;
             }
         }
@@ -176,7 +215,7 @@ namespace CLIENT_wpf
             t_loop = true;
         }
 
-        private void THREAD_RECV()
+        private void THREAD_MSG_RECV()
         {
             byte[] buf = new byte[BUF_SZ];
             String data;
@@ -187,21 +226,60 @@ namespace CLIENT_wpf
                 len = sock.Receive(buf);
                 data = Encoding.UTF8.GetString(buf, 0, len);
                 Console.WriteLine(data);
-                if(data[0] == '#')
+                if (data[0] == '#')
                 {
-                    var parts = data.Split(' ');
-                    int a = Convert.ToInt32(parts[0]);
-                    int b = Convert.ToInt32(parts[1]);
+                    Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
+                    var token = data.Split(',');
+                    ID = Tokenized(token[0], ":");
+                    PORT = Tokenized(token[1], ":");
 
-                    Console.WriteLine(a + b);
-                  
-                    
-                    
-                    
+                    Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
+                    /*
+                    data = "Hi i'm c# Client";
+                    buf = Encoding.ASCII.GetBytes(data);
+                    len = sock.Send(buf);
+                    */
+                    //SEND 스레드
+                }
+                else if (data[0] == '$')
+                {
+                    Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
+                    var token = data.Split(',');
+                    int other_id = Tokenized(token[0], ":");
+                    int other_port = Tokenized(token[1], ":");
+                    //PORT 요청 작업
+
+                }
+                else if (data[0] == '@')
+                {
+                    int target_port = Tokenized(data, ":");
+                    //RECV 스레드
                 }
                 
                 
             }
+        }
+
+        private void THREAD_SEND()
+        {
+            byte[] buf = new byte[BUF_SZ];
+            String msg;
+            int len;
+            
+            Socket send_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            try
+            {
+                send_sock.Connect(SERV_IP, PORT);
+            }
+            catch
+            {
+                Console.WriteLine("연결 실패");
+                return;
+            }
+
+
+
+
         }
     }
 }
