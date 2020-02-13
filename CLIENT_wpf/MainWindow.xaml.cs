@@ -28,6 +28,9 @@ namespace CLIENT_wpf
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
+        const int CONNECT = 1;
+        const int TCP = 1;
+        const int UDP = 2;
         const int BUF_SZ = 1024;
         const int BUF_LEN = 65540;
         const int PACK_SIZE = 4096;
@@ -51,8 +54,10 @@ namespace CLIENT_wpf
         Thread T_msg_recv;
         bool t_loop = true;
 
-        [DllImport("test.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void test();
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void testwo();
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void dll_IMG_SEND_THREAD(int socket_no);
 
 
         public MainWindow()
@@ -73,13 +78,10 @@ namespace CLIENT_wpf
 
             Console.WriteLine(Tokenized(parts[1],":") +"\n"+ Tokenized(parts[0], ":"));
            */
-
-            test();
             
-            /*
-            t = new Thread(ok);
+            t = new Thread(()=>testwo());
             t.Start();
-            */
+            
         }
 
         private int Tokenized(String BASE,String TARGET)
@@ -167,52 +169,70 @@ namespace CLIENT_wpf
 
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
-            Boolean IS;
-
-            IS = CREATE_SOCKET();
-            if (!IS)
+            sock = CREATE_SOCKET(SERV_IP,SERV_PORT,TCP,CONNECT);
+            if (sock!=null)
             {
                 //MessageBox.Show("CONNECT FALSE");
             }
-            else
+            else {
                 //MessageBox.Show("CONNECT OK");
-
+            }
             T_msg_recv = new Thread(THREAD_MSG_RECV);
-            T_msg_recv.Start();
+            T_msg_recv.Start(); 
 
         }
 
-        private bool CREATE_SOCKET()
+        private Socket CREATE_SOCKET(String ip, int port, int type,int opt)
         {
-            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-            try
+            Socket temp_sock;
+            if (type == TCP)
             {
-                sock.Connect(SERV_IP, SERV_PORT);
-                Console.WriteLine("최초 연결 성공");
-                return true;
-            }
-            catch
-            {
-                Console.WriteLine("최초 연결 실패");
-                return false;
-            }
-        }
+                temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+                try
+                {
+                    temp_sock.Connect(ip, port);
+                    Console.WriteLine("TCP 연결 성공");
+                    return temp_sock;
+                }
+                catch
+                {
+                    Console.WriteLine("TCP 연결 실패");
+                    return null;
+                }
 
-        private void ok()
-        {
-            for (int i = 0;t_loop ; i++)
+            }
+            else if (type == UDP)
             {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                    (ThreadStart)delegate ()
+                temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                if (opt == 1)
+                {
+                    try
                     {
-                        int k = int.Parse(tx.Text);
-                        k++;
-                        tx.Text = k.ToString();
-                    });
+                        sock.Connect(ip, port);
+                        Console.WriteLine("UDP 연결 성공");
+                        return temp_sock;
+                    }
+                    catch
+                    {
+                        Console.WriteLine("UDP 연결 실패");
+                        return null;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("UDP 소켓 생성 성공");
+                    return temp_sock;
+                }
             }
+            else
+                Console.WriteLine("잘못된 소켓 생성");
 
-            t_loop = true;
+            return null;
+        }
+
+        private void ok(String arg)
+        {
+            Console.WriteLine(arg);
         }
 
         private void THREAD_MSG_RECV()
@@ -239,6 +259,13 @@ namespace CLIENT_wpf
                     buf = Encoding.ASCII.GetBytes(data);
                     len = sock.Send(buf);
                     */
+                    Socket send_sock = CREATE_SOCKET(SERV_IP, PORT, UDP, CONNECT);
+                    
+
+                    
+                   
+
+
                     //SEND 스레드
                 }
                 else if (data[0] == '$')

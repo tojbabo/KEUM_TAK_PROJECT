@@ -1,5 +1,12 @@
 # KEUM_TAK_PROJECT
 프로젝트 속성 - 구성 속성 - 디버깅 - 환경 <PATH=C:\Temp\opencv\build\x64\vc15\bin;%PATH%> 내용을 추가해 주어야 한다.
+# - 0213
+dll을 thread로 구동
+1. c++로 작성하여 dll로 만든 모듈을 thread로 구동함을 확인
+2. 인자 넘겨주는 것 또한 정상적으로 동작됨을 확인
+
+NEXT - send thread 구현 -> socket을 만들어서 인자로 넘겨줄지, socket생성 과정부터 thread에서 처리할지 결정해야함.
+#
 # - 0211
 WPF 환경에서 dll 연동
 1. sscanf의 부재점을 단순히 인덱싱 하여 substring하는 방식으로 해결
