@@ -2,6 +2,13 @@
 using namespace cv;
 using namespace std;
 
+void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
+	memset(adr, 0, sizeof(*adr));
+	adr->sin_family = AF_INET;
+	adr->sin_addr.s_addr = inet_addr(ip);
+	adr->sin_port = htons(port);
+}
+
 extern "C" {
 	__declspec(dllexport) void test()
 	{
@@ -23,12 +30,19 @@ extern "C" {
 		}
 
 	}
-	__declspec(dllexport) void dll_IMG_SEND_THREAD(int socket_no)
+	__declspec(dllexport) void dll_IMG_SEND_THREAD(String serv_ip,int serv_port)
 	{
+		SOCKADDR_IN adr;
+		SOCKET sock;
 		Mat frame;
 		VideoCapture cap(0);
-
 		vector<uchar> encoded;
+		
+		OJJJ_Memset(&adr, serv_ip.c_str(), serv_port);
+		cout << "[SEND THREAD] - Memset ok"<<endl;
+		sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		connect(sock, (struct sockaddr*)&adr, sizeof(adr));
+		cout << "[SEND THREAD] - connect ok" << endl;
 
 		namedWindow("send", WINDOW_AUTOSIZE);
 		if (!cap.isOpened()) {
@@ -36,6 +50,7 @@ extern "C" {
 			exit(1);
 		}
 
+		cout << "[SEND THREAD] - sending start" << endl;
 		while (1) {
 			cap >> frame;
 			if (frame.size().width == 0)continue;//simple integrity check; skip erroneous data...
@@ -57,14 +72,21 @@ extern "C" {
 			ibuf[0] = total_pack;
 
 			// 전송에 앞서 패킷 수 통지
-			send(socket_no, (char*)ibuf, sizeof(int), 0);
+			send(sock, (char*)ibuf, sizeof(int), 0);
 
 			// 통지한 패킷 수 만큼 데이터 전송
 			for (int i = 0; i < total_pack; i++)
-				send(socket_no, (char*)&encoded[i*PACK_SZ], PACK_SZ, 0);
+				send(sock, (char*)&encoded[i*PACK_SZ], PACK_SZ, 0);
 			waitKey(FRAME_INTERVAL);
 
 			puts("sending");
 		}
 	}
+	__declspec(dllexport) void dll_IMG_RECV_THREAD(String serv_ip, int serv_port)
+	{
+	}
+
+	
+
+
 }

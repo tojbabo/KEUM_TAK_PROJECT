@@ -50,14 +50,15 @@ namespace CLIENT_wpf
 
         bool loop = false;
 
-        Thread t;
+        Thread T_img_send;
+        Thread T_img_recv;
         Thread T_msg_recv;
         bool t_loop = true;
 
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void testwo();
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void dll_IMG_SEND_THREAD(int socket_no);
+        extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);
 
 
         public MainWindow()
@@ -78,10 +79,10 @@ namespace CLIENT_wpf
 
             Console.WriteLine(Tokenized(parts[1],":") +"\n"+ Tokenized(parts[0], ":"));
            */
-            
+            /*
             t = new Thread(()=>testwo());
             t.Start();
-            
+            */            
         }
 
         private int Tokenized(String BASE,String TARGET)
@@ -92,7 +93,7 @@ namespace CLIENT_wpf
             if (int.TryParse(sub_str, out index))
                 return index;
             
-            Console.WriteLine("Tokenize error - /Base : " + BASE +" /Sub string : "+sub_str+" /Index : "+index);
+            Console.WriteLine("Tokenize error --- \n/Base : " + BASE +" /Sub string : "+sub_str+" /Index : "+index);
             return -1;
             
         }
@@ -126,7 +127,8 @@ namespace CLIENT_wpf
                 cap.Dispose();
             }
 
-            Release_thread(t);
+            Release_thread(T_img_recv);
+            Release_thread(T_img_send);
             Release_thread(T_msg_recv);   
         }
         private void Release_thread(Thread t)
@@ -230,11 +232,6 @@ namespace CLIENT_wpf
             return null;
         }
 
-        private void ok(String arg)
-        {
-            Console.WriteLine(arg);
-        }
-
         private void THREAD_MSG_RECV()
         {
             byte[] buf = new byte[BUF_SZ];
@@ -254,18 +251,8 @@ namespace CLIENT_wpf
                     PORT = Tokenized(token[1], ":");
 
                     Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
-                    /*
-                    data = "Hi i'm c# Client";
-                    buf = Encoding.ASCII.GetBytes(data);
-                    len = sock.Send(buf);
-                    */
-                    Socket send_sock = CREATE_SOCKET(SERV_IP, PORT, UDP, CONNECT);
-                    
-
-                    
-                   
-
-
+                   /* T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP,PORT));
+                    T_img_send.Start();*/
                     //SEND 스레드
                 }
                 else if (data[0] == '$')
@@ -274,6 +261,11 @@ namespace CLIENT_wpf
                     var token = data.Split(',');
                     int other_id = Tokenized(token[0], ":");
                     int other_port = Tokenized(token[1], ":");
+
+                    data = "$"+other_id.ToString();
+                    buf = Encoding.ASCII.GetBytes(data);
+                    len = sock.Send(buf);
+                    
                     //PORT 요청 작업
 
                 }
@@ -285,28 +277,6 @@ namespace CLIENT_wpf
                 
                 
             }
-        }
-
-        private void THREAD_SEND()
-        {
-            byte[] buf = new byte[BUF_SZ];
-            String msg;
-            int len;
-            
-            Socket send_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            try
-            {
-                send_sock.Connect(SERV_IP, PORT);
-            }
-            catch
-            {
-                Console.WriteLine("연결 실패");
-                return;
-            }
-
-
-
-
         }
     }
 }
