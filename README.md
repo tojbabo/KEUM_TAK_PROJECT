@@ -1,5 +1,12 @@
 # KEUM_TAK_PROJECT
 프로젝트 속성 - 구성 속성 - 디버깅 - 환경 <PATH=C:\Temp\opencv\build\x64\vc15\bin;%PATH%> 내용을 추가해 주어야 한다.
+# - 0214
+SEND THREAD 완벽구현
+1. DLL 내에서 thread생성하여 send하는 기능 구현
+2. IP와 PORT를 넘겨주어 thread내에서 socket을 생성하여 전송하도록 함.
+
+NEXT - RECV thread 구현
+#
 # - 0213
 dll을 thread로 구동
 1. c++로 작성하여 dll로 만든 모듈을 thread로 구동함을 확인
