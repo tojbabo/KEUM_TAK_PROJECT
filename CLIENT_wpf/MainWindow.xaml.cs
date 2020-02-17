@@ -92,8 +92,8 @@ namespace CLIENT_wpf
             String sub_str = BASE.Substring(index+1);
             if (int.TryParse(sub_str, out index))
                 return index;
-            
-            Console.WriteLine("Tokenize error --- \n/Base : " + BASE +" /Sub string : "+sub_str+" /Index : "+index);
+
+            Console.WriteLine("Tokenize error --- '" + TARGET + "' not found \n/Base : " + BASE + " /Sub string : " + sub_str + " /Index : " + index);
             return -1;
             
         }
@@ -251,8 +251,8 @@ namespace CLIENT_wpf
                     PORT = Tokenized(token[1], ":");
 
                     Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
-                   /* T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP,PORT));
-                    T_img_send.Start();*/
+                    T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP,PORT));
+                    T_img_send.Start();
                     //SEND 스레드
                 }
                 else if (data[0] == '$')
@@ -277,7 +277,8 @@ namespace CLIENT_wpf
                 
                 
             }
-        }
+        }   
     }
 }
 
+  
