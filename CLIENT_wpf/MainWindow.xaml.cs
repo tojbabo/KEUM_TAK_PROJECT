@@ -106,14 +106,14 @@ namespace CLIENT_wpf
             int num = Base.IndexOf(target);
             if (num == -1)
                 return num;
-            /*
+            /**/
             Console.WriteLine("BASE : "+Base);
             Console.WriteLine("Target : "+target);
             Console.WriteLine("Total lenth : " + Base.Length);
             Console.WriteLine("Index : "+num);
             Console.WriteLine("Left : "+Base.Substring(0,num));
             Console.WriteLine("Right : "+Base.Substring(num));
-            */
+            
             return num;
         }
 
@@ -264,21 +264,25 @@ namespace CLIENT_wpf
                 temp = Encoding.UTF8.GetString(buf, 0, len);
                 Console.WriteLine("서버로 부터 수신한 메시지 : "+temp);
                 data += temp;
-                int num = TOKEN(data, "\n");
-                if (num == -1)
+                while (true)
                 {
-                    continue;
-                }
-                else if(num == data.Length-1)
-                {
-                    MSG_CHECKING(data);
-                    data = "";
-                }
-                else
-                {
-                    temp = data.Substring(0, num);
-                    data = data.Substring(num);
-                    MSG_CHECKING(temp);
+                    int num = TOKEN(data, "\n");
+                    if (num == -1)
+                    {
+                        break;
+                    }
+                    else if (num == data.Length - 1)
+                    {
+                        MSG_CHECKING(data);
+                        data = "";
+                        break;
+                    }
+                    else
+                    {
+                        temp = data.Substring(0, num);
+                        data = data.Substring(num+1);
+                        MSG_CHECKING(temp);
+                    }
                 }
             }
         }   
@@ -310,8 +314,6 @@ namespace CLIENT_wpf
                 buf = Encoding.ASCII.GetBytes(data);
                 len = sock.Send(buf);
                 Console.WriteLine("send to server : " + data);
-
-
                 //PORT 요청 작업
 
             }
@@ -319,6 +321,7 @@ namespace CLIENT_wpf
             {
                 Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
                 int target_port = Tokenized(data, ":");
+                Console.WriteLine("New port is : " + target_port);
                 //RECV 스레드
             }
         }
