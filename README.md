@@ -1,5 +1,13 @@
 # KEUM_TAK_PROJECT
 프로젝트 속성 - 구성 속성 - 디버깅 - 환경 <PATH=C:\Temp\opencv\build\x64\vc15\bin;%PATH%> 내용을 추가해 주어야 한다.
+# - 0218
+통신간에 발생하는 문제점 개선
+1. tcp 통신간에 버퍼가 끊기는 문제점 개선
+   ( 데이터의 말단에  '\n'으로 정의하여 말단을 만나기 전까진 데이터를 수신했다고 생각하지 않도록 함)
+2. 서버 측에선 아직 미구현 
+
+NEXT - RECV Thread 구현
+#
 # - 0214
 SEND THREAD 완벽구현
 1. DLL 내에서 thread생성하여 send하는 기능 구현

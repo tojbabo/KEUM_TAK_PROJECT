@@ -69,6 +69,9 @@ namespace CLIENT_wpf
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+           // String eng = "Hi\n I'm fine";
+            //TOKEN(eng, "\n");
+
             /*
             String BASE = "#ABC:33,CDD:47";
 
@@ -96,6 +99,22 @@ namespace CLIENT_wpf
             Console.WriteLine("Tokenize error --- '" + TARGET + "' not found \n/Base : " + BASE + " /Sub string : " + sub_str + " /Index : " + index);
             return -1;
             
+        }
+
+        private int TOKEN(String Base, String target)
+        {
+            int num = Base.IndexOf(target);
+            if (num == -1)
+                return num;
+            /*
+            Console.WriteLine("BASE : "+Base);
+            Console.WriteLine("Target : "+target);
+            Console.WriteLine("Total lenth : " + Base.Length);
+            Console.WriteLine("Index : "+num);
+            Console.WriteLine("Left : "+Base.Substring(0,num));
+            Console.WriteLine("Right : "+Base.Substring(num));
+            */
+            return num;
         }
 
         private bool InitWebCamera()
@@ -235,49 +254,74 @@ namespace CLIENT_wpf
         private void THREAD_MSG_RECV()
         {
             byte[] buf = new byte[BUF_SZ];
-            String data;
             int len;
+            String data ="";
+            String temp;
             while (true)
             {
-                Console.WriteLine("서버로 부터 기다리는 중");
+                Console.WriteLine("메시지 수신중");
                 len = sock.Receive(buf);
-                data = Encoding.UTF8.GetString(buf, 0, len);
-                Console.WriteLine(data);
-                if (data[0] == '#')
+                temp = Encoding.UTF8.GetString(buf, 0, len);
+                Console.WriteLine("서버로 부터 수신한 메시지 : "+temp);
+                data += temp;
+                int num = TOKEN(data, "\n");
+                if (num == -1)
                 {
-                    Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
-                    var token = data.Split(',');
-                    ID = Tokenized(token[0], ":");
-                    PORT = Tokenized(token[1], ":");
-
-                    Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
-                    T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP,PORT));
-                    T_img_send.Start();
-                    //SEND 스레드
+                    continue;
                 }
-                else if (data[0] == '$')
+                else if(num == data.Length-1)
                 {
-                    Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
-                    var token = data.Split(',');
-                    int other_id = Tokenized(token[0], ":");
-                    int other_port = Tokenized(token[1], ":");
-
-                    data = "$"+other_id.ToString();
-                    buf = Encoding.ASCII.GetBytes(data);
-                    len = sock.Send(buf);
-                    
-                    //PORT 요청 작업
-
+                    MSG_CHECKING(data);
+                    data = "";
                 }
-                else if (data[0] == '@')
+                else
                 {
-                    int target_port = Tokenized(data, ":");
-                    //RECV 스레드
+                    temp = data.Substring(0, num);
+                    data = data.Substring(num);
+                    MSG_CHECKING(temp);
                 }
-                
-                
             }
         }   
+
+        private void MSG_CHECKING(String data)
+        {
+            byte[] buf = new byte[BUF_SZ];
+            int len;
+            if (data[0] == '#')
+            {
+                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
+                var token = data.Split(',');
+                ID = Tokenized(token[0], ":");
+                PORT = Tokenized(token[1], ":");
+
+                Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
+                //T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
+                //T_img_send.Start();
+                //SEND 스레드
+            }
+            else if (data[0] == '$')
+            {
+                Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
+                var token = data.Split(',');
+                int other_id = Tokenized(token[0], ":");
+                int other_port = Tokenized(token[1], ":");
+
+                data = "$" + other_id.ToString();
+                buf = Encoding.ASCII.GetBytes(data);
+                len = sock.Send(buf);
+                Console.WriteLine("send to server : " + data);
+
+
+                //PORT 요청 작업
+
+            }
+            else if (data[0] == '@')
+            {
+                Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
+                int target_port = Tokenized(data, ":");
+                //RECV 스레드
+            }
+        }
     }
 }
 
