@@ -37,7 +37,7 @@ namespace CLIENT_wpf
         const int ENCODE_QUALITY = 80;
         const int frameWidth = 640;
         const int frameHeight = 480;
-        const String SERV_IP = "127.0.0.1";
+        const String SERV_IP = "192.168.0.48";
         const int SERV_PORT = 9000;
 
         int ID;
@@ -59,6 +59,8 @@ namespace CLIENT_wpf
         extern public static void testwo();
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);
 
 
         public MainWindow()
@@ -289,8 +291,6 @@ namespace CLIENT_wpf
 
         private void MSG_CHECKING(String data)
         {
-            byte[] buf = new byte[BUF_SZ];
-            int len;
             if (data[0] == '#')
             {
                 Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
@@ -299,8 +299,8 @@ namespace CLIENT_wpf
                 PORT = Tokenized(token[1], ":");
 
                 Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
-                //T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
-                //T_img_send.Start();
+                T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
+                T_img_send.Start();
                 //SEND 스레드
             }
             else if (data[0] == '$')
@@ -309,10 +309,12 @@ namespace CLIENT_wpf
                 var token = data.Split(',');
                 int other_id = Tokenized(token[0], ":");
                 int other_port = Tokenized(token[1], ":");
+                byte[] buf = new byte[BUF_SZ];
 
+            
                 data = "$" + other_id.ToString();
                 buf = Encoding.ASCII.GetBytes(data);
-                len = sock.Send(buf);
+                sock.Send(buf);
                 Console.WriteLine("send to server : " + data);
                 //PORT 요청 작업
 
@@ -323,6 +325,8 @@ namespace CLIENT_wpf
                 int target_port = Tokenized(data, ":");
                 Console.WriteLine("New port is : " + target_port);
                 //RECV 스레드
+                T_img_recv = new Thread(()=> dll_IMG_RECV_THREAD(SERV_IP,target_port));
+                T_img_recv.Start();
             }
         }
     }
