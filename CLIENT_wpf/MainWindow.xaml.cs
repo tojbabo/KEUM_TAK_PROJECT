@@ -57,6 +57,8 @@ namespace CLIENT_wpf
         extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void Hi();
 
         // 최초 실행되는 함수
         public MainWindow()
@@ -66,23 +68,7 @@ namespace CLIENT_wpf
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-           // String eng = "Hi\n I'm fine";
-            //TOKEN(eng, "\n");
-
-            /*
-            String BASE = "#ABC:33,CDD:47";
-
-
-            var parts = BASE.Split(',');
-            Console.WriteLine("배열의 갯수 : "+parts.Length);
-            Console.WriteLine(parts[0]+"\n"+parts[1] + "\n" + BASE.Substring(5));
-
-            Console.WriteLine(Tokenized(parts[1],":") +"\n"+ Tokenized(parts[0], ":"));
-           */
-            /*
-            t = new Thread(()=>testwo());
-            t.Start();
-            */            
+            Hi();
         }
         // 문자열을 나누는 함수 - 임시버전
         private int Tokenized(String BASE,String TARGET)
