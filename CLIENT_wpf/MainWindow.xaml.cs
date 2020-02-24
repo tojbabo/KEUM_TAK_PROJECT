@@ -35,10 +35,11 @@ namespace CLIENT_wpf
         const int BUF_LEN = 65540;
         const int PACK_SIZE = 4096;
         const int ENCODE_QUALITY = 80;
-        const int frameWidth = 640;
-        const int frameHeight = 480;
-        const String SERV_IP = "192.168.0.48";
-        const int SERV_PORT = 9000;
+        const int frameWidth = 320;
+        const int frameHeight = 240;
+
+        String SERV_IP = "192.168.0.48";
+        int SERV_PORT = 9000;
 
         int ID;
         int PORT;
@@ -48,27 +49,21 @@ namespace CLIENT_wpf
 
         Socket sock = null;
 
-        bool loop = false;
-
         Thread T_img_send;
         Thread T_img_recv;
         Thread T_msg_recv;
-        bool t_loop = true;
 
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void testwo();
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);
 
-
+        // 최초 실행되는 함수
         public MainWindow()
         {
             InitializeComponent();
-            
         }
-
+        // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
            // String eng = "Hi\n I'm fine";
@@ -89,7 +84,7 @@ namespace CLIENT_wpf
             t.Start();
             */            
         }
-
+        // 문자열을 나누는 함수 - 임시버전
         private int Tokenized(String BASE,String TARGET)
         {
             int index;
@@ -102,7 +97,7 @@ namespace CLIENT_wpf
             return -1;
             
         }
-
+        // 문자열 나누는 함수 - 임시번전
         private int TOKEN(String Base, String target)
         {
             int num = Base.IndexOf(target);
@@ -118,7 +113,7 @@ namespace CLIENT_wpf
             
             return num;
         }
-
+        // 최초 카메라 셋팅
         private bool InitWebCamera()
         {
             try
@@ -137,10 +132,9 @@ namespace CLIENT_wpf
                 return false;
             }
         }
-
+        // 종료 시 처리할 작업들
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            loop = false;
 
             
             if (cap!=null&&cap.IsOpened())
@@ -159,27 +153,51 @@ namespace CLIENT_wpf
             t.Interrupt();
             t.Abort();
         }
-
+        // SHOW 버튼 클릭시
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (!InitWebCamera())
             {
-                ////MessageBox.Show("CAM OPEN FALSE");
+                //MessageBox.Show("CAM OPEN FALSE");
             }
             else
             {
                 //MessageBox.Show("CAM OPEN OK");
             }
 
-            Mat frame = new Mat(); 
             //Cv2.NamedWindow("1", WindowMode.AutoSize);
-            loop = true;
-            while (loop)
+            CAPTURE_IMG();
+        }
+        // CONNECT 버튼 클릭시
+        private void CLICK_CONNECT(object sender, RoutedEventArgs e)
+        {
+            SERV_IP = TBX_IP.Text;
+            int.TryParse(TBX_PORT.Text, out SERV_PORT);
+
+
+            sock = CREATE_SOCKET(SERV_IP,SERV_PORT,TCP,CONNECT);
+            if (sock!=null)
             {
-                if (cap.Read(frame))
+                //MessageBox.Show("CONNECT FALSE");
+            }
+            else {
+                //MessageBox.Show("CONNECT OK");
+            }
+            
+            T_msg_recv = new Thread(THREAD_MSG_RECV);
+            T_msg_recv.Start(); 
+
+        }
+        // 윈도우 상에 이미지 출력 관련 함수
+        private void CAPTURE_IMG()
+        {
+            Mat mat = new Mat();
+            while (true)
+            {
+                if (cap.Read(mat))
                 {
                     //Cv2.ImShow("1", frame);
-                    WriteableBitmapConverter.ToWriteableBitmap(frame, wb);
+                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
                     image.Source = wb;
                 }
 
@@ -189,24 +207,11 @@ namespace CLIENT_wpf
 
             }
         }
-
-        private void CLICK_CONNECT(object sender, RoutedEventArgs e)
-        {
-            sock = CREATE_SOCKET(SERV_IP,SERV_PORT,TCP,CONNECT);
-            if (sock!=null)
-            {
-                //MessageBox.Show("CONNECT FALSE");
-            }
-            else {
-                //MessageBox.Show("CONNECT OK");
-            }
-            T_msg_recv = new Thread(THREAD_MSG_RECV);
-            T_msg_recv.Start(); 
-
-        }
-
+        // 소켓을 생성하는 함수 
         private Socket CREATE_SOCKET(String ip, int port, int type,int opt)
         {
+            // type : TCP(1) / UDP(2)
+            // opt : 1 - 연결 UDP / 그 외: 일반 UDP
             Socket temp_sock;
             if (type == TCP)
             {
@@ -252,7 +257,7 @@ namespace CLIENT_wpf
 
             return null;
         }
-
+        // 메시지 수신 쓰레드
         private void THREAD_MSG_RECV()
         {
             byte[] buf = new byte[BUF_SZ];
@@ -265,6 +270,11 @@ namespace CLIENT_wpf
                 len = sock.Receive(buf);
                 temp = Encoding.UTF8.GetString(buf, 0, len);
                 Console.WriteLine("서버로 부터 수신한 메시지 : "+temp);
+
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                 {
+                     TBX_MESSAGE.AppendText(temp);
+                 }));
                 data += temp;
                 while (true)
                 {
@@ -288,7 +298,7 @@ namespace CLIENT_wpf
                 }
             }
         }   
-
+        // 수신한 메시지를 프로토콜에 맞게 확인 후 처리하는 함수
         private void MSG_CHECKING(String data)
         {
             if (data[0] == '#')
@@ -327,6 +337,25 @@ namespace CLIENT_wpf
                 //RECV 스레드
                 T_img_recv = new Thread(()=> dll_IMG_RECV_THREAD(SERV_IP,target_port));
                 T_img_recv.Start();
+            }
+        }
+        // 서버로 메시지 보내는 함수
+        private void BTN_MSG_SEND_Click(object sender, RoutedEventArgs e)
+        {
+            TBX_INPUT.Focus();
+            byte[] buf = new byte[BUF_SZ];
+            
+            buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text+"\n");
+            sock.Send(buf);
+            TBX_INPUT.Text = "";
+            
+        }
+        // 엔터로 메시지 전송
+        private void TBX_INPUT_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Return)
+            {
+                BTN_MSG_SEND_Click(this,e);
             }
         }
     }

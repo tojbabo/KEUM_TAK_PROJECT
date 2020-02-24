@@ -5,13 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CLIENT_wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="503.538" Width="987.839"
+        Title="MainWindow" Height="385.538" Width="819.839"
         Loaded="Window_Loaded" Closing="Window_Closing">
-    <Grid Margin="-4,0,3.6,0">
-        <Image x:Name="image" Height="411" Margin="16,10,6,0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-        <Button x:Name="button" Content="SHOW" HorizontalAlignment="Left" Margin="583,443,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click"/>
-        <TextBox x:Name="tx" HorizontalAlignment="Left" Height="23" Margin="809,214,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="662,443,0,0" VerticalAlignment="Top" Width="75" Click="CLICK_CONNECT"/>
+    <Grid Margin="-4,0,2,2">
+        <Image x:Name="image" Height="240" Width="320" Margin="46,27,448,86"/>
+        <Button x:Name="button" Content="SHOW" HorizontalAlignment="Left" Margin="388,294,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click" Height="23"/>
+        <TextBox x:Name="TBX_MESSAGE" HorizontalAlignment="Left" Height="234" Margin="388,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="398"/>
+        <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="467,295,0,0" VerticalAlignment="Top" Width="75" Click="CLICK_CONNECT" Height="22"/>
+        <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="23" Margin="388,266,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="325" KeyDown="TBX_INPUT_KeyDown"/>
+        <Button x:Name="BTN_MSG_SEND" Content="SEND" HorizontalAlignment="Left" Margin="718,266,0,0" VerticalAlignment="Top" Width="68" Click="BTN_MSG_SEND_Click" Height="23"/>
+        <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="547,294,0,0" TextWrapping="Wrap" Text="192.168.0.48" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="672,294,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="114"/>
 
     </Grid>
 </Window>

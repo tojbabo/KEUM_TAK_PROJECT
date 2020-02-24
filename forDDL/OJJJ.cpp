@@ -79,7 +79,7 @@ extern "C" {
 				send(sock, (char*)&encoded[i*PACK_SZ], PACK_SZ, 0);
 			waitKey(FRAME_INTERVAL);
 
-			puts("sending");
+			//puts("sending");
 		}
 	}
 	__declspec(dllexport) void dll_IMG_RECV_THREAD(String serv_ip, int serv_port)
@@ -139,8 +139,5 @@ extern "C" {
 		}
 		puts("i'm out");
 	}
-
-	
-
 
 }

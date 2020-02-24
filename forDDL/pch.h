@@ -18,8 +18,8 @@
 #define BUF_SZ 1024
 #define BUF_LEN 65540
 #define PACK_SZ 4096
-#define HEIGHT 480
-#define WIDTH 640
+#define HEIGHT 240
+#define WIDTH 320
 
 #endif //PCH_H
 
