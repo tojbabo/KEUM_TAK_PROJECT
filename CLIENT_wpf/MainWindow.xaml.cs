@@ -160,7 +160,6 @@ namespace CLIENT_wpf
             SERV_IP = TBX_IP.Text;
             int.TryParse(TBX_PORT.Text, out SERV_PORT);
 
-
             sock = CREATE_SOCKET(SERV_IP,SERV_PORT,TCP,CONNECT);
             if (sock!=null)
             {
@@ -169,6 +168,11 @@ namespace CLIENT_wpf
             else {
                 //MessageBox.Show("CONNECT OK");
             }
+            String name = "^"+TBX_NAME.Text;
+            byte[] buf = new byte[BUF_SZ];
+
+            buf = Encoding.ASCII.GetBytes(name);
+            sock.Send(buf);
             
             T_msg_recv = new Thread(THREAD_MSG_RECV);
             T_msg_recv.Start(); 
@@ -344,6 +348,8 @@ namespace CLIENT_wpf
                 BTN_MSG_SEND_Click(this,e);
             }
         }
+
+
     }
 }
 
