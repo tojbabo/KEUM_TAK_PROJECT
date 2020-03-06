@@ -13,5 +13,5 @@
 	tensorflow - 1.14
 	tflearn - 0.3.2
 
-### 
+### 참고
 https://github.com/safreita1/Resnet-Emotion-Recognition
