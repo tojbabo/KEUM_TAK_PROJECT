@@ -316,7 +316,7 @@ namespace CLIENT_wpf
                 data = "$" + other_id.ToString();
                 buf = Encoding.ASCII.GetBytes(data);
                 sock.Send(buf);
-                Console.WriteLine("send to server : " + data);
+                Console.WriteLine("send to server : " + data+"\n");
                 //PORT 요청 작업
 
             }
