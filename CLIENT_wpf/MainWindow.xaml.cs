@@ -168,11 +168,12 @@ namespace CLIENT_wpf
             else {
                 //MessageBox.Show("CONNECT OK");
             }
-            String name = "^"+TBX_NAME.Text;
+            String name = "^"+TBX_NAME.Text+"\n";
             byte[] buf = new byte[BUF_SZ];
 
             buf = Encoding.ASCII.GetBytes(name);
             sock.Send(buf);
+            Console.WriteLine("send name data");
             
             T_msg_recv = new Thread(THREAD_MSG_RECV);
             T_msg_recv.Start(); 
@@ -268,21 +269,21 @@ namespace CLIENT_wpf
                 data += temp;
                 while (true)
                 {
-                    int num = TOKEN(data, "\n");
-                    if (num == -1)
-                    {
+                    int num = TOKEN(data, "\n");                                                            // \n으로 메시지 구분
+                    if (num == -1)                                                                          // \n이 없는 경우 -> 메시지를 완전히 수신 안한 경우 다음 메시지에 추가 됨
+                    {                                                                                      
                         break;
                     }
-                    else if (num == data.Length - 1)
+                    else if (num == data.Length - 1)                                                        // \n이 문자열 맨 마지막인 경우 -> 메시지 정상 수신
                     {
                         MSG_CHECKING(data);
                         data = "";
                         break;
                     }
-                    else
-                    {
-                        temp = data.Substring(0, num);
-                        data = data.Substring(num+1);
+                    else                                                                                    // \n이 문자열 사이에 존재 -> 메시지 동시에 수신
+                    { 
+                        temp = data.Substring(0, num);                                                      // \n기준으로 왼쪽 : 현재 메시지로 판단
+                        data = data.Substring(num+1);                                                       // \n기준으로 오른쪽 : 다음 수신 메시지로 판단
                         MSG_CHECKING(temp);
                     }
                 }
@@ -348,8 +349,6 @@ namespace CLIENT_wpf
                 BTN_MSG_SEND_Click(this,e);
             }
         }
-
-
     }
 }
 
