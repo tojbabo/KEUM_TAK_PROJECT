@@ -49,6 +49,7 @@ namespace CLIENT_wpf
 
         Socket sock = null;
 
+
         Thread T_img_send;
         Thread T_img_recv;
         Thread T_msg_recv;
@@ -59,6 +60,12 @@ namespace CLIENT_wpf
         extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void Hi();
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static int dll_Get_Socket(String serv_ip, int serv_port, int opt);
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void dll_test(int sock);
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void testing(Mat frame, int sock);
 
         // 최초 실행되는 함수
         public MainWindow()
@@ -68,36 +75,40 @@ namespace CLIENT_wpf
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine("0412 - ver1.0");
             Hi();
-        }
-        // 문자열을 나누는 함수 - 임시버전
-        private int Tokenized(String BASE,String TARGET)
-        {
-            int index;
-            index = BASE.IndexOf(TARGET);
-            String sub_str = BASE.Substring(index+1);
-            if (int.TryParse(sub_str, out index))
-                return index;
 
-            Console.WriteLine("Tokenize error --- '" + TARGET + "' not found \n/Base : " + BASE + " /Sub string : " + sub_str + " /Index : " + index);
-            return -1;
-            
+            int num = dll_Get_Socket(SERV_IP, PORT, 1);
         }
-        // 문자열 나누는 함수 - 임시번전
-        private int TOKEN(String Base, String target)
+        // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
+        private int Token_Get_Num(String Base, String target)
         {
-            int num = Base.IndexOf(target);
-            if (num == -1)
+            Console.WriteLine("BASE : " + Base);
+            Console.WriteLine("Target : " + target);
+
+            int num;
+            num = Base.IndexOf(target);
+            String sub_str = Base.Substring(num + 1);
+            if (int.TryParse(sub_str, out num))
                 return num;
-            /**/
-            Console.WriteLine("BASE : "+Base);
-            Console.WriteLine("Target : "+target);
-            Console.WriteLine("Total lenth : " + Base.Length);
-            Console.WriteLine("Index : "+num);
-            Console.WriteLine("Left : "+Base.Substring(0,num));
-            Console.WriteLine("Right : "+Base.Substring(num));
-            
-            return num;
+
+            return -1;
+
+        }
+        // 문자열의 특정 문자의 위치를 얻어오는 함수
+        private int Token_Get_Index(String Base, String target)
+        {
+            int index = Base.IndexOf(target);
+            if (index != -1)
+            {
+                Console.WriteLine("BASE : " + Base);
+                Console.WriteLine("Target : " + target);
+                Console.WriteLine("Total lenth : " + Base.Length);
+                Console.WriteLine("Index : " + index);
+                Console.WriteLine("Left : " + Base.Substring(0, index));
+                Console.WriteLine("Right : " + Base.Substring(index));
+            }
+            return index;
         }
         // 최초 카메라 셋팅
         private bool InitWebCamera()
@@ -122,15 +133,15 @@ namespace CLIENT_wpf
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
-            
-            if (cap!=null&&cap.IsOpened())
-            { 
+
+            if (cap != null && cap.IsOpened())
+            {
                 cap.Dispose();
             }
 
             Release_thread(T_img_recv);
             Release_thread(T_img_send);
-            Release_thread(T_msg_recv);   
+            Release_thread(T_msg_recv);
         }
         private void Release_thread(Thread t)
         {
@@ -160,23 +171,26 @@ namespace CLIENT_wpf
             SERV_IP = TBX_IP.Text;
             int.TryParse(TBX_PORT.Text, out SERV_PORT);
 
-            sock = CREATE_SOCKET(SERV_IP,SERV_PORT,TCP,CONNECT);
-            if (sock!=null)
+            sock = CREATE_SOCKET(SERV_IP, SERV_PORT, TCP, CONNECT);
+            Console.WriteLine(sock);
+
+            if (sock != null)
             {
                 //MessageBox.Show("CONNECT FALSE");
             }
-            else {
+            else
+            {
                 //MessageBox.Show("CONNECT OK");
             }
-            String name = "^"+TBX_NAME.Text+"\n";
+            String name = "^" + TBX_NAME.Text + "\n";
             byte[] buf = new byte[BUF_SZ];
 
             buf = Encoding.ASCII.GetBytes(name);
             sock.Send(buf);
             Console.WriteLine("send name data");
-            
+
             T_msg_recv = new Thread(THREAD_MSG_RECV);
-            T_msg_recv.Start(); 
+            T_msg_recv.Start();
 
         }
         // 윈도우 상에 이미지 출력 관련 함수
@@ -199,7 +213,7 @@ namespace CLIENT_wpf
             }
         }
         // 소켓을 생성하는 함수 
-        private Socket CREATE_SOCKET(String ip, int port, int type,int opt)
+        private Socket CREATE_SOCKET(String ip, int port, int type, int opt)
         {
             // type : TCP(1) / UDP(2)
             // opt : 1 - 연결 UDP / 그 외: 일반 UDP
@@ -253,14 +267,14 @@ namespace CLIENT_wpf
         {
             byte[] buf = new byte[BUF_SZ];
             int len;
-            String data ="";
+            String data = "";
             String temp;
             while (true)
             {
                 Console.WriteLine("메시지 수신중");
                 len = sock.Receive(buf);
                 temp = Encoding.UTF8.GetString(buf, 0, len);
-                Console.WriteLine("서버로 부터 수신한 메시지 : "+temp);
+                Console.WriteLine("서버로 부터 수신한 메시지 : " + temp);
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                  {
@@ -269,9 +283,9 @@ namespace CLIENT_wpf
                 data += temp;
                 while (true)
                 {
-                    int num = TOKEN(data, "\n");                                                            // \n으로 메시지 구분
+                    int num = Token_Get_Index(data, "\n");                                                  // \n으로 메시지 구분
                     if (num == -1)                                                                          // \n이 없는 경우 -> 메시지를 완전히 수신 안한 경우 다음 메시지에 추가 됨
-                    {                                                                                      
+                    {
                         break;
                     }
                     else if (num == data.Length - 1)                                                        // \n이 문자열 맨 마지막인 경우 -> 메시지 정상 수신
@@ -281,14 +295,14 @@ namespace CLIENT_wpf
                         break;
                     }
                     else                                                                                    // \n이 문자열 사이에 존재 -> 메시지 동시에 수신
-                    { 
+                    {
                         temp = data.Substring(0, num);                                                      // \n기준으로 왼쪽 : 현재 메시지로 판단
-                        data = data.Substring(num+1);                                                       // \n기준으로 오른쪽 : 다음 수신 메시지로 판단
+                        data = data.Substring(num + 1);                                                       // \n기준으로 오른쪽 : 다음 수신 메시지로 판단
                         MSG_CHECKING(temp);
                     }
                 }
             }
-        }   
+        }
         // 수신한 메시지를 프로토콜에 맞게 확인 후 처리하는 함수
         private void MSG_CHECKING(String data)
         {
@@ -296,37 +310,43 @@ namespace CLIENT_wpf
             {
                 Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
                 var token = data.Split(',');
-                ID = Tokenized(token[0], ":");
-                PORT = Tokenized(token[1], ":");
+                ID = Token_Get_Num(token[0], ":");
+                PORT = Token_Get_Num(token[1], ":");
 
                 Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
-                T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
+
+                int temp = dll_Get_Socket(SERV_IP, PORT, 1);
+
+                T_img_send = new Thread(() => THREAD_IMG_SEND(temp,SERV_IP, PORT));
                 T_img_send.Start();
+
+                //                T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
+                //               T_img_send.Start();
                 //SEND 스레드
             }
             else if (data[0] == '$')
             {
                 Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
                 var token = data.Split(',');
-                int other_id = Tokenized(token[0], ":");
-                int other_port = Tokenized(token[1], ":");
+                int other_id = Token_Get_Num(token[0], ":");
+                int other_port = Token_Get_Num(token[1], ":");
                 byte[] buf = new byte[BUF_SZ];
 
-            
+
                 data = "$" + other_id.ToString();
                 buf = Encoding.ASCII.GetBytes(data);
                 sock.Send(buf);
-                Console.WriteLine("send to server : " + data+"\n");
+                Console.WriteLine("send to server : " + data + "\n");
                 //PORT 요청 작업
 
             }
             else if (data[0] == '@')
             {
                 Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
-                int target_port = Tokenized(data, ":");
+                int target_port = Token_Get_Num(data, ":");
                 Console.WriteLine("New port is : " + target_port);
                 //RECV 스레드
-                T_img_recv = new Thread(()=> dll_IMG_RECV_THREAD(SERV_IP,target_port));
+                T_img_recv = new Thread(() => dll_IMG_RECV_THREAD(SERV_IP, target_port));
                 T_img_recv.Start();
             }
         }
@@ -335,19 +355,45 @@ namespace CLIENT_wpf
         {
             TBX_INPUT.Focus();
             byte[] buf = new byte[BUF_SZ];
-            
-            buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text+"\n");
+
+            buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text + "\n");
             sock.Send(buf);
             TBX_INPUT.Text = "";
-            
+
         }
         // 엔터로 메시지 전송
         private void TBX_INPUT_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.Key == Key.Return)
+            if (e.Key == Key.Return)
             {
-                BTN_MSG_SEND_Click(this,e);
+                BTN_MSG_SEND_Click(this, e);
             }
+        }
+
+        private void THREAD_IMG_SEND(int t_ImgSend_Sock, String ip, int port)
+        {
+            String IP = ip;
+            int PORT = port;
+            InitWebCamera();
+            Mat mat = new Mat();
+            while (true)
+            {
+                if (cap.Read(mat))
+                {
+                    Cv2.ImShow("1", mat);
+                    //WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+                    //image.Source = wb;
+                }
+
+                testing(mat, t_ImgSend_Sock);
+
+
+                int c = Cv2.WaitKey(10);
+                if (c != -1)
+                    break;
+
+            }
+
         }
     }
 }
