@@ -14,7 +14,7 @@
         <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="308,294,0,0" VerticalAlignment="Top" Width="75" Click="CLICK_CONNECT" Height="22"/>
         <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="23" Margin="388,266,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="325" KeyDown="TBX_INPUT_KeyDown"/>
         <Button x:Name="BTN_MSG_SEND" Content="SEND" HorizontalAlignment="Left" Margin="718,266,0,0" VerticalAlignment="Top" Width="68" Click="BTN_MSG_SEND_Click" Height="23"/>
-        <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="522,294,0,0" TextWrapping="Wrap" Text="192.168.0.48" VerticalAlignment="Top" Width="145"/>
+        <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="522,294,0,0" TextWrapping="Wrap" Text="172.30.1.27" VerticalAlignment="Top" Width="145"/>
         <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="672,294,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="114"/>
         <TextBox x:Name="TBX_NAME" HorizontalAlignment="Left" Height="23" Margin="388,294,0,0" TextWrapping="Wrap" Text="USER" VerticalAlignment="Top" Width="129"/>
 

@@ -20,6 +20,8 @@ using System.Windows.Threading;
 using System.Threading;
 
 using System.Runtime.InteropServices;
+using System.Drawing;
+using System.IO;
 
 namespace CLIENT_wpf
 {
@@ -37,6 +39,8 @@ namespace CLIENT_wpf
         const int ENCODE_QUALITY = 80;
         const int frameWidth = 320;
         const int frameHeight = 240;
+
+
 
         String SERV_IP = "192.168.0.48";
         int SERV_PORT = 9000;
@@ -66,6 +70,8 @@ namespace CLIENT_wpf
         extern public static void dll_test(int sock);
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void testing(Mat frame, int sock);
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void testhree(byte[] b1, int sock);
 
         // 최초 실행되는 함수
         public MainWindow()
@@ -75,10 +81,14 @@ namespace CLIENT_wpf
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("0412 - ver1.0");
+            Console.WriteLine("0415 - ver1.1");
             Hi();
 
             int num = dll_Get_Socket(SERV_IP, PORT, 1);
+
+
+
+
         }
         // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
         private int Token_Get_Num(String Base, String target)
@@ -120,8 +130,9 @@ namespace CLIENT_wpf
                 cap.FrameHeight = frameHeight;
                 cap.Open(0);
                 wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+               
                 image.Source = wb;
-
+               
                 return true;
             }
             catch
@@ -150,9 +161,13 @@ namespace CLIENT_wpf
             t.Interrupt();
             t.Abort();
         }
-        // SHOW 버튼 클릭시
+        // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+
+            T_img_send = new Thread(() => TH());
+            T_img_send.Start();
+            /*
             if (!InitWebCamera())
             {
                 //MessageBox.Show("CAM OPEN FALSE");
@@ -163,7 +178,47 @@ namespace CLIENT_wpf
             }
 
             //Cv2.NamedWindow("1", WindowMode.AutoSize);
-            CAPTURE_IMG();
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromTicks(10000000);
+            timer.Tick += new EventHandler(timer_Tick);
+            timer.Start();
+            CAPTURE_IMG();*/
+
+
+        }
+        // 테스팅용
+        private void TH()
+        {
+            Console.WriteLine("Thread start");
+
+            WriteableBitmap wb;
+            cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
+            cap.FrameWidth = frameWidth;
+            cap.FrameHeight = frameHeight;
+            cap.Open(0);
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+            {
+                wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+                image.Source = wb;
+
+
+                Mat mat = new Mat();
+
+                while (true)
+                {
+                    if (cap.Read(mat))
+                    {
+                        Cv2.ImShow("2", mat);
+
+                        WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+
+                    }
+                    int c = Cv2.WaitKey(10);
+                    if (c != -1)
+                        break;
+                }
+            }));
+            Console.WriteLine("Thread end");
         }
         // CONNECT 버튼 클릭시
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
@@ -197,13 +252,28 @@ namespace CLIENT_wpf
         private void CAPTURE_IMG()
         {
             Mat mat = new Mat();
+            OpenCvSharp.Size size = new OpenCvSharp.Size(640, 480);
+            Mat dst = new Mat();
+
             while (true)
             {
                 if (cap.Read(mat))
                 {
-                    //Cv2.ImShow("1", frame);
+
+
+                    Cv2.Resize(mat, dst, size);
+
+                    var b = new byte[mat.Channels() * mat.Cols * mat.Rows];
+                    System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, mat.Channels() * mat.Cols * mat.Rows);
+
+
+
+
+                    //testhree(b);
+                    Cv2.ImShow("2", mat);
+
                     WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-                    image.Source = wb;
+
                 }
 
                 int c = Cv2.WaitKey(10);
@@ -317,8 +387,9 @@ namespace CLIENT_wpf
 
                 int temp = dll_Get_Socket(SERV_IP, PORT, 1);
 
-                T_img_send = new Thread(() => THREAD_IMG_SEND(temp,SERV_IP, PORT));
+                T_img_send = new Thread(() => THREAD_IMG_SEND(temp, SERV_IP, PORT));
                 T_img_send.Start();
+
 
                 //                T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
                 //               T_img_send.Start();
@@ -374,26 +445,39 @@ namespace CLIENT_wpf
         {
             String IP = ip;
             int PORT = port;
-            InitWebCamera();
-            Mat mat = new Mat();
-            while (true)
+            int size;
+
+            cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
+            cap.FrameWidth = frameWidth;
+            cap.FrameHeight = frameHeight;
+            cap.Open(0);
+            WriteableBitmap wb;
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
             {
-                if (cap.Read(mat))
+                wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+                image.Source = wb;
+
+                Mat mat = new Mat();
+                while (true)
                 {
-                    Cv2.ImShow("1", mat);
-                    //WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-                    //image.Source = wb;
+                    if (cap.Read(mat))
+                    {
+                        //Cv2.ImShow("1", mat);
+
+                        size = mat.Channels() * mat.Cols * mat.Rows;
+                        var b = new byte[size];
+                        System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
+
+                        testhree(b,t_ImgSend_Sock);
+
+                        WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+
+                    }
+                    int c = Cv2.WaitKey(10);
+                    if (c != -1)
+                        break;
                 }
-
-                testing(mat, t_ImgSend_Sock);
-
-
-                int c = Cv2.WaitKey(10);
-                if (c != -1)
-                    break;
-
-            }
-
+            }));
         }
     }
 }
