@@ -2,8 +2,8 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.1.2"
-#define RECENT "UI에서 받아온 Mat파일 출력까지 성공"
+#define DLL_VER "1.2.1"
+#define RECENT "서버로 부터 받아온 Mat파일 UI에 출력 중"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));
@@ -214,7 +214,11 @@ extern "C" {
 		return new Mat(frame);
 	}
 
-	__declspec(dllexport) void testhree(BYTE* b1,int sock)
+
+	__declspec(dllexport) int DLL_SENDING(int sock, char* msg, int str_len) {
+		return send(sock, msg, str_len, 0);
+	}
+	__declspec(dllexport) void DLL_IMG_SEND(BYTE* b1,int sock)
 	{
 		Mat frame =  Mat(480, 640, CV_8UC3, b1);
 		Mat temp;
@@ -255,6 +259,42 @@ extern "C" {
 
 
 
+	}
+	__declspec(dllexport) BYTE* DLL_IMG_RECV(int sock)
+	{
+		char msg[BUF_LEN];
+		int len;
+
+		do {
+			len = recv(sock, msg, BUF_LEN, 0);
+		} while (len > sizeof(int));
+
+		int total_pack = ((int*)msg)[0];
+
+		cout << "expecting length of packs:" << total_pack << endl;
+		// 패킷의 크기와 수만큼 변수 생성
+		char* longbuf = new char[PACK_SZ * total_pack];
+
+		// 패킷의 수 만큼 데이터 리시브
+		for (int i = 0; i < total_pack; i++) {
+			len = recv(sock, msg, BUF_LEN, 0);
+			// 패킷 사이즈보다 작은 데이터를 수신시 무시
+			if (len != PACK_SZ) {
+				cerr << "Received unexpected size pack:" << len << endl;
+				continue;
+			}
+			// 연속해서 리시브한 데이터를 하나의 변수로 통합
+			memcpy(&longbuf[i * PACK_SZ], msg, PACK_SZ);
+		}
+
+		Mat rawData = Mat(1, PACK_SZ * total_pack, CV_8UC1, longbuf);
+		Mat mat = imdecode(rawData, IMREAD_COLOR);
+
+		int size = mat.channels() * mat.cols * mat.rows;
+		BYTE* bit = new BYTE[size];
+		memcpy(bit, mat.data, sizeof(bit));
+		
+		return bit;
 	}
 
 }
