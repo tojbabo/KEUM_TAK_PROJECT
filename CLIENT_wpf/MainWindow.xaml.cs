@@ -22,6 +22,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 
 namespace CLIENT_wpf
 {
@@ -41,6 +42,8 @@ namespace CLIENT_wpf
         const int frameHeight = 240;
 
 
+        bool isSend = false;
+        bool isNew = true;
 
         String SERV_IP = "192.168.0.48";
         int SERV_PORT = 9000;
@@ -58,12 +61,15 @@ namespace CLIENT_wpf
         Thread T_img_recv;
         Thread T_msg_recv;
 
+
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void Hi();                                                                             // 버전 체크 및 DLL 연결 확인
+
+
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 전송 스레드
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 수신 스레드
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void Hi();                                                                             // 버전 체크 및 DLL 연결 확인
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int dll_Get_Socket(String serv_ip, int serv_port, int opt);                            // C++ 용 SOCKET 구하는 함수
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -71,13 +77,15 @@ namespace CLIENT_wpf
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void DLL_IMG_SEND(byte[] b, int sock);                                                 // [new] 이미지 전송 스레드
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static byte[] DLL_IMG_RECV (int sock);                                                        // [new] 이미지 수신 스레드
-
+        extern public static unsafe IntPtr DLL_IMG_RECV(int sock, int* size);                                       // [new] 이미지 수신 스레드
+        /* */
         // 최초 실행되는 함수
         public MainWindow()
         {
             InitializeComponent();
+
         }
+
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -130,9 +138,9 @@ namespace CLIENT_wpf
                 cap.FrameHeight = frameHeight;
                 cap.Open(0);
                 wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
-               
+
                 image.Source = wb;
-               
+
                 return true;
             }
             catch
@@ -164,6 +172,8 @@ namespace CLIENT_wpf
         // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            if (isSend == false) { isSend = true; button.Content = "YES SHOW"; }
+            else { isSend = false; button.Content = "NO SHOW"; }
             /*
             T_img_send = new Thread(() => TH());
             T_img_send.Start();
@@ -185,6 +195,11 @@ namespace CLIENT_wpf
             CAPTURE_IMG();*/
 
 
+        }
+        private void Button_Click_change(object sender, RoutedEventArgs e)
+        {
+            if (isNew) { isNew = false; BTN_CHANGE.Content = "OLD"; }
+            else { isNew = true; BTN_CHANGE.Content = "NEW"; }
         }
         // 테스팅용
         private void TH()
@@ -385,15 +400,22 @@ namespace CLIENT_wpf
 
                 Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
 
-                int temp = dll_Get_Socket(SERV_IP, PORT, 1);
+                if (isSend)
+                {
+                    if (isNew)
+                    {
+                        int temp = dll_Get_Socket(SERV_IP, PORT, 1);
 
-                T_img_send = new Thread(() => THREAD_IMG_SEND(temp, SERV_IP, PORT));
-                T_img_send.Start();
-
-
-                //                T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
-                //               T_img_send.Start();
-                //SEND 스레드
+                        T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
+                        T_img_send.Start();
+                    }
+                    else
+                    {
+                        T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
+                        T_img_send.Start();
+                        //SEND 스레드
+                    }
+                }
             }
             else if (data[0] == '$')
             {
@@ -417,15 +439,19 @@ namespace CLIENT_wpf
                 int target_port = Token_Get_Num(data, ":");
                 Console.WriteLine("New port is : " + target_port);
 
-                int temp = dll_Get_Socket(SERV_IP, target_port, 1);
-                T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
-                T_img_recv.Start();
-                
-                
-                
-                //RECV 스레드
-                //T_img_recv = new Thread(() => dll_IMG_RECV_THREAD(SERV_IP, target_port));
-                //T_img_recv.Start();
+                if (isNew)
+                {
+                    int temp = dll_Get_Socket(SERV_IP, target_port, 1);
+                    T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
+                    T_img_recv.Start();
+                }
+
+                else
+                {
+                    //RECV 스레드
+                    T_img_recv = new Thread(() => dll_IMG_RECV_THREAD(SERV_IP, target_port));
+                    T_img_recv.Start();
+                }
             }
         }
         // 서버로 메시지 보내는 함수
@@ -449,9 +475,8 @@ namespace CLIENT_wpf
         }
 
         // 이미지 전송 함수 - UI에 출력 되는 버전
-        private void THREAD_IMG_SEND(int t_ImgSend_Sock, String ip, int port)
+        private void THREAD_IMG_SEND(int t_ImgSend_Sock)
         {
-           
             int size;
 
             cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
@@ -475,7 +500,8 @@ namespace CLIENT_wpf
                         var b = new byte[size];
                         System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
 
-                        DLL_IMG_SEND(b,t_ImgSend_Sock);
+                        Console.WriteLine("sending");
+                        DLL_IMG_SEND(b, t_ImgSend_Sock);
 
                         WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
 
@@ -491,42 +517,42 @@ namespace CLIENT_wpf
         private void THREAD_IMG_RECV(int t_ImgRecv_Sock)
         {
             Console.WriteLine("recv thread start!!");
-            int num = DLL_SENDING(t_ImgRecv_Sock, "hi", "hi".Length);
-            
-            /*
-            /// send trigger를 한번 보내야함
-            int num = 1 ;
-            Console.WriteLine("TIRGGER RESULT : " + num.ToString());
-            int size;
+            int num = DLL_SENDING(t_ImgRecv_Sock, "send trigger", "send trigger".Length);
 
             WriteableBitmap wb;
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
             {
                 wb = new WriteableBitmap(frameWidth, frameHeight, 96, 96, PixelFormats.Bgr24, null);
                 image2.Source = wb;
-
-                Mat mat = new Mat();
-
+                int size=0;
+                Mat mat = null;
+                IntPtr ptr;
                 while (true)
                 {
-                    if (cap.Read(mat))
+
+                    //Cv2.ImShow("1", mat);
+                    unsafe
                     {
-                        //Cv2.ImShow("1", mat);
-
-                        size = mat.Channels() * mat.Cols * mat.Rows;
+                        Console.WriteLine("receiving");
+                         ptr = DLL_IMG_RECV(t_ImgRecv_Sock, &size);
                         var b = new byte[size];
-                        System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
 
-                        testhree(b, t_ImgSend_Sock);
-
-                        WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+                        System.Runtime.InteropServices.Marshal.Copy(ptr, b, 0, size);
+                        try
+                        {
+                            mat = new Mat(240, 320, MatType.CV_8UC3, b);
+                        }
+                        catch (Exception e) { }
 
                     }
+                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+
+
                     int c = Cv2.WaitKey(10);
                     if (c != -1)
                         break;
                 }
-            }));*/
+            }));
         }
 
 

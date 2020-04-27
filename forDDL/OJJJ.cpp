@@ -2,8 +2,8 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.2.1"
-#define RECENT "서버로 부터 받아온 Mat파일 UI에 출력 중"
+#define DLL_VER "1.2.2"
+#define RECENT "서버로 부터 받아온 Mat파일 UI에 출력 중, 배포 성공"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));
@@ -260,9 +260,10 @@ extern "C" {
 
 
 	}
-	__declspec(dllexport) BYTE* DLL_IMG_RECV(int sock)
+	__declspec(dllexport) BYTE* DLL_IMG_RECV(int sock,int* size)
 	{
-		char msg[BUF_LEN];
+		char* msg = new char[BUF_LEN];
+		//char msg[BUF_LEN];
 		int len;
 
 		do {
@@ -271,7 +272,7 @@ extern "C" {
 
 		int total_pack = ((int*)msg)[0];
 
-		cout << "expecting length of packs:" << total_pack << endl;
+		//cout << "expecting length of packs:" << total_pack << endl;
 		// 패킷의 크기와 수만큼 변수 생성
 		char* longbuf = new char[PACK_SZ * total_pack];
 
@@ -280,7 +281,7 @@ extern "C" {
 			len = recv(sock, msg, BUF_LEN, 0);
 			// 패킷 사이즈보다 작은 데이터를 수신시 무시
 			if (len != PACK_SZ) {
-				cerr << "Received unexpected size pack:" << len << endl;
+				//cerr << "Received unexpected size pack:" << len << endl;
 				continue;
 			}
 			// 연속해서 리시브한 데이터를 하나의 변수로 통합
@@ -290,8 +291,8 @@ extern "C" {
 		Mat rawData = Mat(1, PACK_SZ * total_pack, CV_8UC1, longbuf);
 		Mat mat = imdecode(rawData, IMREAD_COLOR);
 
-		int size = mat.channels() * mat.cols * mat.rows;
-		BYTE* bit = new BYTE[size];
+		*size = mat.channels() * mat.cols * mat.rows;
+		BYTE* bit = new BYTE[*size];
 		memcpy(bit, mat.data, sizeof(bit));
 		
 		return bit;
