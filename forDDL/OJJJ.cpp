@@ -2,8 +2,8 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.2.2"
-#define RECENT "서버로 부터 받아온 Mat파일 UI에 출력 중, 배포 성공"
+#define DLL_VER "1.3.0"
+#define RECENT "서버로 부터 받아온 Mat파일 UI에 출력완료 - 조금 불안정"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));
@@ -124,12 +124,13 @@ extern "C" {
 		}
 		puts("i'm out");
 	}
+
 	// 소켓 생성 - 연결 후 반환 // opt_0  : tcp, opt_1 : udp
 	__declspec(dllexport) int dll_Get_Socket(String serv_ip, int serv_port, int opt) {
 		// opt-0 : tcp, opt-1 : udp
 		SOCKADDR_IN adr;
 		SOCKET sock;
-		
+
 		OJJJ_Memset(&adr, serv_ip.c_str(), serv_port);
 
 
@@ -141,86 +142,20 @@ extern "C" {
 			sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 			connect(sock, (struct sockaddr*) & adr, sizeof(adr));
 		}cout << "----------------------DLL CREATE SOCKET" << endl;
-		cout << "ip : " << serv_ip << endl << "port : " << serv_port << endl 
-			<< "opt : " << opt << endl<<"socket id : "<<sock<<endl;
+		cout << "ip : " << serv_ip << endl << "port : " << serv_port << endl
+			<< "opt : " << opt << endl << "socket id : " << sock << endl;
 		cout << "---------------------------------------" << endl;
 
 		return sock;
 
 	}
-	__declspec(dllexport) void dll_test(int sock) {
-
-
-		char msg[] = "Hi I'm DLL\n";
-		int str_len;
-
-		send(sock, msg, strlen(msg), 0);
-
-		printf("send msg <%s>\n", msg);
-
-
-
-	}
-	__declspec(dllexport) void testing(Mat frame, int sock)
-	{
-
-		cout << "hi";
-		Mat temp;
-		vector<uchar> encoded;
-
-
-		cout << "[SEND THREAD] - sending start" << endl;
-
-		if (frame.size().width == 0)return;//simple integrity check; skip erroneous data...
-											 // 이미지 사이즈 변환
-		resize(frame, temp, Size(WIDTH, HEIGHT), 0, 0, INTER_LINEAR);
-
-		// jpg로 변환된 데이터가 저장될 변수
-		vector < int > compression_params;
-		// 변수 설정
-		compression_params.push_back(IMWRITE_JPEG_QUALITY);
-		compression_params.push_back(ENCODE_QUALITY);
-		// 데이터 변환
-		imencode(".jpg", temp, encoded, compression_params);
-		imshow("send", temp);
-		// 전송될 패킷의 숫자 설정
-		int total_pack = 1 + (encoded.size() - 1) / PACK_SZ;
-
-		int ibuf[1];
-		ibuf[0] = total_pack;
-
-		// 전송에 앞서 패킷 수 통지
-		send(sock, (char*)ibuf, sizeof(int), 0);
-
-		// 통지한 패킷 수 만큼 데이터 전송
-		for (int i = 0; i < total_pack; i++)
-			send(sock, (char*)&encoded[i * PACK_SZ], PACK_SZ, 0);
-		waitKey(FRAME_INTERVAL);
-
-		//puts("sending");
-
-	}
-	__declspec(dllexport) Mat* WINAPI testwo()
-	{
-		Mat frame;
-		VideoCapture cap(0);
-
-		if (!cap.isOpened()) {
-			cerr << "OpenCV Failed to open camera";
-			exit(1);
-		}
-
-		cap >> frame;
-		return new Mat(frame);
-	}
-
 
 	__declspec(dllexport) int DLL_SENDING(int sock, char* msg, int str_len) {
 		return send(sock, msg, str_len, 0);
 	}
-	__declspec(dllexport) void DLL_IMG_SEND(BYTE* b1,int sock)
+	__declspec(dllexport) void DLL_IMG_SEND(BYTE* b1, int sock)
 	{
-		Mat frame =  Mat(480, 640, CV_8UC3, b1);
+		Mat frame = Mat(480, 640, CV_8UC3, b1);
 		Mat temp;
 		vector<uchar> encoded;
 
@@ -260,12 +195,22 @@ extern "C" {
 
 
 	}
-	__declspec(dllexport) BYTE* DLL_IMG_RECV(int sock,int* size)
-	{
+	__declspec(dllexport) Mat* DLL_IMG_RECV(int sock)
+	{/*
+		Mat frame;
+		VideoCapture cap(0);
+
+		if (!cap.isOpened()) {
+			cerr << "OpenCV Failed to open camera";
+			exit(1);
+		}
+
+		cap >> frame;
+		return new Mat(frame);*/
+
 		char* msg = new char[BUF_LEN];
 		//char msg[BUF_LEN];
 		int len;
-
 		do {
 			len = recv(sock, msg, BUF_LEN, 0);
 		} while (len > sizeof(int));
@@ -285,17 +230,14 @@ extern "C" {
 				continue;
 			}
 			// 연속해서 리시브한 데이터를 하나의 변수로 통합
+
 			memcpy(&longbuf[i * PACK_SZ], msg, PACK_SZ);
 		}
 
 		Mat rawData = Mat(1, PACK_SZ * total_pack, CV_8UC1, longbuf);
+
 		Mat mat = imdecode(rawData, IMREAD_COLOR);
 
-		*size = mat.channels() * mat.cols * mat.rows;
-		BYTE* bit = new BYTE[*size];
-		memcpy(bit, mat.data, sizeof(bit));
-		
-		return bit;
+		return new Mat(mat);
 	}
-
 }

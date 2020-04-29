@@ -42,7 +42,7 @@ namespace CLIENT_wpf
         const int frameHeight = 240;
 
 
-        bool isSend = false;
+        bool isSend = true;
         bool isNew = true;
 
         String SERV_IP = "192.168.0.48";
@@ -77,7 +77,8 @@ namespace CLIENT_wpf
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void DLL_IMG_SEND(byte[] b, int sock);                                                 // [new] 이미지 전송 스레드
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static unsafe IntPtr DLL_IMG_RECV(int sock, int* size);                                       // [new] 이미지 수신 스레드
+        extern public static IntPtr DLL_IMG_RECV(int sock);                                                         // [new] 이미지 수신 스레드
+
         /* */
         // 최초 실행되는 함수
         public MainWindow()
@@ -85,17 +86,13 @@ namespace CLIENT_wpf
             InitializeComponent();
 
         }
-
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("0424 - ver1.2");
+            Console.WriteLine("0427 - ver1.4");
             Hi();
 
             int num = dll_Get_Socket(SERV_IP, PORT, 1);
-
-
-
 
         }
         // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
@@ -201,40 +198,17 @@ namespace CLIENT_wpf
             if (isNew) { isNew = false; BTN_CHANGE.Content = "OLD"; }
             else { isNew = true; BTN_CHANGE.Content = "NEW"; }
         }
-        // 테스팅용
-        private void TH()
+        private void Button_Click_test(object sender,RoutedEventArgs e)
         {
-            Console.WriteLine("Thread start");
 
-            WriteableBitmap wb;
-            cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
-            cap.FrameWidth = frameWidth;
-            cap.FrameHeight = frameHeight;
-            cap.Open(0);
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-            {
-                wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
-                image.Source = wb;
+            byte[] buf = new byte[BUF_SZ];
 
+            String data = "$" + ID.ToString();
+            buf = Encoding.ASCII.GetBytes(data);
+            sock.Send(buf);
 
-                Mat mat = new Mat();
-
-                while (true)
-                {
-                    if (cap.Read(mat))
-                    {
-                        Cv2.ImShow("2", mat);
-
-                        WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-
-                    }
-                    int c = Cv2.WaitKey(10);
-                    if (c != -1)
-                        break;
-                }
-            }));
-            Console.WriteLine("Thread end");
         }
+
         // CONNECT 버튼 클릭시
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
@@ -280,10 +254,6 @@ namespace CLIENT_wpf
 
                     var b = new byte[mat.Channels() * mat.Cols * mat.Rows];
                     System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, mat.Channels() * mat.Cols * mat.Rows);
-
-
-
-
                     //testhree(b);
                     Cv2.ImShow("2", mat);
 
@@ -483,34 +453,31 @@ namespace CLIENT_wpf
             cap.FrameWidth = frameWidth;
             cap.FrameHeight = frameHeight;
             cap.Open(0);
-            WriteableBitmap wb;
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+            /**/
+            Mat mat = new Mat();
+            while (true)
             {
-                wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
-                image.Source = wb;
+                cap.Read(mat);
+                size = mat.Channels() * mat.Cols * mat.Rows;
 
-                Mat mat = new Mat();
-                while (true)
+                var b = new byte[size];
+
+                System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
+
+                DLL_IMG_SEND(b, t_ImgSend_Sock);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
-                    if (cap.Read(mat))
-                    {
-                        //Cv2.ImShow("1", mat);
 
-                        size = mat.Channels() * mat.Cols * mat.Rows;
-                        var b = new byte[size];
-                        System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
+                    WriteableBitmap wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+                    image.Source = wb;
+                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
 
-                        Console.WriteLine("sending");
-                        DLL_IMG_SEND(b, t_ImgSend_Sock);
-
-                        WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-
-                    }
-                    int c = Cv2.WaitKey(10);
-                    if (c != -1)
-                        break;
-                }
-            }));
+                    //Cv2.ImShow("dfdf", mat);
+                }));
+                int c = Cv2.WaitKey(10);
+                if (c != -1)
+                    break;
+            }
         }
 
         // 이미지 수신 함수 - UI에 출력 되는 버전
@@ -518,45 +485,39 @@ namespace CLIENT_wpf
         {
             Console.WriteLine("recv thread start!!");
             int num = DLL_SENDING(t_ImgRecv_Sock, "send trigger", "send trigger".Length);
+            Mat mat;
+            IntPtr ptr;
 
-            WriteableBitmap wb;
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+            while (true)
             {
-                wb = new WriteableBitmap(frameWidth, frameHeight, 96, 96, PixelFormats.Bgr24, null);
-                image2.Source = wb;
-                int size=0;
-                Mat mat = null;
-                IntPtr ptr;
-                while (true)
+
+
+                ptr = DLL_IMG_RECV(t_ImgRecv_Sock);
+                if (ptr != null)
                 {
+                    mat = new Mat(ptr);
+                    Console.WriteLine("mat cols : " + mat.Cols +"/ mat rows : " + mat.Rows);
+                    //Cv2.ImShow("qweqwe", mat);
 
-                    //Cv2.ImShow("1", mat);
-                    unsafe
+                    Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
                     {
-                        Console.WriteLine("receiving");
-                         ptr = DLL_IMG_RECV(t_ImgRecv_Sock, &size);
-                        var b = new byte[size];
-
-                        System.Runtime.InteropServices.Marshal.Copy(ptr, b, 0, size);
                         try
                         {
-                            mat = new Mat(240, 320, MatType.CV_8UC3, b);
+                            WriteableBitmap wb = new WriteableBitmap(mat.Cols, mat.Rows, 96, 96, PixelFormats.Bgr24, null);
+                            image2.Source = wb;
+                            WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
                         }
                         catch (Exception e) { }
-
-                    }
-                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-
+                    }));
 
                     int c = Cv2.WaitKey(10);
                     if (c != -1)
                         break;
                 }
-            }));
+                else
+                    Console.WriteLine("is null~~!");
+            }
         }
-
-
     }
 }
-
   
