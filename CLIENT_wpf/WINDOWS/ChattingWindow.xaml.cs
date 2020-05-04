@@ -23,13 +23,14 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using CLIENT_wpf.WINDOWS;
 
 namespace CLIENT_wpf
 {
     /// <summary>
     /// MainWindow.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class MainWindow : System.Windows.Window
+    public partial class ChattingWindow : System.Windows.Window
     {
         const int CONNECT = 1;
         const int TCP = 1;
@@ -81,7 +82,7 @@ namespace CLIENT_wpf
 
         /* */
         // 최초 실행되는 함수
-        public MainWindow()
+        public ChattingWindow()
         {
             InitializeComponent();
 
@@ -137,6 +138,7 @@ namespace CLIENT_wpf
                 wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
 
                 image.Source = wb;
+                image2.Source = wb;
 
                 return true;
             }
@@ -169,27 +171,12 @@ namespace CLIENT_wpf
         // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            
+            
+            
             if (isSend == false) { isSend = true; button.Content = "YES SHOW"; }
             else { isSend = false; button.Content = "NO SHOW"; }
-            /*
-            T_img_send = new Thread(() => TH());
-            T_img_send.Start();
-            /*
-            if (!InitWebCamera())
-            {
-                //MessageBox.Show("CAM OPEN FALSE");
-            }
-            else
-            {
-                //MessageBox.Show("CAM OPEN OK");
-            }
 
-            //Cv2.NamedWindow("1", WindowMode.AutoSize);
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromTicks(10000000);
-            timer.Tick += new EventHandler(timer_Tick);
-            timer.Start();
-            CAPTURE_IMG();*/
 
 
         }
@@ -206,6 +193,28 @@ namespace CLIENT_wpf
             String data = "$" + ID.ToString();
             buf = Encoding.ASCII.GetBytes(data);
             sock.Send(buf);
+
+        }
+        private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
+        {/*
+            StartWindow SW = new StartWindow();
+            System.Windows.Window.GetWindow(this).Close();
+            SW.Show();*/
+
+
+            /**/
+
+            if (!InitWebCamera())
+            {
+                //MessageBox.Show("CAM OPEN FALSE");
+            }
+            else
+            {
+                //MessageBox.Show("CAM OPEN OK");
+            }
+
+            //Cv2.NamedWindow("1", WindowMode.AutoSize);
+            CAPTURE_IMG();
 
         }
 
@@ -255,7 +264,7 @@ namespace CLIENT_wpf
                     var b = new byte[mat.Channels() * mat.Cols * mat.Rows];
                     System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, mat.Channels() * mat.Cols * mat.Rows);
                     //testhree(b);
-                    Cv2.ImShow("2", mat);
+                    //Cv2.ImShow("2", mat);
 
                     WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
 
@@ -518,6 +527,8 @@ namespace CLIENT_wpf
                     Console.WriteLine("is null~~!");
             }
         }
+
+        
     }
 }
   

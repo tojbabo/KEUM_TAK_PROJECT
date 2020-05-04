@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CLIENT_wpf"
              StartupUri="WINDOWS/ChattingWindow.xaml">
+    <!--StartupUri="WINDOWS/ChattingWindow.xaml">-->
     <Application.Resources>
          
     </Application.Resources>

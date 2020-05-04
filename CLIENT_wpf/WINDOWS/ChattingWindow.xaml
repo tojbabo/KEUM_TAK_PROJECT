@@ -1,26 +1,30 @@
-﻿<Window x:Class="CLIENT_wpf.MainWindow"
+﻿<Window x:Class="CLIENT_wpf.ChattingWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CLIENT_wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="385.538" Width="1231.839"
+        Title="MainWindow" Height="626.403" Width="1405.039" ResizeMode="NoResize"
         Loaded="Window_Loaded" Closing="Window_Closing">
-    <Grid Margin="-4,0,2,2">
+    <Grid>
 
-        <Image x:Name="image" Height="240" Width="320" Margin="63,27,843,86"/>
-        <Image x:Name="image2" Height="240" Width="320" Margin="791,27,115,86"/>
-        <Button x:Name="button" Content="YES SHOW" HorizontalAlignment="Left" Margin="229,294,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click" Height="23"/>
-        <TextBox x:Name="TBX_MESSAGE" HorizontalAlignment="Left" Height="234" Margin="388,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="398" Grid.ColumnSpan="2"/>
-        <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="308,294,0,0" VerticalAlignment="Top" Width="75" Click="CLICK_CONNECT" Height="22"/>
-        <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="23" Margin="388,266,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="325" KeyDown="TBX_INPUT_KeyDown" Grid.ColumnSpan="2"/>
-        <Button x:Name="BTN_MSG_SEND" Content="SEND" HorizontalAlignment="Left" Margin="718,266,0,0" VerticalAlignment="Top" Width="68" Click="BTN_MSG_SEND_Click" Height="23"/>
-        <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="522,294,0,0" TextWrapping="Wrap" Text="192.168.0.9" VerticalAlignment="Top" Width="145" Grid.ColumnSpan="2"/>
-        <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="672,293,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="114"/>
-        <TextBox x:Name="TBX_NAME" HorizontalAlignment="Left" Height="23" Margin="388,294,0,0" TextWrapping="Wrap" Text="USER" VerticalAlignment="Top" Width="129"/>
-        <Button x:Name="BTN_CHANGE" Content="NEW" HorizontalAlignment="Left" Margin="150,294,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click_change" Height="23"/>
-        <Button x:Name="BTN_TEST" Content="TEST" HorizontalAlignment="Left" Margin="71,294,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click_test" Height="23"/>
+        <Image x:Name="image" Height="240" Width="320" Margin="33,28,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Image x:Name="image2" Height="240" Width="320" Margin="33,280,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button x:Name="BTN_EXIT" Content="EXIT" HorizontalAlignment="Left" Margin="33,525,0,0" VerticalAlignment="Top" Width="320" Click="BTN_EXIT_Click" Height="43"/>
 
+
+        <TextBox x:Name="TBX_MESSAGE" Margin="376,28,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="619" Height="492" VerticalAlignment="Top"/>
+        <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="43" Margin="376,525,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="483" KeyDown="TBX_INPUT_KeyDown"/>
+        <Button x:Name="BTN_MSG_SEND" Content="SEND" HorizontalAlignment="Left" Margin="864,525,0,0" VerticalAlignment="Top" Width="131" Click="BTN_MSG_SEND_Click" Height="43"/>
+        <Grid>
+        <Button x:Name="button" Content="YES SHOW" HorizontalAlignment="Left" Margin="1017,118,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click" Height="40"/>
+        <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="1017,163,0,0" VerticalAlignment="Top" Width="145" Click="CLICK_CONNECT" Height="40"/>
+        <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="1017,216,0,0" TextWrapping="Wrap" Text="192.168.0.34" VerticalAlignment="Top" Width="145"/>
+        <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="1017,248,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="145"/>
+        <TextBox x:Name="TBX_NAME" HorizontalAlignment="Left" Height="23" Margin="1017,274,0,0" TextWrapping="Wrap" Text="USER" VerticalAlignment="Top" Width="145"/>
+        <Button x:Name="BTN_CHANGE" Content="NEW" HorizontalAlignment="Left" Margin="1017,73,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_change" Height="40"/>
+        <Button x:Name="BTN_TEST" Content="TEST" HorizontalAlignment="Left" Margin="1017,28,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_test" Height="40"/>
+        </Grid>
     </Grid>
 </Window>
