@@ -23,7 +23,9 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using CLIENT_wpf.CLASS;
 using CLIENT_wpf.WINDOWS;
+using CLIENT_wpf.FUNC;
 
 namespace CLIENT_wpf
 {
@@ -32,22 +34,8 @@ namespace CLIENT_wpf
     /// </summary>
     public partial class ChattingWindow : System.Windows.Window
     {
-        const int CONNECT = 1;
-        const int TCP = 1;
-        const int UDP = 2;
-        const int BUF_SZ = 1024;
-        const int BUF_LEN = 65540;
-        const int PACK_SIZE = 4096;
-        const int ENCODE_QUALITY = 80;
-        const int frameWidth = 320;
-        const int frameHeight = 240;
-
-
         bool isSend = true;
         bool isNew = true;
-
-        String SERV_IP = "192.168.0.48";
-        int SERV_PORT = 9000;
 
         int ID;
         int PORT;
@@ -57,83 +45,39 @@ namespace CLIENT_wpf
 
         Socket sock = null;
 
-
         Thread T_img_send;
         Thread T_img_recv;
         Thread T_msg_recv;
 
+       
 
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void Hi();                                                                             // 버전 체크 및 DLL 연결 확인
-
-
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 전송 스레드
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 수신 스레드
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int dll_Get_Socket(String serv_ip, int serv_port, int opt);                            // C++ 용 SOCKET 구하는 함수
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static int DLL_SENDING(int sock, String msg, int str_len);                                    // C++ 소켓으로 메시지 전송
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void DLL_IMG_SEND(byte[] b, int sock);                                                 // [new] 이미지 전송 스레드
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static IntPtr DLL_IMG_RECV(int sock);                                                         // [new] 이미지 수신 스레드
+        VAL val = new VAL();
 
         /* */
         // 최초 실행되는 함수
         public ChattingWindow()
         {
             InitializeComponent();
-
         }
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("0427 - ver1.4");
-            Hi();
+            DLL.Hi();
+            
 
-            int num = dll_Get_Socket(SERV_IP, PORT, 1);
-
-        }
-        // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
-        private int Token_Get_Num(String Base, String target)
-        {
-            Console.WriteLine("BASE : " + Base);
-            Console.WriteLine("Target : " + target);
-
-            int num;
-            num = Base.IndexOf(target);
-            String sub_str = Base.Substring(num + 1);
-            if (int.TryParse(sub_str, out num))
-                return num;
-
-            return -1;
+            int num = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1);
 
         }
-        // 문자열의 특정 문자의 위치를 얻어오는 함수
-        private int Token_Get_Index(String Base, String target)
-        {
-            int index = Base.IndexOf(target);
-            if (index != -1)
-            {
-                Console.WriteLine("BASE : " + Base);
-                Console.WriteLine("Target : " + target);
-                Console.WriteLine("Total lenth : " + Base.Length);
-                Console.WriteLine("Index : " + index);
-                Console.WriteLine("Left : " + Base.Substring(0, index));
-                Console.WriteLine("Right : " + Base.Substring(index));
-            }
-            return index;
-        }
+       
         // 최초 카메라 셋팅
         private bool InitWebCamera()
         {
             try
             {
                 cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
-                cap.FrameWidth = frameWidth;
-                cap.FrameHeight = frameHeight;
+                cap.FrameWidth = VAL.frameWidth;
+                cap.FrameHeight = VAL.frameHeight;
                 cap.Open(0);
                 wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
 
@@ -157,17 +101,11 @@ namespace CLIENT_wpf
                 cap.Dispose();
             }
 
-            Release_thread(T_img_recv);
-            Release_thread(T_img_send);
-            Release_thread(T_msg_recv);
+            UTILITY.Release_thread(T_img_recv);
+            UTILITY.Release_thread(T_img_send);
+            UTILITY.Release_thread(T_msg_recv);
         }
-        private void Release_thread(Thread t)
-        {
-            if (t == null)
-                return;
-            t.Interrupt();
-            t.Abort();
-        }
+
         // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -188,7 +126,7 @@ namespace CLIENT_wpf
         private void Button_Click_test(object sender,RoutedEventArgs e)
         {
 
-            byte[] buf = new byte[BUF_SZ];
+            byte[] buf = new byte[VAL.BUF_SZ];
 
             String data = "$" + ID.ToString();
             buf = Encoding.ASCII.GetBytes(data);
@@ -221,10 +159,10 @@ namespace CLIENT_wpf
         // CONNECT 버튼 클릭시
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
-            SERV_IP = TBX_IP.Text;
-            int.TryParse(TBX_PORT.Text, out SERV_PORT);
+            val.SERV_IP = TBX_IP.Text;
+            int.TryParse(TBX_PORT.Text, out val.SERV_PORT);
 
-            sock = CREATE_SOCKET(SERV_IP, SERV_PORT, TCP, CONNECT);
+            sock = CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
             Console.WriteLine(sock);
 
             if (sock != null)
@@ -236,7 +174,7 @@ namespace CLIENT_wpf
                 //MessageBox.Show("CONNECT OK");
             }
             String name = "^" + TBX_NAME.Text + "\n";
-            byte[] buf = new byte[BUF_SZ];
+            byte[] buf = new byte[VAL.BUF_SZ];
 
             buf = Encoding.ASCII.GetBytes(name);
             sock.Send(buf);
@@ -282,7 +220,7 @@ namespace CLIENT_wpf
             // type : TCP(1) / UDP(2)
             // opt : 1 - 연결 UDP / 그 외: 일반 UDP
             Socket temp_sock;
-            if (type == TCP)
+            if (type == VAL.TCP)
             {
                 temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
                 try
@@ -298,7 +236,7 @@ namespace CLIENT_wpf
                 }
 
             }
-            else if (type == UDP)
+            else if (type == VAL.UDP)
             {
                 temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 if (opt == 1)
@@ -329,7 +267,7 @@ namespace CLIENT_wpf
         // 메시지 수신 쓰레드
         private void THREAD_MSG_RECV()
         {
-            byte[] buf = new byte[BUF_SZ];
+            byte[] buf = new byte[VAL.BUF_SZ];
             int len;
             String data = "";
             String temp;
@@ -347,7 +285,7 @@ namespace CLIENT_wpf
                 data += temp;
                 while (true)
                 {
-                    int num = Token_Get_Index(data, "\n");                                                  // \n으로 메시지 구분
+                    int num = UTILITY.Token_Get_Index(data, "\n");                                                  // \n으로 메시지 구분
                     if (num == -1)                                                                          // \n이 없는 경우 -> 메시지를 완전히 수신 안한 경우 다음 메시지에 추가 됨
                     {
                         break;
@@ -374,8 +312,8 @@ namespace CLIENT_wpf
             {
                 Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
                 var token = data.Split(',');
-                ID = Token_Get_Num(token[0], ":");
-                PORT = Token_Get_Num(token[1], ":");
+                ID = UTILITY.Token_Get_Num(token[0], ":");
+                PORT = UTILITY.Token_Get_Num(token[1], ":");
 
                 Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
 
@@ -383,14 +321,14 @@ namespace CLIENT_wpf
                 {
                     if (isNew)
                     {
-                        int temp = dll_Get_Socket(SERV_IP, PORT, 1);
+                        int temp = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1);
 
                         T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
                         T_img_send.Start();
                     }
                     else
                     {
-                        T_img_send = new Thread(() => dll_IMG_SEND_THREAD(SERV_IP, PORT));
+                        T_img_send = new Thread(() => DLL.dll_IMG_SEND_THREAD(val.SERV_IP, PORT));
                         T_img_send.Start();
                         //SEND 스레드
                     }
@@ -400,9 +338,9 @@ namespace CLIENT_wpf
             {
                 Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
                 var token = data.Split(',');
-                int other_id = Token_Get_Num(token[0], ":");
-                int other_port = Token_Get_Num(token[1], ":");
-                byte[] buf = new byte[BUF_SZ];
+                int other_id = UTILITY.Token_Get_Num(token[0], ":");
+                int other_port = UTILITY.Token_Get_Num(token[1], ":");
+                byte[] buf = new byte[VAL.BUF_SZ];
 
 
                 data = "$" + other_id.ToString();
@@ -415,12 +353,12 @@ namespace CLIENT_wpf
             else if (data[0] == '@')
             {
                 Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
-                int target_port = Token_Get_Num(data, ":");
+                int target_port = UTILITY.Token_Get_Num(data, ":");
                 Console.WriteLine("New port is : " + target_port);
 
                 if (isNew)
                 {
-                    int temp = dll_Get_Socket(SERV_IP, target_port, 1);
+                    int temp = DLL.dll_Get_Socket(val.SERV_IP, target_port, 1);
                     T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
                     T_img_recv.Start();
                 }
@@ -428,7 +366,7 @@ namespace CLIENT_wpf
                 else
                 {
                     //RECV 스레드
-                    T_img_recv = new Thread(() => dll_IMG_RECV_THREAD(SERV_IP, target_port));
+                    T_img_recv = new Thread(() => DLL.dll_IMG_RECV_THREAD(val.SERV_IP, target_port));
                     T_img_recv.Start();
                 }
             }
@@ -437,7 +375,7 @@ namespace CLIENT_wpf
         private void BTN_MSG_SEND_Click(object sender, RoutedEventArgs e)
         {
             TBX_INPUT.Focus();
-            byte[] buf = new byte[BUF_SZ];
+            byte[] buf = new byte[VAL.BUF_SZ];
 
             buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text + "\n");
             sock.Send(buf);
@@ -452,15 +390,14 @@ namespace CLIENT_wpf
                 BTN_MSG_SEND_Click(this, e);
             }
         }
-
         // 이미지 전송 함수 - UI에 출력 되는 버전
         private void THREAD_IMG_SEND(int t_ImgSend_Sock)
         {
             int size;
 
             cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
-            cap.FrameWidth = frameWidth;
-            cap.FrameHeight = frameHeight;
+            cap.FrameWidth = VAL.frameWidth;
+            cap.FrameHeight = VAL.frameHeight;
             cap.Open(0);
             /**/
             Mat mat = new Mat();
@@ -473,7 +410,7 @@ namespace CLIENT_wpf
 
                 System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
 
-                DLL_IMG_SEND(b, t_ImgSend_Sock);
+                DLL.DLL_IMG_SEND(b, t_ImgSend_Sock);
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
 
@@ -488,12 +425,11 @@ namespace CLIENT_wpf
                     break;
             }
         }
-
         // 이미지 수신 함수 - UI에 출력 되는 버전
         private void THREAD_IMG_RECV(int t_ImgRecv_Sock)
         {
             Console.WriteLine("recv thread start!!");
-            int num = DLL_SENDING(t_ImgRecv_Sock, "send trigger", "send trigger".Length);
+            int num = DLL.DLL_SENDING(t_ImgRecv_Sock, "send trigger", "send trigger".Length);
             Mat mat;
             IntPtr ptr;
 
@@ -501,7 +437,7 @@ namespace CLIENT_wpf
             {
 
 
-                ptr = DLL_IMG_RECV(t_ImgRecv_Sock);
+                ptr = DLL.DLL_IMG_RECV(t_ImgRecv_Sock);
                 if (ptr != null)
                 {
                     mat = new Mat(ptr);
@@ -526,9 +462,7 @@ namespace CLIENT_wpf
                 else
                     Console.WriteLine("is null~~!");
             }
-        }
-
-        
+        }  
     }
 }
   
