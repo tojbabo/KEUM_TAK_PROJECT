@@ -72,6 +72,14 @@ namespace CLIENT_wpf.WINDOWS
             MW.Show();
         }
 
+        private void Click_F5(object sender, RoutedEventArgs e)
+        {
+            byte[] buf = new byte[VAL.BUF_SZ];
+
+            buf = Encoding.ASCII.GetBytes("!request\n");
+            sock.Send(buf);
+        }
+
         private void Recv_From_Child(string item)
         {
             Console.WriteLine("data is : " + item);
@@ -81,7 +89,6 @@ namespace CLIENT_wpf.WINDOWS
             buf = Encoding.ASCII.GetBytes(item);
             sock.Send(buf);
         }
-
 
         private void Click_DEBUG(object sender, RoutedEventArgs e)
         {
@@ -128,5 +135,6 @@ namespace CLIENT_wpf.WINDOWS
                 }
             }
         }
+
     }
 }

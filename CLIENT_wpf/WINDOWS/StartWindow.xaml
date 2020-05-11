@@ -43,7 +43,7 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <Button Content="새로고침" HorizontalAlignment="Left" Margin="49,54,0,0" VerticalAlignment="Top" Width="74" Height="37"/>
+        <Button Content="새로고침" HorizontalAlignment="Left" Margin="49,54,0,0" VerticalAlignment="Top" Width="74" Height="37" Click="Click_F5"/>
         <Button Content="DEBUG" HorizontalAlignment="Left" Height="26" Margin="49,10,0,0" VerticalAlignment="Top" Width="60" RenderTransformOrigin="-0.044,0.491"  Click="Click_DEBUG"/>
 
     </Grid>
