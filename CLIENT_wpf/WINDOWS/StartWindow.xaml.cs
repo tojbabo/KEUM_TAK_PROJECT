@@ -68,7 +68,7 @@ namespace CLIENT_wpf.WINDOWS
             MakingWindow MW = new MakingWindow();
             this.DataSendEvent += new DataPushEventHandler(MW.Recv_From_Parent);
             MW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child);
-           
+
             MW.Show();
         }
 
@@ -97,7 +97,7 @@ namespace CLIENT_wpf.WINDOWS
             Msg_recv_thread = new Thread(THREAD_MSG_RECV);
             Msg_recv_thread.Start();
         }
-      
+
         private void THREAD_MSG_RECV()
         {
             byte[] buf = new byte[VAL.BUF_SZ];
@@ -124,6 +124,7 @@ namespace CLIENT_wpf.WINDOWS
                     }
                     else if (num == data.Length - 1)                                                        // \n이 문자열 맨 마지막인 경우 -> 메시지 정상 수신
                     {
+                        MSG_CHECKING(data);
                         data = "";
                         break;
                     }
@@ -131,10 +132,39 @@ namespace CLIENT_wpf.WINDOWS
                     {
                         temp = data.Substring(0, num);                                                      // \n기준으로 왼쪽 : 현재 메시지로 판단
                         data = data.Substring(num + 1);                                                       // \n기준으로 오른쪽 : 다음 수신 메시지로 판단
+                        MSG_CHECKING(temp);                                                     // \n기준으로 오른쪽 : 다음 수신 메시지로 판단
                     }
                 }
             }
         }
+        private void MSG_CHECKING(String data)
+        {
+            if (data[0] == '#')
+            {
+                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
+                
+            }
+            else if (data[0] == '$')
+            {
+                Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
+                
 
+            }
+            else if (data[0] == '@')
+            {
+                //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
+                
+            }
+            else if (data[0] == '!')
+            {
+                Console.WriteLine("! - 방 목록 받아옴!!");
+
+                var token = data.Split(',');
+                Console.WriteLine("token 1 : " + token[0]);
+
+                Console.WriteLine("token 2 : " + token[1]);
+
+            }
+        }
     }
 }
