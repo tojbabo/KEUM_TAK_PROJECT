@@ -19,19 +19,29 @@ namespace CLIENT_wpf.WINDOWS
     /// </summary>
     public partial class MakingWindow : Window
     {
+        public DataGetEventHandler DataSendEvent;
         public MakingWindow()
         {
             InitializeComponent();
         }
 
-        private void Click_NO(object sender, RoutedEventArgs e)
+        private void Click_No(object sender, RoutedEventArgs e)
         {
-
+            
+            Window.GetWindow(this).Close();
         }
 
         private void Click_Yes(object sender, RoutedEventArgs e)
         {
+            String temp = "@" + TB_TITLE.Text + "," + TB_PASSWD.Text + "\n";
+            Console.WriteLine(temp);
+            DataSendEvent(temp);
+
             Window.GetWindow(this).Close();
+        }
+        public void Recv_From_Parent(string param)
+        {
+            Console.WriteLine("Set Action value called");   
         }
     }
 }

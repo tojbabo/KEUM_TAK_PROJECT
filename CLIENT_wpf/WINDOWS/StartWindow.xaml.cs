@@ -12,12 +12,18 @@ using CLIENT_wpf.WINDOWS;
 
 namespace CLIENT_wpf.WINDOWS
 {
+
+    public delegate void DataGetEventHandler(string item);
+    public delegate void DataPushEventHandler(string value);
+
     public partial class StartWindow : Window
     {
         VAL val = new VAL();
         List<DATA> listData;
         Thread Msg_recv_thread;
         Socket sock;
+
+        public DataPushEventHandler DataSendEvent;
 
         public StartWindow()
         {
@@ -32,6 +38,22 @@ namespace CLIENT_wpf.WINDOWS
             sock.Close();
         }
 
+        private void add_listview()
+        {
+            listData = new List<DATA>();
+            listData.Add(new DATA() { id = 1, title = "[임시]첫번째 생성해본 방", man = 1 });
+
+            ListView.ItemsSource = listData;
+            ListView.Items.Refresh();
+        }
+
+        private class DATA
+        {
+            public int id { get; set; }
+            public string title { get; set; }
+            public int man { get; set; }
+
+        }
 
         private void Click_Join(object sender, RoutedEventArgs e)
         {
@@ -44,26 +66,22 @@ namespace CLIENT_wpf.WINDOWS
         private void Click_MakingRoom(object sender, RoutedEventArgs e)
         {
             MakingWindow MW = new MakingWindow();
+            this.DataSendEvent += new DataPushEventHandler(MW.Recv_From_Parent);
+            MW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child);
+           
             MW.Show();
         }
 
-        private void add_listview()
+        private void Recv_From_Child(string item)
         {
-            listData = new List<DATA>();
-            listData.Add(new DATA() { id=1, title="[임시]첫번째 생성해본 방", man=1});
+            Console.WriteLine("data is : " + item);
+            byte[] buf = new byte[VAL.BUF_SZ];
 
-            ListView.ItemsSource = listData;
-            ListView.Items.Refresh();
-            
-            
-        }
-        private class DATA
-        {
-            public int id { get; set; }
-            public string title { get; set; }
-            public int man { get; set; }
 
+            buf = Encoding.ASCII.GetBytes(item);
+            sock.Send(buf);
         }
+
 
         private void Click_DEBUG(object sender, RoutedEventArgs e)
         {
@@ -71,9 +89,9 @@ namespace CLIENT_wpf.WINDOWS
 
             Msg_recv_thread = new Thread(THREAD_MSG_RECV);
             Msg_recv_thread.Start();
-
         }
-        void THREAD_MSG_RECV()
+      
+        private void THREAD_MSG_RECV()
         {
             byte[] buf = new byte[VAL.BUF_SZ];
             int len;

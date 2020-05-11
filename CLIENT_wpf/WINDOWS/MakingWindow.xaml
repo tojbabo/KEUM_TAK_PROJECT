@@ -8,9 +8,9 @@
         Title="MakingWindow" Height="249.375" Width="270.875" ResizeMode="NoResize">
     <Grid>
 
-        <Button Content="취소" HorizontalAlignment="Left" Height="38" Margin="140,164,0,0" VerticalAlignment="Top" Width="101" Click="Click_Yes"/>
-        <Button Content="확인" HorizontalAlignment="Left" Height="36" Margin="34,166,0,0" VerticalAlignment="Top" Width="100" Click="Click_NO"/>
-        <TextBox HorizontalAlignment="Left" Height="22" Margin="34,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" >
+        <Button Content="취소" HorizontalAlignment="Left" Height="36" Margin="140,166,0,0" VerticalAlignment="Top" Width="101" Click="Click_No"/>
+        <Button Content="확인" HorizontalAlignment="Left" Height="36" Margin="34,166,0,0" VerticalAlignment="Top" Width="100" Click="Click_Yes"/>
+        <TextBox x:Name="TB_TITLE" HorizontalAlignment="Left" Height="22" Margin="34,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" >
             <TextBox.Style>
                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                     <Style.Resources>
@@ -34,7 +34,7 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <TextBox HorizontalAlignment="Left" Height="22" Margin="34,37,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" >
+        <TextBox x:Name="TB_PASSWD" HorizontalAlignment="Left" Height="22" Margin="34,37,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" >
             <TextBox.Style>
                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                     <Style.Resources>
@@ -58,14 +58,14 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <ComboBox HorizontalAlignment="Left" Height="15" Margin="145,78,0,0" VerticalAlignment="Top" Width="96"/>
-        <ComboBox HorizontalAlignment="Left" Height="15" Margin="145,98,0,0" VerticalAlignment="Top" Width="96"/>
-        <ComboBox HorizontalAlignment="Left" Height="15" Margin="145,118,0,0" VerticalAlignment="Top" Width="96"/>
-        <ComboBox HorizontalAlignment="Left" Height="15" Margin="145,138,0,0" VerticalAlignment="Top" Width="96"/>
-        <CheckBox Content="감정 1" HorizontalAlignment="Left" Margin="34,78,0,0" VerticalAlignment="Top"/>
-        <CheckBox Content="감정 2" HorizontalAlignment="Left" Margin="34,98,0,0" VerticalAlignment="Top"/>
-        <CheckBox Content="감정 3" HorizontalAlignment="Left" Margin="34,118,0,0" VerticalAlignment="Top"/>
-        <CheckBox Content="감정 4" HorizontalAlignment="Left" Margin="34,138,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="A1" HorizontalAlignment="Left" Height="15" Margin="145,78,0,0" VerticalAlignment="Top" Width="96"/>
+        <ComboBox x:Name="A2" HorizontalAlignment="Left" Height="15" Margin="145,98,0,0" VerticalAlignment="Top" Width="96"/>
+        <ComboBox x:Name="A3" HorizontalAlignment="Left" Height="15" Margin="145,118,0,0" VerticalAlignment="Top" Width="96"/>
+        <ComboBox x:Name="A4" HorizontalAlignment="Left" Height="15" Margin="145,138,0,0" VerticalAlignment="Top" Width="96"/>
+        <CheckBox x:Name="E1" Content="감정 1" HorizontalAlignment="Left" Margin="34,78,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="E2"  Content="감정 2" HorizontalAlignment="Left" Margin="34,98,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="E3" Content="감정 3" HorizontalAlignment="Left" Margin="34,118,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="E4" Content="감정 4" HorizontalAlignment="Left" Margin="34,138,0,0" VerticalAlignment="Top"/>
 
 
     </Grid>
