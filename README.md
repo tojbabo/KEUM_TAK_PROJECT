@@ -1,6 +1,10 @@
 # KEUM_TAK_PROJECT
 프로젝트 속성 - 구성 속성 - 디버깅 - 환경 <PATH=C:\Temp\opencv\build\x64\vc15\bin;%PATH%> 내용을 추가해 주어야 한다.
 #
+# - 0511
+대기방 만들기
+ - 대기방 연결 (DEBUG 버튼 클릭시 연결)
+#
 # - 0502
 UI 일부 수정
  - 보고서 제출용 UI 와꾸짜기

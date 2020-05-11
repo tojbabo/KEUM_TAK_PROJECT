@@ -94,6 +94,7 @@
     <Compile Include="CLASS\DLL.cs" />
     <Compile Include="CLASS\VAL.cs" />
     <Compile Include="FUNC\CumstomThread.cs" />
+    <Compile Include="FUNC\PROTOCOL.cs" />
     <Compile Include="FUNC\UTILITY.cs" />
     <Compile Include="WINDOWS\MakingWindow.xaml.cs">
       <DependentUpon>MakingWindow.xaml</DependentUpon>
