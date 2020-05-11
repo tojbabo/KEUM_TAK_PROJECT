@@ -7,7 +7,9 @@
         mc:Ignorable="d"
         Title="StartWindow" Height="450" Width="800" ResizeMode="NoResize">
     <Grid>
-        <ListView x:Name="ListView" HorizontalAlignment="Left" Height="286" Margin="49,109,0,0" VerticalAlignment="Top" Width="705">
+        <ListView 
+            x:Name="ListView" HorizontalAlignment="Left" 
+            Height="286" Margin="49,109,0,0" VerticalAlignment="Top" Width="705">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="방 번호" Width="80" DisplayMemberBinding="{Binding id}" />

@@ -22,7 +22,7 @@ namespace CLIENT_wpf.WINDOWS
         List<DATA> listData;
         Thread Msg_recv_thread;
         Socket sock;
-
+        string str_temp;
         public DataPushEventHandler DataSendEvent;
 
         public StartWindow()
@@ -41,7 +41,7 @@ namespace CLIENT_wpf.WINDOWS
         private void add_listview()
         {
             listData = new List<DATA>();
-            listData.Add(new DATA() { id = 1, title = "[임시]첫번째 생성해본 방", man = 1 });
+            listData.Add(new DATA() { id = 1, title = "[임시]첫번째 생성해본 방", man = "1" });
 
             ListView.ItemsSource = listData;
             ListView.Items.Refresh();
@@ -51,36 +51,46 @@ namespace CLIENT_wpf.WINDOWS
         {
             public int id { get; set; }
             public string title { get; set; }
-            public int man { get; set; }
+            public string man { get; set; }
 
         }
 
         private void Click_Join(object sender, RoutedEventArgs e)
         {
+            int id = ((DATA)ListView.SelectedItem).id;
 
-            ChattingWindow CW = new ChattingWindow();
-            Window.GetWindow(this).Close();
-            CW.Show();
+            PasswdWindow PW = new PasswdWindow();
+            this.DataSendEvent += new DataPushEventHandler(PW.Recv_From_Parent);
+            PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_PasswdData);
+            PW.Show();
+
+            Console.WriteLine(str_temp);
+
+
+            /* ChattingWindow CW = new ChattingWindow();
+             Window.GetWindow(this).Close();
+             CW.Show();*/
         }
 
         private void Click_MakingRoom(object sender, RoutedEventArgs e)
         {
             MakingWindow MW = new MakingWindow();
             this.DataSendEvent += new DataPushEventHandler(MW.Recv_From_Parent);
-            MW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child);
+            MW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_SendMakingData);
 
             MW.Show();
         }
 
         private void Click_F5(object sender, RoutedEventArgs e)
         {
+            listData = new List<DATA>();
             byte[] buf = new byte[VAL.BUF_SZ];
 
             buf = Encoding.ASCII.GetBytes("!request\n");
             sock.Send(buf);
         }
 
-        private void Recv_From_Child(string item)
+        private void Recv_From_Child_SendMakingData(string item)
         {
             Console.WriteLine("data is : " + item);
             byte[] buf = new byte[VAL.BUF_SZ];
@@ -89,6 +99,11 @@ namespace CLIENT_wpf.WINDOWS
             buf = Encoding.ASCII.GetBytes(item);
             sock.Send(buf);
         }
+        private void Recv_From_Child_PasswdData(string item)
+        {
+            str_temp = item;
+        }
+
 
         private void Click_DEBUG(object sender, RoutedEventArgs e)
         {
@@ -142,28 +157,37 @@ namespace CLIENT_wpf.WINDOWS
             if (data[0] == '#')
             {
                 Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
-                
+
             }
             else if (data[0] == '$')
             {
                 Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
-                
+
 
             }
             else if (data[0] == '@')
             {
                 //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
-                
+
             }
             else if (data[0] == '!')
             {
                 Console.WriteLine("! - 방 목록 받아옴!!");
 
                 var token = data.Split(',');
-                Console.WriteLine("token 1 : " + token[0]);
 
-                Console.WriteLine("token 2 : " + token[1]);
+                int ID =UTILITY.Token_Get_Num(token[0], "!");
+                String TITLE = token[1];
+                String PERSON = token[2];
 
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    listData.Add(new DATA() { id = ID, title = TITLE, man = PERSON });
+
+                    ListView.ItemsSource = listData;
+                    ListView.Items.Refresh();
+
+                }));
             }
         }
     }

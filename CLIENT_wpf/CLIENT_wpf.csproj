@@ -99,6 +99,9 @@
     <Compile Include="WINDOWS\MakingWindow.xaml.cs">
       <DependentUpon>MakingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WINDOWS\PasswdWindow.xaml.cs">
+      <DependentUpon>PasswdWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WINDOWS\StartWindow.xaml.cs">
       <DependentUpon>StartWindow.xaml</DependentUpon>
     </Compile>
@@ -115,6 +118,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="WINDOWS\MakingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WINDOWS\PasswdWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
