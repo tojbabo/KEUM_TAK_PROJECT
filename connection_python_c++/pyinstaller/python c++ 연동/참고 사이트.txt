@@ -1,0 +1,5 @@
+https://igotit.tistory.com/entry/%EB%8B%A4%EB%A5%B8%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8%EA%B3%BC-%EB%A9%94%EB%AA%A8%EB%A6%AC%EA%B3%B5%EC%9C%A0-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%A7%B5-%ED%8C%8C%EC%9D%BC
+	- c++ 쪽 메모리 맵 파일
+
+http://egloos.zum.com/sweeper/v/2990023
+	- 메모리 맵 파일 개념

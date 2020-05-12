@@ -1,0 +1,73 @@
+#include <windows.h>
+#include <cstring>
+#include <cstdbool>
+#include <iostream>
+
+typedef struct
+{
+	void* hFileMap;
+	void* pData;
+	char MapName[256];
+	size_t Size;
+} SharedMemory;
+
+bool CreateMemoryMap(SharedMemory* shm)
+{
+	if ((shm->hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, shm->Size, shm->MapName)) == NULL)
+	{
+		return false;
+	}
+
+	if ((shm->pData = MapViewOfFile(shm->hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, shm->Size)) == NULL)
+	{
+		CloseHandle(shm->hFileMap);
+		return false;
+	}
+	return true;
+}
+
+bool FreeMemoryMap(SharedMemory* shm)
+{
+	if (shm && shm->hFileMap)
+	{
+		if (shm->pData)
+		{
+			UnmapViewOfFile(shm->pData);
+		}
+
+		if (shm->hFileMap)
+		{
+			CloseHandle(shm->hFileMap);
+		}
+		return true;
+	}
+	return false;
+}
+
+int main()
+{
+	SharedMemory shm = { 0 };
+	shm.Size = 512;
+	sprintf(shm.MapName, "Local\\Test");
+
+	if (CreateMemoryMap(&shm))
+	{
+		char* ptr = (char*)shm.pData;
+		memset(ptr, 0, shm.Size);
+
+		while (ptr && (*ptr == 0))
+		{
+			Sleep(100);
+		}
+
+		int size = (int)*ptr;
+		ptr += sizeof(char);
+
+		int i = 0;
+		for (; i < size; ++i)
+		{
+			std::cout << ptr[i];
+		}
+		FreeMemoryMap(&shm);
+	}
+}

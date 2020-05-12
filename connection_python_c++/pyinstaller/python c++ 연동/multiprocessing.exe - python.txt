@@ -1,0 +1,37 @@
+import cv2
+import numpy
+import sys
+import time
+
+
+def main(filename):
+    img = cv2.imread(filename, cv2.IMREAD_COLOR)
+    filename_list = ['dog.jpg', 'cat.jpg', 'lena.jpg']
+    index = filename_list.index(filename)
+
+    if filename not in filename_list:
+        print("no file!!!")
+        return
+    else:
+        print("file find ok")
+
+    if img is not None:
+        print(img)
+        cv2.imshow('image', img)
+    else:
+        print("No img")
+
+    cv2.waitKey(1)
+    time.sleep(1)
+    cv2.destroyAllWindows()
+
+    index = index + 1
+
+    if index == 3:
+        index = 0
+
+    main(filename_list[index])
+
+
+if __name__ == '__main__':
+    main(sys.argv[1])

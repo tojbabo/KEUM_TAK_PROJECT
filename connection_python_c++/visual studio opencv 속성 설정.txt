@@ -1,0 +1,14 @@
+1. 구성속성 - 디버깅 - 환경
+	PATH=D:\opencv\build\x64\vc15\bin;%PATH%
+
+2. C/C++ - 추가 포함 디렉터리
+	- 내 설치 경로 : D:\
+	D:\opencv\build\include
+
+3. 링커 - 일반 - 추가 라이브러리 디렉터리
+	D:\opencv\build\x64\vc15\lib
+
+4. 링커 - 입력 - 추가 종속성
+	opencv_world410d.lib;opencv_world410.lib
+
+opencv_world410d.lib - Debug, C:\Windows\SysWOW64 복사함

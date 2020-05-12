@@ -1,0 +1,28 @@
+
+#include <iostream>
+#include <string>
+#include <Windows.h>
+#include <tchar.h>
+using namespace std;
+
+
+int main() {
+	char option[] = "open";
+	char title[] = "multiprocessing.exe";
+	char parameter[] = "cat.jpg";
+	int count = 0;
+
+	// ShellExecute(핸들값, 수행동작 지정, 프로그램 파일명, 수행시 파라미터, 파일 경로, 수행시 윈도우 크기 등)
+	if (ShellExecute(GetDesktopWindow(), _T(option), _T(title), _T(parameter), 0, SW_SHOWDEFAULT))
+		printf("Success !!!");
+	else
+		printf("nonononono");
+
+	while (1) {
+		printf("count = %d\n", count);
+		Sleep(1500);
+		count++;
+	}
+
+	return 0;
+}

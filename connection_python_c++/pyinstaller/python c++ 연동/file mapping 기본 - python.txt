@@ -1,0 +1,7 @@
+import mmap
+
+shm = mmap.mmap(0, 512, "Local\\Test") #You should "open" the memory map file instead of attempting to create it..
+if shm:
+    shm.write(bytes("5", 'UTF-8'));
+    shm.write(bytes("Hello", 'UTF-8'))
+    print("GOOD")

@@ -1,0 +1,7 @@
+﻿1. pyinstaller 설치
+
+2. cmd 창에서 .py 파일 있는 경로로 감
+
+3. pyinstaller -F -n 이름 py이름
+	-> dist 폴더 안에 exe 파일 하나 생김
+-F 옵션 삭제 시 폴더 전체 생성
