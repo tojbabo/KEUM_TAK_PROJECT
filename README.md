@@ -6,6 +6,9 @@
     
 ### Face_Recognition folder
   - 얼굴인식 모듈
+  
+### connection_python_c++
+  - 서버 및 인공지능 모듈 통합
 
 ### 버전
 	numpy - 1.16.5
