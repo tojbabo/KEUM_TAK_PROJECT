@@ -111,7 +111,6 @@ namespace CLIENT_wpf.WINDOWS
         {
             int id = ((DATA)ListView.SelectedItem).id;
             byte[] buf = new byte[VAL.BUF_SZ];
-
             buf = Encoding.ASCII.GetBytes("#," + id + "," + passwd + "\n");
             sock.Send(buf);
         }
@@ -204,7 +203,15 @@ namespace CLIENT_wpf.WINDOWS
 
                 _Window_Close();
                 this.Close();
-            }            
+            }
+            else if (data[0] == '$')
+            {
+                Console.WriteLine("$ - 서버로 부터 메시지 !!");
+                // 방 접근하세요 #,메시지종류,메시지내용
+                
+                var token = data.Split(',');
+                MessageBox.Show(token[1] + token[2]);
+            }
         }
 
     }
