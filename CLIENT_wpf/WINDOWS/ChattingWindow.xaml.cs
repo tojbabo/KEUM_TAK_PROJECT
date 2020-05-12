@@ -55,8 +55,9 @@ namespace CLIENT_wpf
 
         /* */
         // 최초 실행되는 함수
-        public ChattingWindow()
+        public ChattingWindow(String port)
         {
+            int.TryParse(port, out PORT);
             InitializeComponent();
         }
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현

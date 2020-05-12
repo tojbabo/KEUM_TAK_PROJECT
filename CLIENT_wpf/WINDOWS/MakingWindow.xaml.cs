@@ -33,7 +33,7 @@ namespace CLIENT_wpf.WINDOWS
 
         private void Click_Yes(object sender, RoutedEventArgs e)
         {
-            String temp = "@" + TB_TITLE.Text + "," + TB_PASSWD.Text + "\n";
+            String temp = "@," + TB_TITLE.Text + "," + TB_PASSWD.Text + "\n";
             Console.WriteLine(temp);
             DataSendEvent(temp);
 

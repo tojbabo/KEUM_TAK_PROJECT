@@ -22,7 +22,6 @@ namespace CLIENT_wpf.WINDOWS
         List<DATA> listData;
         Thread Msg_recv_thread;
         Socket sock;
-        string str_temp;
         public DataPushEventHandler DataSendEvent;
 
         public StartWindow()
@@ -34,10 +33,19 @@ namespace CLIENT_wpf.WINDOWS
         // 종료 시 처리할 작업들
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            _Window_Close();
+        }
+
+        private void _Window_Close()
+        {
+            Console.WriteLine("나 종료된당 히힛");
             UTILITY.Release_thread(Msg_recv_thread);
             sock.Close();
         }
 
+        /// <summary>
+        /// 이건 지워야할 함수임
+        /// </summary>
         private void add_listview()
         {
             listData = new List<DATA>();
@@ -64,7 +72,6 @@ namespace CLIENT_wpf.WINDOWS
             PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_PasswdData);
             PW.Show();
 
-            Console.WriteLine(str_temp);
 
 
             /* ChattingWindow CW = new ChattingWindow();
@@ -99,9 +106,14 @@ namespace CLIENT_wpf.WINDOWS
             buf = Encoding.ASCII.GetBytes(item);
             sock.Send(buf);
         }
-        private void Recv_From_Child_PasswdData(string item)
+
+        private void Recv_From_Child_PasswdData(string passwd)
         {
-            str_temp = item;
+            int id = ((DATA)ListView.SelectedItem).id;
+            byte[] buf = new byte[VAL.BUF_SZ];
+
+            buf = Encoding.ASCII.GetBytes("#," + id + "," + passwd + "\n");
+            sock.Send(buf);
         }
 
 
@@ -152,33 +164,18 @@ namespace CLIENT_wpf.WINDOWS
                 }
             }
         }
+
         private void MSG_CHECKING(String data)
         {
-            if (data[0] == '#')
-            {
-                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
-
-            }
-            else if (data[0] == '$')
-            {
-                Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
-
-
-            }
-            else if (data[0] == '@')
-            {
-                //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
-
-            }
-            else if (data[0] == '!')
+            if (data[0] == '!')
             {
                 Console.WriteLine("! - 방 목록 받아옴!!");
 
                 var token = data.Split(',');
 
-                int ID =UTILITY.Token_Get_Num(token[0], "!");
-                String TITLE = token[1];
-                String PERSON = token[2];
+                int.TryParse(token[1], out int ID);
+                String TITLE = token[2];
+                String PERSON = token[3];
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -189,6 +186,26 @@ namespace CLIENT_wpf.WINDOWS
 
                 }));
             }
+            else if (data[0] == '@')
+            {
+                //비밀 번호 요청
+                //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
+
+            }
+            else if (data[0] == '#')
+            {
+                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
+                // 방 접근하세요 #,port
+                var token = data.Split(',');
+                String PORT = token[1];
+
+                ChattingWindow CW = new ChattingWindow(PORT);
+                CW.Show();
+
+                _Window_Close();
+                this.Close();
+            }            
         }
+
     }
 }
