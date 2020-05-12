@@ -115,13 +115,84 @@ namespace CLIENT_wpf.WINDOWS
             sock.Send(buf);
         }
 
+        private void Recv_From_Child_ReStart(String a)
+        {
+            this.Show();
+            _Window_Close();
+            //다시 연결
+            Init_window();
+
+        }
+
 
         private void Click_DEBUG(object sender, RoutedEventArgs e)
+        {
+            Init_window();
+        }
+        
+        private void Init_window()
         {
             sock = PROTOCOL.CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
 
             Msg_recv_thread = new Thread(THREAD_MSG_RECV);
             Msg_recv_thread.Start();
+        }
+
+
+        private void MSG_CHECKING(String data)
+        {
+            if (data[0] == '!')
+            {
+                Console.WriteLine("! - 방 목록 받아옴!!");
+
+                var token = data.Split(',');
+
+                int.TryParse(token[1], out int ID);
+                String TITLE = token[2];
+                String PERSON = token[3];
+
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    listData.Add(new DATA() { id = ID, title = TITLE, man = PERSON });
+
+                    ListView.ItemsSource = listData;
+                    ListView.Items.Refresh();
+
+                }));
+            }
+            else if (data[0] == '@')
+            {
+                //비밀 번호 요청
+                //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
+
+            }
+            else if (data[0] == '#')
+            {
+                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
+                // 방 접근하세요 #,port
+                var token = data.Split(',');
+                String PORT = token[1];
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+
+                    ChattingWindow CW = new ChattingWindow(PORT);
+                    this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
+                    CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_ReStart);
+                    CW.Show();
+                    this.Hide();
+                    //_Window_Close();
+                    //this.Close();
+                    Console.WriteLine("StartWindow -> ChattingWindow");
+                }));
+            }
+            else if (data[0] == '$')
+            {
+                Console.WriteLine("$ - 서버로 부터 메시지 !!");
+                // 방 접근하세요 #,메시지종류,메시지내용
+
+                var token = data.Split(',');
+                MessageBox.Show(token[1] + token[2]);
+            }
         }
 
         private void THREAD_MSG_RECV()
@@ -164,55 +235,6 @@ namespace CLIENT_wpf.WINDOWS
             }
         }
 
-        private void MSG_CHECKING(String data)
-        {
-            if (data[0] == '!')
-            {
-                Console.WriteLine("! - 방 목록 받아옴!!");
-
-                var token = data.Split(',');
-
-                int.TryParse(token[1], out int ID);
-                String TITLE = token[2];
-                String PERSON = token[3];
-
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                {
-                    listData.Add(new DATA() { id = ID, title = TITLE, man = PERSON });
-
-                    ListView.ItemsSource = listData;
-                    ListView.Items.Refresh();
-
-                }));
-            }
-            else if (data[0] == '@')
-            {
-                //비밀 번호 요청
-                //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
-
-            }
-            else if (data[0] == '#')
-            {
-                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
-                // 방 접근하세요 #,port
-                var token = data.Split(',');
-                String PORT = token[1];
-
-                ChattingWindow CW = new ChattingWindow(PORT);
-                CW.Show();
-
-                _Window_Close();
-                this.Close();
-            }
-            else if (data[0] == '$')
-            {
-                Console.WriteLine("$ - 서버로 부터 메시지 !!");
-                // 방 접근하세요 #,메시지종류,메시지내용
-                
-                var token = data.Split(',');
-                MessageBox.Show(token[1] + token[2]);
-            }
-        }
 
     }
 }

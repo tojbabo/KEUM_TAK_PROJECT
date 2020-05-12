@@ -26,6 +26,7 @@ using System.Reflection;
 using CLIENT_wpf.CLASS;
 using CLIENT_wpf.WINDOWS;
 using CLIENT_wpf.FUNC;
+using System.Collections.Specialized;
 
 namespace CLIENT_wpf
 {
@@ -34,6 +35,8 @@ namespace CLIENT_wpf
     /// </summary>
     public partial class ChattingWindow : System.Windows.Window
     {
+        public DataGetEventHandler DataSendEvent;
+
         bool isSend = true;
         bool isNew = true;
 
@@ -57,8 +60,10 @@ namespace CLIENT_wpf
         // 최초 실행되는 함수
         public ChattingWindow(String port)
         {
-            int.TryParse(port, out PORT);
             InitializeComponent();
+            int.TryParse(port, out PORT);
+            TBX_PORT.Text = port;
+
         }
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -70,7 +75,12 @@ namespace CLIENT_wpf
             int num = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1);
 
         }
-       
+
+        public void Recv_From_Parent(string param)
+        {
+            Console.WriteLine("Set Action value called");
+        }
+
         // 최초 카메라 셋팅
         private bool InitWebCamera()
         {
@@ -142,7 +152,7 @@ namespace CLIENT_wpf
 
 
             /**/
-
+            /*
             if (!InitWebCamera())
             {
                 //MessageBox.Show("CAM OPEN FALSE");
@@ -153,7 +163,13 @@ namespace CLIENT_wpf
             }
 
             //Cv2.NamedWindow("1", WindowMode.AutoSize);
-            CAPTURE_IMG();
+            CAPTURE_IMG();*/
+
+            Console.WriteLine("ChattingWindow -> StartWindow");
+
+            DataSendEvent("");
+
+            System.Windows.Window.GetWindow(this).Close();
 
         }
 
