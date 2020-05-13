@@ -2,8 +2,8 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.3.0"
-#define RECENT "서버로 부터 받아온 Mat파일 UI에 출력완료 - 조금 불안정"
+#define DLL_VER "1.4.0"
+#define RECENT "웬만한 기능 거의 구현"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));
@@ -131,21 +131,27 @@ extern "C" {
 		SOCKADDR_IN adr;
 		SOCKET sock;
 
-		OJJJ_Memset(&adr, serv_ip.c_str(), serv_port);
+		try {
+			OJJJ_Memset(&adr, serv_ip.c_str(), serv_port);
 
 
-		if (opt == 1) {
-			sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-			connect(sock, (struct sockaddr*) & adr, sizeof(adr));
+			if (opt == 1) {
+				sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+				connect(sock, (struct sockaddr*) & adr, sizeof(adr));
+			}
+			else if (opt == 0) {
+				sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+				connect(sock, (struct sockaddr*) & adr, sizeof(adr));
+			}cout << "----------------------DLL CREATE SOCKET" << endl;
+			cout << "ip : " << serv_ip << endl << "port : " << serv_port << endl
+				<< "opt : " << opt << endl << "socket id : " << sock << endl;
+			cout << "---------------------------------------" << endl;
 		}
-		else if (opt == 0) {
-			sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-			connect(sock, (struct sockaddr*) & adr, sizeof(adr));
-		}cout << "----------------------DLL CREATE SOCKET" << endl;
-		cout << "ip : " << serv_ip << endl << "port : " << serv_port << endl
-			<< "opt : " << opt << endl << "socket id : " << sock << endl;
-		cout << "---------------------------------------" << endl;
-
+		catch (Exception e) {
+			cout << "socket making error" << endl;
+			Sleep(1000);
+			sock = dll_Get_Socket(serv_ip, serv_port, opt);
+		}
 		return sock;
 
 	}
