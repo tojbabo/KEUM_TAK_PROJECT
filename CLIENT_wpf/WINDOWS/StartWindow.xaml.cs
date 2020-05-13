@@ -70,12 +70,24 @@ namespace CLIENT_wpf.WINDOWS
         #region UI - 이벤트
         private void Click_Join(object sender, RoutedEventArgs e)
         {
-            int id = ((DATA)ListView.SelectedItem).id;
+            if (ListView.SelectedItem != null)
+            {
+                int id = ((DATA)ListView.SelectedItem).id;
 
-            PasswdWindow PW = new PasswdWindow();
-            this.DataSendEvent += new DataPushEventHandler(PW.Recv_From_Parent);
-            PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_PasswdData);
-            PW.Show();
+                PasswdWindow PW = new PasswdWindow();
+                this.DataSendEvent += new DataPushEventHandler(PW.Recv_From_Parent);
+                PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_PasswdData);
+                PW.Show();
+            }
+            else
+            {
+                Console.WriteLine("eror");
+                ChattingWindow CW = new ChattingWindow();
+                CW.Show();
+                this.Close();
+
+            }
+
 
 
 
