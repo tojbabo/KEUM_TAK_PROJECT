@@ -30,15 +30,14 @@ using System.Collections.Specialized;
 
 namespace CLIENT_wpf
 {
-    /// <summary>
-    /// MainWindow.xaml에 대한 상호 작용 논리
-    /// </summary>
+
     public partial class ChattingWindow : System.Windows.Window
     {
         public DataGetEventHandler DataSendEvent;
 
         bool isSend = true;
         bool isNew = true;
+        bool isConnect = false;
 
         int ID;
         int PORT;
@@ -52,61 +51,35 @@ namespace CLIENT_wpf
         Thread T_img_recv;
         Thread T_msg_recv;
 
-       
-
         VAL val = new VAL();
 
         /* */
-        // 최초 실행되는 함수
+        public ChattingWindow()
+        {
+            InitializeComponent();
+            UTILITY.START();
+            //forDEBUG.Visibility = Visibility.Collapsed;
+        }
         public ChattingWindow(String port)
         {
             InitializeComponent();
             int.TryParse(port, out PORT);
             TBX_PORT.Text = port;
-
+            TBX_IP.Text = val.SERV_IP;
         }
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("0427 - ver1.4");
-            DLL.Hi();
-            
-
             int num = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1);
-
         }
 
-        public void Recv_From_Parent(string param)
-        {
-            Console.WriteLine("Set Action value called");
-        }
-
-        // 최초 카메라 셋팅
-        private bool InitWebCamera()
-        {
-            try
-            {
-                cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
-                cap.FrameWidth = VAL.frameWidth;
-                cap.FrameHeight = VAL.frameHeight;
-                cap.Open(0);
-                wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
-
-                image.Source = wb;
-                image2.Source = wb;
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
         // 종료 시 처리할 작업들
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
-
+            _Window_Closing();   
+        }
+        public void _Window_Closing()
+        {
             if (cap != null && cap.IsOpened())
             {
                 cap.Dispose();
@@ -117,17 +90,61 @@ namespace CLIENT_wpf
             UTILITY.Release_thread(T_msg_recv);
         }
 
+
+        #region 통신 관련
+        private bool Connect_to_Server()
+        {
+            if (isConnect)
+            {
+                sock.Close();
+                _Window_Closing();
+
+                BTN_CONNECT.Content = "CONNECT";
+                UTILITY.bool_change(isConnect);
+                return true;
+            }
+            else
+            {
+                try
+                {
+                    int.TryParse(TBX_PORT.Text, out val.SERV_PORT);
+
+                    Console.WriteLine(val.SERV_PORT);
+
+                    sock = PROTOCOL.CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
+
+                    String name = "^" + TBX_NAME.Text + "\n";
+                    byte[] buf = new byte[VAL.BUF_SZ];
+
+                    buf = Encoding.ASCII.GetBytes(name);
+                    sock.Send(buf);
+                    Console.WriteLine("send name data");
+
+                    T_msg_recv = new Thread(THREAD_MSG_RECV);
+                    T_msg_recv.Start();
+
+                    BTN_CONNECT.Content = "DISCONNECT";
+                    UTILITY.bool_change(isConnect);
+                    return true;
+                }
+                catch (Exception e) { return false; }
+            }
+            
+
+        }
+
+        public void Recv_From_Parent(string param)
+        {
+            Console.WriteLine("Set Action value called");
+        }
+        #endregion
+
+        #region UI 이벤트
         // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            
-            
-            
             if (isSend == false) { isSend = true; button.Content = "YES SHOW"; }
             else { isSend = false; button.Content = "NO SHOW"; }
-
-
-
         }
         private void Button_Click_change(object sender, RoutedEventArgs e)
         {
@@ -172,115 +189,34 @@ namespace CLIENT_wpf
             System.Windows.Window.GetWindow(this).Close();
 
         }
-
         // CONNECT 버튼 클릭시
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
-            val.SERV_IP = TBX_IP.Text;
-            int.TryParse(TBX_PORT.Text, out val.SERV_PORT);
+            Connect_to_Server();
+        }
 
-            sock = CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
-            Console.WriteLine(sock);
-
-            if (sock != null)
-            {
-                //MessageBox.Show("CONNECT FALSE");
-            }
-            else
-            {
-                //MessageBox.Show("CONNECT OK");
-            }
-            String name = "^" + TBX_NAME.Text + "\n";
+        // 서버로 메시지 보내는 함수
+        private void BTN_MSG_SEND_Click(object sender, RoutedEventArgs e)
+        {
+            TBX_INPUT.Focus();
             byte[] buf = new byte[VAL.BUF_SZ];
 
-            buf = Encoding.ASCII.GetBytes(name);
+            buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text + "\n");
             sock.Send(buf);
-            Console.WriteLine("send name data");
-
-            T_msg_recv = new Thread(THREAD_MSG_RECV);
-            T_msg_recv.Start();
+            TBX_INPUT.Text = "";
 
         }
-        // 윈도우 상에 이미지 출력 관련 함수
-        private void CAPTURE_IMG()
+        // 엔터로 메시지 전송
+        private void TBX_INPUT_KeyDown(object sender, KeyEventArgs e)
         {
-            Mat mat = new Mat();
-            OpenCvSharp.Size size = new OpenCvSharp.Size(640, 480);
-            Mat dst = new Mat();
-
-            while (true)
+            if (e.Key == Key.Return)
             {
-                if (cap.Read(mat))
-                {
-
-
-                    Cv2.Resize(mat, dst, size);
-
-                    var b = new byte[mat.Channels() * mat.Cols * mat.Rows];
-                    System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, mat.Channels() * mat.Cols * mat.Rows);
-                    //testhree(b);
-                    //Cv2.ImShow("2", mat);
-
-                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-
-                }
-
-                int c = Cv2.WaitKey(10);
-                if (c != -1)
-                    break;
-
+                BTN_MSG_SEND_Click(this, e);
             }
         }
-        // 소켓을 생성하는 함수 
-        private Socket CREATE_SOCKET(String ip, int port, int type, int opt)
-        {
-            // type : TCP(1) / UDP(2)
-            // opt : 1 - 연결 UDP / 그 외: 일반 UDP
-            Socket temp_sock;
-            if (type == VAL.TCP)
-            {
-                temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-                try
-                {
-                    temp_sock.Connect(ip, port);
-                    Console.WriteLine("TCP 연결 성공");
-                    return temp_sock;
-                }
-                catch
-                {
-                    Console.WriteLine("TCP 연결 실패");
-                    return null;
-                }
+        #endregion
 
-            }
-            else if (type == VAL.UDP)
-            {
-                temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                if (opt == 1)
-                {
-                    try
-                    {
-                        sock.Connect(ip, port);
-                        Console.WriteLine("UDP 연결 성공");
-                        return temp_sock;
-                    }
-                    catch
-                    {
-                        Console.WriteLine("UDP 연결 실패");
-                        return null;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("UDP 소켓 생성 성공");
-                    return temp_sock;
-                }
-            }
-            else
-                Console.WriteLine("잘못된 소켓 생성");
-
-            return null;
-        }
+        #region 페이지 쓰레드
         // 메시지 수신 쓰레드
         private void THREAD_MSG_RECV()
         {
@@ -294,11 +230,6 @@ namespace CLIENT_wpf
                 len = sock.Receive(buf);
                 temp = Encoding.UTF8.GetString(buf, 0, len);
                 Console.WriteLine("서버로 부터 수신한 메시지 : " + temp);
-
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                 {
-                     TBX_MESSAGE.AppendText(temp);
-                 }));
                 data += temp;
                 while (true)
                 {
@@ -387,24 +318,12 @@ namespace CLIENT_wpf
                     T_img_recv.Start();
                 }
             }
-        }
-        // 서버로 메시지 보내는 함수
-        private void BTN_MSG_SEND_Click(object sender, RoutedEventArgs e)
-        {
-            TBX_INPUT.Focus();
-            byte[] buf = new byte[VAL.BUF_SZ];
-
-            buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text + "\n");
-            sock.Send(buf);
-            TBX_INPUT.Text = "";
-
-        }
-        // 엔터로 메시지 전송
-        private void TBX_INPUT_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Return)
-            {
-                BTN_MSG_SEND_Click(this, e);
+            else 
+            {   // 일반 메시지
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    TBX_MESSAGE.AppendText(data);
+                }));
             }
         }
         // 이미지 전송 함수 - UI에 출력 되는 버전
@@ -479,7 +398,60 @@ namespace CLIENT_wpf
                 else
                     Console.WriteLine("is null~~!");
             }
-        }  
+        }
+        #endregion
+
+        // 최초 카메라 셋팅
+        private bool InitWebCamera()
+        {
+            try
+            {
+                cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
+                cap.FrameWidth = VAL.frameWidth;
+                cap.FrameHeight = VAL.frameHeight;
+                cap.Open(0);
+                wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+
+                image.Source = wb;
+                image2.Source = wb;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        // 윈도우 상에 이미지 출력 관련 함수
+        private void CAPTURE_IMG()
+        {
+            Mat mat = new Mat();
+            OpenCvSharp.Size size = new OpenCvSharp.Size(640, 480);
+            Mat dst = new Mat();
+
+            while (true)
+            {
+                if (cap.Read(mat))
+                {
+
+
+                    Cv2.Resize(mat, dst, size);
+
+                    var b = new byte[mat.Channels() * mat.Cols * mat.Rows];
+                    System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, mat.Channels() * mat.Cols * mat.Rows);
+                    //testhree(b);
+                    //Cv2.ImShow("2", mat);
+
+                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+
+                }
+
+                int c = Cv2.WaitKey(10);
+                if (c != -1)
+                    break;
+
+            }
+        }
     }
 }
   

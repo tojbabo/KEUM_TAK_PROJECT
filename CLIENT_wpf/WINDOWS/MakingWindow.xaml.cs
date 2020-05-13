@@ -20,6 +20,7 @@ namespace CLIENT_wpf.WINDOWS
     public partial class MakingWindow : Window
     {
         public DataGetEventHandler DataSendEvent;
+        
         public MakingWindow()
         {
             InitializeComponent();
@@ -39,6 +40,7 @@ namespace CLIENT_wpf.WINDOWS
 
             Window.GetWindow(this).Close();
         }
+        
         public void Recv_From_Parent(string param)
         {
             Console.WriteLine("Set Action value called");   

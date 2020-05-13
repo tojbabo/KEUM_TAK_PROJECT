@@ -24,18 +24,32 @@ namespace CLIENT_wpf.WINDOWS
         Socket sock;
         public DataPushEventHandler DataSendEvent;
 
+        private class DATA
+        {
+            public int id { get; set; }
+            public string title { get; set; }
+            public string man { get; set; }
+
+        }
+
         public StartWindow()
         {
             InitializeComponent();
-            add_listview();
+            UTILITY.START();
+            //add_listview();
         }
+        private void Init_window()
+        {
+            sock = PROTOCOL.CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
 
+            Msg_recv_thread = new Thread(THREAD_MSG_RECV);
+            Msg_recv_thread.Start();
+        }
         // 종료 시 처리할 작업들
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             _Window_Close();
         }
-
         private void _Window_Close()
         {
             Console.WriteLine("나 종료된당 히힛");
@@ -55,14 +69,7 @@ namespace CLIENT_wpf.WINDOWS
             ListView.Items.Refresh();
         }
 
-        private class DATA
-        {
-            public int id { get; set; }
-            public string title { get; set; }
-            public string man { get; set; }
-
-        }
-
+        #region UI - 이벤트
         private void Click_Join(object sender, RoutedEventArgs e)
         {
             int id = ((DATA)ListView.SelectedItem).id;
@@ -97,104 +104,13 @@ namespace CLIENT_wpf.WINDOWS
             sock.Send(buf);
         }
 
-        private void Recv_From_Child_SendMakingData(string item)
-        {
-            Console.WriteLine("data is : " + item);
-            byte[] buf = new byte[VAL.BUF_SZ];
-
-
-            buf = Encoding.ASCII.GetBytes(item);
-            sock.Send(buf);
-        }
-
-        private void Recv_From_Child_PasswdData(string passwd)
-        {
-            int id = ((DATA)ListView.SelectedItem).id;
-            byte[] buf = new byte[VAL.BUF_SZ];
-            buf = Encoding.ASCII.GetBytes("#," + id + "," + passwd + "\n");
-            sock.Send(buf);
-        }
-
-        private void Recv_From_Child_ReStart(String a)
-        {
-            this.Show();
-            _Window_Close();
-            //다시 연결
-            Init_window();
-
-        }
-
-
         private void Click_DEBUG(object sender, RoutedEventArgs e)
         {
             Init_window();
         }
-        
-        private void Init_window()
-        {
-            sock = PROTOCOL.CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
+        #endregion
 
-            Msg_recv_thread = new Thread(THREAD_MSG_RECV);
-            Msg_recv_thread.Start();
-        }
-
-
-        private void MSG_CHECKING(String data)
-        {
-            if (data[0] == '!')
-            {
-                Console.WriteLine("! - 방 목록 받아옴!!");
-
-                var token = data.Split(',');
-
-                int.TryParse(token[1], out int ID);
-                String TITLE = token[2];
-                String PERSON = token[3];
-
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                {
-                    listData.Add(new DATA() { id = ID, title = TITLE, man = PERSON });
-
-                    ListView.ItemsSource = listData;
-                    ListView.Items.Refresh();
-
-                }));
-            }
-            else if (data[0] == '@')
-            {
-                //비밀 번호 요청
-                //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
-
-            }
-            else if (data[0] == '#')
-            {
-                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
-                // 방 접근하세요 #,port
-                var token = data.Split(',');
-                String PORT = token[1];
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                {
-
-                    ChattingWindow CW = new ChattingWindow(PORT);
-                    this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
-                    CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_ReStart);
-                    CW.Show();
-                    this.Hide();
-                    //_Window_Close();
-                    //this.Close();
-                    Console.WriteLine("StartWindow -> ChattingWindow");
-                }));
-            }
-            else if (data[0] == '$')
-            {
-                Console.WriteLine("$ - 서버로 부터 메시지 !!");
-                // 방 접근하세요 #,메시지종류,메시지내용
-
-                var token = data.Split(',');
-                MessageBox.Show(token[1] + token[2]);
-            }
-        }
-
+        #region 페이지 스레드
         private void THREAD_MSG_RECV()
         {
             byte[] buf = new byte[VAL.BUF_SZ];
@@ -234,7 +150,93 @@ namespace CLIENT_wpf.WINDOWS
                 }
             }
         }
+        private void MSG_CHECKING(String data)
+        {
+            if (data[0] == '!')
+            {
+                Console.WriteLine("! - 방 목록 받아옴!!");
 
+                var token = data.Split(',');
+
+                int.TryParse(token[1], out int ID);
+                String TITLE = token[2];
+                String PERSON = token[3];
+
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    listData.Add(new DATA() { id = ID, title = TITLE, man = PERSON });
+
+                    ListView.ItemsSource = listData;
+                    ListView.Items.Refresh();
+
+                }));
+            }
+            else if (data[0] == '@')
+            {
+                //비밀 번호 요청
+                //Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
+
+            }
+            else if (data[0] == '#')
+            {
+                Console.WriteLine("# - 방에 입장하라는 명령 !!");
+                // 방 접근하세요 #,port
+                var token = data.Split(',');
+                String PORT = token[1];
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+
+                    ChattingWindow CW = new ChattingWindow(PORT);
+                    this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
+                    CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_ReStart);
+                    CW.Show();
+                    this.Hide();
+                    //_Window_Close();
+                    //this.Close();
+                    Console.WriteLine("StartWindow -> ChattingWindow");
+                }));
+            }
+            else if (data[0] == '$')
+            {
+                Console.WriteLine("$ - 서버로 부터 메시지 !!");
+                // 방 접근하세요 #,메시지종류,메시지내용
+
+                var token = data.Split(',');
+                MessageBox.Show(token[1] + token[2]);
+            }
+        }
+
+
+        #endregion
+
+        #region 자식 프로세스 관련
+        private void Recv_From_Child_SendMakingData(string item)
+        {
+            Console.WriteLine("data is : " + item);
+            byte[] buf = new byte[VAL.BUF_SZ];
+
+
+            buf = Encoding.ASCII.GetBytes(item);
+            sock.Send(buf);
+        }
+
+        private void Recv_From_Child_PasswdData(string passwd)
+        {
+            int id = ((DATA)ListView.SelectedItem).id;
+            byte[] buf = new byte[VAL.BUF_SZ];
+            buf = Encoding.ASCII.GetBytes("#," + id + "," + passwd + "\n");
+            sock.Send(buf);
+        }
+
+        private void Recv_From_Child_ReStart(String a)
+        {
+            this.Show();
+            _Window_Close();
+            //다시 연결
+            Init_window();
+
+        }
+        #endregion
 
     }
 }

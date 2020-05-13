@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CLIENT_wpf.CLASS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,12 @@ namespace CLIENT_wpf.FUNC
 {
     class UTILITY
     {
+
+        public static void START()
+        {
+            Console.WriteLine("0427 - ver1.4");
+            DLL.Hi();
+        }
         // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
         public static int Token_Get_Num(String Base, String target)
         {
@@ -49,5 +56,14 @@ namespace CLIENT_wpf.FUNC
             t.Interrupt();
             t.Abort();
         }
+
+        public static bool bool_change(bool data)
+        {
+            if (data)
+                return false;
+            else
+                return true;
+        }
+
     }
 }

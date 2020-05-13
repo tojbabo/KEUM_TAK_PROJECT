@@ -2,8 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CLIENT_wpf"
-             StartupUri="WINDOWS/StartWindow.xaml">
-    <!--StartupUri="WINDOWS/ChattingWindow.xaml">-->
+             StartupUri="WINDOWS/ChattingWindow.xaml">
+    <!--"StartWindow"-->
+    <!--"ChattingWindow"-->
     <Application.Resources>
          
     </Application.Resources>
