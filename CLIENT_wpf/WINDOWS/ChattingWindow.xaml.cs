@@ -123,7 +123,6 @@ namespace CLIENT_wpf
             {
                 try
                 {
-                    val.SERV_IP = TBX_IP.Text;
                     int.TryParse(TBX_PORT.Text, out val.SERV_PORT);
 
                     Console.WriteLine(val.SERV_PORT);
@@ -144,7 +143,9 @@ namespace CLIENT_wpf
                     UTILITY.bool_change(isConnect);
                     return true;
                 }
-                catch (Exception e) { return false; }
+                catch (Exception e) {
+                    Console.WriteLine("soicket creae error");
+                    return false; }
             }
             
 
@@ -209,6 +210,7 @@ namespace CLIENT_wpf
         // CONNECT 버튼 클릭시
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
+            val.SERV_IP = TBX_IP.Text;
             Connect_to_Server();
         }
 
