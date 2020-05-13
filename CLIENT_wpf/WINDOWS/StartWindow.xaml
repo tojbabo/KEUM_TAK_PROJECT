@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CLIENT_wpf.WINDOWS"
         mc:Ignorable="d"
-        Title="StartWindow" Height="450" Width="800" ResizeMode="NoResize">
+        Title="방 목록" Height="450" Width="800" ResizeMode="NoResize">
     <Grid>
         <ListView 
             x:Name="ListView" HorizontalAlignment="Left" 
-            Height="286" Margin="49,109,0,0" VerticalAlignment="Top" Width="705">
+            Height="286" Margin="49,109,0,0" VerticalAlignment="Top" Width="705" MouseDoubleClick="ListView_DoubleClick">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="방 번호" Width="80" DisplayMemberBinding="{Binding id}" />
@@ -46,7 +46,7 @@
             </TextBox.Style>
         </TextBox>
         <Button Content="새로고침" HorizontalAlignment="Left" Margin="49,54,0,0" VerticalAlignment="Top" Width="74" Height="37" Click="Click_F5"/>
-        <Button Content="DEBUG" HorizontalAlignment="Left" Height="26" Margin="49,10,0,0" VerticalAlignment="Top" Width="60" RenderTransformOrigin="-0.044,0.491"  Click="Click_DEBUG"/>
+        <Button x:Name="BTN_CONNECT" Content="연결요청" HorizontalAlignment="Left" Height="39" Margin="49,10,0,0" VerticalAlignment="Top" Width="74" RenderTransformOrigin="-0.044,0.491"  Click="Click_CONNECT"/>
 
     </Grid>
 </Window>

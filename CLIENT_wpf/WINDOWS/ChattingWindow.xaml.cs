@@ -27,6 +27,7 @@ using CLIENT_wpf.CLASS;
 using CLIENT_wpf.WINDOWS;
 using CLIENT_wpf.FUNC;
 using System.Collections.Specialized;
+using System.Diagnostics;
 
 namespace CLIENT_wpf
 {
@@ -58,6 +59,7 @@ namespace CLIENT_wpf
         {
             InitializeComponent();
             UTILITY.START();
+            _Window.Title = "Debug";
             //forDEBUG.Visibility = Visibility.Collapsed;
         }
         public ChattingWindow(String port)
@@ -66,6 +68,20 @@ namespace CLIENT_wpf
             int.TryParse(port, out PORT);
             TBX_PORT.Text = port;
             TBX_IP.Text = val.SERV_IP;
+            forDEBUG.Visibility = Visibility.Collapsed;
+
+            Connect_to_Server();
+        }
+        public ChattingWindow(String port, String name)
+        {
+            InitializeComponent();
+            _Window.Title = name;
+            int.TryParse(port, out PORT);
+            TBX_PORT.Text = port;
+            TBX_IP.Text = val.SERV_IP;
+            forDEBUG.Visibility = Visibility.Collapsed;
+
+            Connect_to_Server();
         }
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -452,6 +468,8 @@ namespace CLIENT_wpf
 
             }
         }
+
+       
     }
 }
   

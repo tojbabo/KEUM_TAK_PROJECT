@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CLIENT_wpf"
-        mc:Ignorable="d" Height="626.403" Width="1405.039"
-        Title="MainWindow"  ResizeMode="NoResize"
+        mc:Ignorable="d" Height="626.403" Width="1020.539"
+        Title="MainWindow"  ResizeMode="NoResize" x:Name="_Window"
         Loaded="Window_Loaded" Closing="Window_Closing">
     <Grid >
 
@@ -18,13 +18,17 @@
         <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="43" Margin="376,525,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="483" KeyDown="TBX_INPUT_KeyDown"/>
         <Button x:Name="BTN_MSG_SEND" Content="SEND" HorizontalAlignment="Left" Margin="864,525,0,0" VerticalAlignment="Top" Width="131" Click="BTN_MSG_SEND_Click" Height="43"/>
         <Grid x:Name="forDEBUG">
-        <Button x:Name="button" Content="YES SHOW" HorizontalAlignment="Left" Margin="1017,118,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click" Height="40"/>
-        <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="1017,163,0,0" VerticalAlignment="Top" Width="145" Click="CLICK_CONNECT" Height="40"/>
-        <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="1017,216,0,0" TextWrapping="Wrap" Text="192.168.0.9" VerticalAlignment="Top" Width="145"/>
-        <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="1017,248,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="145"/>
-        <TextBox x:Name="TBX_NAME" HorizontalAlignment="Left" Height="23" Margin="1017,274,0,0" TextWrapping="Wrap" Text="USER" VerticalAlignment="Top" Width="145"/>
-        <Button x:Name="BTN_CHANGE" Content="NEW" HorizontalAlignment="Left" Margin="1017,73,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_change" Height="40"/>
-        <Button x:Name="BTN_TEST" Content="TEST" HorizontalAlignment="Left" Margin="1017,28,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_test" Height="40"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="95*"/>
+                <ColumnDefinition Width="1304*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="button" Content="YES SHOW" HorizontalAlignment="Left" Margin="609,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click" Height="40" Grid.Column="1"/>
+            <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="759,478,0,0" VerticalAlignment="Top" Width="145" Click="CLICK_CONNECT" Height="40" Grid.Column="1"/>
+            <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="309,450,0,0" TextWrapping="Wrap" Text="192.168.0.9" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
+            <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="459,450,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
+            <TextBox x:Name="TBX_NAME" HorizontalAlignment="Left" Height="23" Margin="609,450,0,0" TextWrapping="Wrap" Text="USER" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
+            <Button x:Name="BTN_CHANGE" Content="NEW" HorizontalAlignment="Left" Margin="459,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_change" Height="40" Grid.Column="1"/>
+            <Button x:Name="BTN_TEST" Content="TEST" HorizontalAlignment="Left" Margin="309,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_test" Height="40" Grid.Column="1"/>
         </Grid>
     </Grid>
 </Window>

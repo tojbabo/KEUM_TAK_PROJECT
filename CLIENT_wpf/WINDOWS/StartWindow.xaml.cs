@@ -36,12 +36,21 @@ namespace CLIENT_wpf.WINDOWS
         {
             InitializeComponent();
             UTILITY.START();
-            //add_listview();
+            Init_window();
         }
         private void Init_window()
         {
             sock = PROTOCOL.CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
+            if (sock == null)
+            {
+                Console.WriteLine("서버가 열려있지 않습니다. 혹은 연결되지 않습니다.");
+                Console.WriteLine("서버를 확인한 후 수동으로 연결하세요");
+                return;
+            }
 
+            BTN_CONNECT.IsEnabled = false;
+
+            listData = new List<DATA>();
             Msg_recv_thread = new Thread(THREAD_MSG_RECV);
             Msg_recv_thread.Start();
         }
@@ -55,18 +64,7 @@ namespace CLIENT_wpf.WINDOWS
             Console.WriteLine("나 종료된당 히힛");
             UTILITY.Release_thread(Msg_recv_thread);
             sock.Close();
-        }
-
-        /// <summary>
-        /// 이건 지워야할 함수임
-        /// </summary>
-        private void add_listview()
-        {
-            listData = new List<DATA>();
-            listData.Add(new DATA() { id = 1, title = "[임시]첫번째 생성해본 방", man = "1" });
-
-            ListView.ItemsSource = listData;
-            ListView.Items.Refresh();
+            BTN_CONNECT.IsEnabled = true;
         }
 
         #region UI - 이벤트
@@ -104,10 +102,21 @@ namespace CLIENT_wpf.WINDOWS
             sock.Send(buf);
         }
 
-        private void Click_DEBUG(object sender, RoutedEventArgs e)
+        private void Click_CONNECT(object sender, RoutedEventArgs e)
         {
             Init_window();
         }
+
+        private void ListView_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            int id = ((DATA)ListView.SelectedItem).id;
+
+            PasswdWindow PW = new PasswdWindow();
+            this.DataSendEvent += new DataPushEventHandler(PW.Recv_From_Parent);
+            PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_PasswdData);
+            PW.Show();
+        }
+
         #endregion
 
         #region 페이지 스레드
@@ -180,13 +189,14 @@ namespace CLIENT_wpf.WINDOWS
             else if (data[0] == '#')
             {
                 Console.WriteLine("# - 방에 입장하라는 명령 !!");
-                // 방 접근하세요 #,port
+                // 방 접근하세요 #,title,port
                 var token = data.Split(',');
-                String PORT = token[1];
+                String title = token[1];
+                String PORT = token[2];
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
 
-                    ChattingWindow CW = new ChattingWindow(PORT);
+                    ChattingWindow CW = new ChattingWindow(PORT,title);
                     this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
                     CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_ReStart);
                     CW.Show();
@@ -238,5 +248,6 @@ namespace CLIENT_wpf.WINDOWS
         }
         #endregion
 
+        
     }
 }
