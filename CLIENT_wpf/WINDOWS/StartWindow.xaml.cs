@@ -116,6 +116,7 @@ namespace CLIENT_wpf.WINDOWS
 
         private void Click_CONNECT(object sender, RoutedEventArgs e)
         {
+            val.SERV_IP = TB_IP.Text;
             Init_window();
         }
 
@@ -208,7 +209,8 @@ namespace CLIENT_wpf.WINDOWS
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
 
-                    ChattingWindow CW = new ChattingWindow(PORT,title);
+                    String IP = TB_IP.Text;
+                    ChattingWindow CW = new ChattingWindow(IP,PORT,title);
                     this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
                     CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_ReStart);
                     CW.Show();

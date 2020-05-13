@@ -62,23 +62,23 @@ namespace CLIENT_wpf
             _Window.Title = "Debug";
             //forDEBUG.Visibility = Visibility.Collapsed;
         }
-        public ChattingWindow(String port)
+        public ChattingWindow(String ip,String port)
         {
             InitializeComponent();
             int.TryParse(port, out PORT);
             TBX_PORT.Text = port;
-            TBX_IP.Text = val.SERV_IP;
+            TBX_IP.Text = ip;
             forDEBUG.Visibility = Visibility.Collapsed;
 
             Connect_to_Server();
         }
-        public ChattingWindow(String port, String name)
+        public ChattingWindow(String ip,String port, String name)
         {
             InitializeComponent();
             _Window.Title = name;
             int.TryParse(port, out PORT);
-            TBX_PORT.Text = port;
-            TBX_IP.Text = val.SERV_IP;
+            TBX_PORT.Text = port; 
+            TBX_IP.Text = ip;
             forDEBUG.Visibility = Visibility.Collapsed;
 
             Connect_to_Server();
@@ -123,6 +123,7 @@ namespace CLIENT_wpf
             {
                 try
                 {
+                    val.SERV_IP = TBX_IP.Text;
                     int.TryParse(TBX_PORT.Text, out val.SERV_PORT);
 
                     Console.WriteLine(val.SERV_PORT);
@@ -285,10 +286,18 @@ namespace CLIENT_wpf
                 {
                     if (isNew)
                     {
-                        int temp = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1);
-
-                        T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
-                        T_img_send.Start();
+                        try
+                        {
+                            int temp = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1); 
+                            T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
+                            T_img_send.Start();
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("에러 발생 ChattigWindow - dll get socket");
+                            MSG_CHECKING(data);
+                        }
+                        
                     }
                     else
                     {

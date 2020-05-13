@@ -21,30 +21,7 @@
         </ListView>
         <Button x:Name="btn" Content="참가" HorizontalAlignment="Left" Height="37" Margin="653,54,0,0" VerticalAlignment="Top" Width="101" Click="Click_Join"/>
         <Button Content="방만들기" HorizontalAlignment="Left" Height="37" Margin="547,54,0,0" VerticalAlignment="Top" Width="101" Click="Click_MakingRoom"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="547,26,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" >
-            <TextBox.Style>
-                <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                    <Style.Resources>
-                        <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                            <VisualBrush.Visual>
-                                <Label Content="닉네임" Foreground="LightGray" />
-                            </VisualBrush.Visual>
-                        </VisualBrush>
-                    </Style.Resources>
-                    <Style.Triggers>
-                        <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
-                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                        </Trigger>
-                        <Trigger Property="Text" Value="{x:Null}">
-                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter Property="Background" Value="White" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
+        <TextBox x:Name="TB_IP" Text="192.168.0.9" HorizontalAlignment="Left" Height="23" Margin="128,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" />
         <Button Content="새로고침" HorizontalAlignment="Left" Margin="49,54,0,0" VerticalAlignment="Top" Width="74" Height="37" Click="Click_F5"/>
         <Button x:Name="BTN_CONNECT" Content="연결요청" HorizontalAlignment="Left" Height="39" Margin="49,10,0,0" VerticalAlignment="Top" Width="74" RenderTransformOrigin="-0.044,0.491"  Click="Click_CONNECT"/>
 
