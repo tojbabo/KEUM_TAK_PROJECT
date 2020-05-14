@@ -383,7 +383,7 @@ namespace CLIENT_wpf
 
                     //Cv2.ImShow("dfdf", mat);
                 }));
-                int c = Cv2.WaitKey(10);
+                int c = Cv2.WaitKey(1000/24);
                 if (c != -1)
                     break;
             }
@@ -418,7 +418,7 @@ namespace CLIENT_wpf
                         catch (Exception e) { }
                     }));
 
-                    int c = Cv2.WaitKey(10);
+                    int c = Cv2.WaitKey(1000/30);
                     if (c != -1)
                         break;
                 }

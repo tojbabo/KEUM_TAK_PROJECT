@@ -14,7 +14,7 @@
 #include <WinSock2.h>
 
 #define ENCODE_QUALITY 80
-#define FRAME_INTERVAL (1000/30)
+#define FRAME_INTERVAL (1000/24)
 #define BUF_SZ 1024
 #define BUF_LEN 65540
 #define PACK_SZ 4096

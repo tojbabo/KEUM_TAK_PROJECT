@@ -192,13 +192,8 @@ extern "C" {
 		// 통지한 패킷 수 만큼 데이터 전송
 		for (int i = 0; i < total_pack; i++)
 			send(sock, (char*)&encoded[i * PACK_SZ], PACK_SZ, 0);
-		waitKey(FRAME_INTERVAL);
-
+		//waitKey(FRAME_INTERVAL);
 		//puts("sending");
-
-
-
-
 
 	}
 	__declspec(dllexport) Mat* DLL_IMG_RECV(int sock)
@@ -232,12 +227,14 @@ extern "C" {
 			len = recv(sock, msg, BUF_LEN, 0);
 			// 패킷 사이즈보다 작은 데이터를 수신시 무시
 			if (len != PACK_SZ) {
-				//cerr << "Received unexpected size pack:" << len << endl;
-				continue;
+				cerr << "Received unexpected size pack:" << len << endl;
+				//continue;
 			}
 			// 연속해서 리시브한 데이터를 하나의 변수로 통합
 
-			memcpy(&longbuf[i * PACK_SZ], msg, PACK_SZ);
+			//memcpy(&longbuf[i * PACK_SZ], msg, PACK_SZ);
+			memcpy(&longbuf[i * PACK_SZ], msg, len);
+
 		}
 
 		Mat rawData = Mat(1, PACK_SZ * total_pack, CV_8UC1, longbuf);
