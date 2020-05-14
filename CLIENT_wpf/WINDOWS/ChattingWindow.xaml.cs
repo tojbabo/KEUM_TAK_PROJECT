@@ -43,6 +43,8 @@ namespace CLIENT_wpf
         int ID;
         int PORT;
 
+        string IP;
+
         VideoCapture cap;
         WriteableBitmap wb;
 
@@ -68,7 +70,9 @@ namespace CLIENT_wpf
             int.TryParse(port, out PORT);
             TBX_PORT.Text = port;
             TBX_IP.Text = ip;
+            IP = ip;
             forDEBUG.Visibility = Visibility.Collapsed;
+            Console.WriteLine("ip is : " + ip +"," + TBX_IP.Text);
 
             Connect_to_Server();
         }
@@ -79,6 +83,8 @@ namespace CLIENT_wpf
             int.TryParse(port, out PORT);
             TBX_PORT.Text = port; 
             TBX_IP.Text = ip;
+            IP = ip;
+            Console.WriteLine("ip is : " + ip + "," + TBX_IP.Text);
             forDEBUG.Visibility = Visibility.Collapsed;
 
             Connect_to_Server();
@@ -127,7 +133,7 @@ namespace CLIENT_wpf
 
                     Console.WriteLine(val.SERV_PORT);
 
-                    sock = PROTOCOL.CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
+                    sock = PROTOCOL.CREATE_SOCKET(IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
 
                     String name = "^" + TBX_NAME.Text + "\n";
                     byte[] buf = new byte[VAL.BUF_SZ];

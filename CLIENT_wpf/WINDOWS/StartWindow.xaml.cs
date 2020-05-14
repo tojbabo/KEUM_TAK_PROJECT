@@ -36,7 +36,7 @@ namespace CLIENT_wpf.WINDOWS
         {
             InitializeComponent();
             UTILITY.START();
-            Init_window();
+            //Init_window();
         }
         private void Init_window()
         {
