@@ -43,7 +43,7 @@ namespace CLIENT_wpf
         int ID;
         int PORT;
 
-        string IP;
+        string IP = "127.0.0.1";
 
         VideoCapture cap;
         WriteableBitmap wb;
@@ -92,7 +92,7 @@ namespace CLIENT_wpf
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            int num = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1);
+            int num = DLL.dll_Get_Socket(IP, PORT, 1);
         }
 
         // 종료 시 처리할 작업들
@@ -296,7 +296,7 @@ namespace CLIENT_wpf
                     {
                         try
                         {
-                            int temp = DLL.dll_Get_Socket(val.SERV_IP, PORT, 1); 
+                            int temp = DLL.dll_Get_Socket(IP, PORT, 1); 
                             T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
                             T_img_send.Start();
                         }
@@ -309,7 +309,7 @@ namespace CLIENT_wpf
                     }
                     else
                     {
-                        T_img_send = new Thread(() => DLL.dll_IMG_SEND_THREAD(val.SERV_IP, PORT));
+                        T_img_send = new Thread(() => DLL.dll_IMG_SEND_THREAD(IP, PORT));
                         T_img_send.Start();
                         //SEND 스레드
                     }
@@ -339,7 +339,7 @@ namespace CLIENT_wpf
 
                 if (isNew)
                 {
-                    int temp = DLL.dll_Get_Socket(val.SERV_IP, target_port, 1);
+                    int temp = DLL.dll_Get_Socket(IP, target_port, 1);
                     T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
                     T_img_recv.Start();
                 }
@@ -347,7 +347,7 @@ namespace CLIENT_wpf
                 else
                 {
                     //RECV 스레드
-                    T_img_recv = new Thread(() => DLL.dll_IMG_RECV_THREAD(val.SERV_IP, target_port));
+                    T_img_recv = new Thread(() => DLL.dll_IMG_RECV_THREAD(IP, target_port));
                     T_img_recv.Start();
                 }
             }
