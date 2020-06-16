@@ -19,7 +19,7 @@ namespace CLIENT_wpf.CLASS
         public const int frameHeight = 240;
         public const double FRAME_INTERVAL = (1000 / 24);
 
-        public String SERV_IP = "192.168.0.9";
+        public String SERV_IP = "192.168.63.155";
         public int SERV_PORT = 9000;
     }
 }

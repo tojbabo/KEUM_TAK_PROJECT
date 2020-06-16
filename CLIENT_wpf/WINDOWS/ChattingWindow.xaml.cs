@@ -78,6 +78,8 @@ namespace CLIENT_wpf
         }
         public ChattingWindow(String ip,String port, String name)
         {
+
+            Console.WriteLine("여ㅣ");
             InitializeComponent();
             _Window.Title = name;
             int.TryParse(port, out PORT);
@@ -376,7 +378,7 @@ namespace CLIENT_wpf
                 size = mat.Channels() * mat.Cols * mat.Rows;
 
                 var b = new byte[size];
-
+                fgn23fgg3dg2df1xv 13
                 System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
 
                 DLL.DLL_IMG_SEND(b, t_ImgSend_Sock);
