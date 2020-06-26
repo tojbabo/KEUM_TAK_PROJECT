@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="소스 파일\리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="소스 파일\함수">
+      <UniqueIdentifier>{f3a60769-4e61-436c-b27a-0223f6f5c586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\클래스">
+      <UniqueIdentifier>{6d278c10-9cb8-4bc7-bfe1-5b72086c96a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\메인로직">
+      <UniqueIdentifier>{9266576a-93eb-47d5-82c1-7c8d86004f03}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="연습용.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="수신.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="송신.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TESTING.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="F_UTILITY.cpp">
+      <Filter>소스 파일\함수</Filter>
+    </ClCompile>
+    <ClCompile Include="F_AI.cpp">
+      <Filter>소스 파일\함수</Filter>
+    </ClCompile>
+    <ClCompile Include="F_SHARED.cpp">
+      <Filter>소스 파일\함수</Filter>
+    </ClCompile>
+    <ClCompile Include="C_COMMAND_CENTER.cpp">
+      <Filter>소스 파일\클래스</Filter>
+    </ClCompile>
+    <ClCompile Include="C_ROOM.cpp">
+      <Filter>소스 파일\클래스</Filter>
+    </ClCompile>
+    <ClCompile Include="C_USER.cpp">
+      <Filter>소스 파일\클래스</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>소스 파일\메인로직</Filter>
+    </ClCompile>
+    <ClCompile Include="L_CHATcpp.cpp">
+      <Filter>소스 파일\메인로직</Filter>
+    </ClCompile>
+    <ClCompile Include="L_START.cpp">
+      <Filter>소스 파일\메인로직</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="temp.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="_UTILITY.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="_CLASS.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="_HEADER.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="_LOGIC.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="_SHARED.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="OJJJ.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

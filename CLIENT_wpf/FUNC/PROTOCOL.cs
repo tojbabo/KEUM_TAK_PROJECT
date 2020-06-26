@@ -19,6 +19,7 @@ namespace CLIENT_wpf.FUNC
             if (type == VAL.TCP)
             {
                 temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+                //temp_sock.ReceiveTimeout = 2000;
                 try
                 {
                     temp_sock.Connect(ip, port);
@@ -35,6 +36,7 @@ namespace CLIENT_wpf.FUNC
             else if (type == VAL.UDP)
             {
                 temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                //temp_sock.ReceiveTimeout = 2000;
                 if (opt == 1)
                 {
                     try

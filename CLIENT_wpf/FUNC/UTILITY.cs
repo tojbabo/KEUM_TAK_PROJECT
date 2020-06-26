@@ -13,14 +13,15 @@ namespace CLIENT_wpf.FUNC
 
         public static void START()
         {
-            Console.WriteLine("0513 - ver1.5.0 - UI의 대부분 기능 구현");
+            Console.WriteLine("0513 - ver1.5.0 - 출력문구 수정");
             DLL.Hi();
         }
         // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
         public static int Token_Get_Num(String Base, String target)
         {
+            /*
             Console.WriteLine("BASE : " + Base);
-            Console.WriteLine("Target : " + target);
+            Console.WriteLine("Target : " + target);*/
 
             int num;
             num = Base.IndexOf(target);
@@ -37,23 +38,24 @@ namespace CLIENT_wpf.FUNC
         {
             int index = Base.IndexOf(target);
             if (index != -1)
-            {
+            {/*
                 Console.WriteLine("BASE : " + Base);
                 Console.WriteLine("Target : " + target);
                 Console.WriteLine("Total lenth : " + Base.Length);
                 Console.WriteLine("Index : " + index);
                 Console.WriteLine("Left : " + Base.Substring(0, index));
-                Console.WriteLine("Right : " + Base.Substring(index));
+                Console.WriteLine("Right : " + Base.Substring(index));*/
             }
             return index;
         }
 
         // 쓰레드 종료
-        public static void Release_thread(Thread t)
+        public static void Release_thread  (Thread t)
         {
             if (t == null)
                 return;
-            t.Interrupt();
+                //Console.WriteLine("인터럽트 전");
+            //t.Interrupt();
             t.Abort();
         }
 

@@ -36,9 +36,14 @@ namespace CLIENT_wpf
     {
         public DataGetEventHandler DataSendEvent;
 
+        // 디버깅용 - 보낼지 말지
         bool isSend = true;
+        // 디버깅용 - UI에 그릴지 말지
         bool isNew = true;
+        // 디버기용 - 연결 체크 여부 확인
         bool isConnect = false;
+
+        bool isRun = true;
 
         int ID;
         int PORT;
@@ -56,7 +61,8 @@ namespace CLIENT_wpf
 
         VAL val = new VAL();
 
-        /* */
+        #region 윈도우 관련
+
         public ChattingWindow()
         {
             InitializeComponent();
@@ -64,37 +70,24 @@ namespace CLIENT_wpf
             _Window.Title = "Debug";
             //forDEBUG.Visibility = Visibility.Collapsed;
         }
-        public ChattingWindow(String ip,String port)
-        {
-            InitializeComponent();
-            int.TryParse(port, out PORT);
-            TBX_PORT.Text = port;
-            TBX_IP.Text = ip;
-            IP = ip;
-            forDEBUG.Visibility = Visibility.Collapsed;
-            Console.WriteLine("ip is : " + ip +"," + TBX_IP.Text);
 
-            Connect_to_Server();
-        }
-        public ChattingWindow(String ip,String port, String name)
-        {
-
-            Console.WriteLine("여ㅣ");
+        public ChattingWindow(String ip,String port, String name="DEBUG")
+        { 
             InitializeComponent();
             _Window.Title = name;
             int.TryParse(port, out PORT);
             TBX_PORT.Text = port; 
             TBX_IP.Text = ip;
             IP = ip;
-            Console.WriteLine("ip is : " + ip + "," + TBX_IP.Text);
             forDEBUG.Visibility = Visibility.Collapsed;
 
             Connect_to_Server();
         }
+
         // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)    
         {
-            int num = DLL.dll_Get_Socket(IP, PORT, 1);
+            //int num = DLL.dll_Get_Socket(IP, PORT, 1);
         }
 
         // 종료 시 처리할 작업들
@@ -104,16 +97,35 @@ namespace CLIENT_wpf
         }
         public void _Window_Closing()
         {
-            if (cap != null && cap.IsOpened())
-            {
-                cap.Dispose();
-            }
 
+
+            isRun = false;
+
+            // Console.WriteLine("리시브 종료 시작");
             UTILITY.Release_thread(T_img_recv);
-            UTILITY.Release_thread(T_img_send);
+            //Console.WriteLine("리시브 종료");
+            //UTILITY.Release_thread(T_img_send); 
+            //Console.WriteLine("샌드 종료");
             UTILITY.Release_thread(T_msg_recv);
+            //Console.WriteLine("메시지 종료");
+
+            sock.Shutdown(SocketShutdown.Both);
+            sock.Close();
+
+
+            T_msg_recv.Join();
+
+
+            bool a = T_img_recv.IsAlive;
+            Console.WriteLine("T_Img_recv is : " + a);
+
+            bool b = T_msg_recv.IsAlive;
+            Console.WriteLine("T_msg_recv is : " + b);
+
+            DataSendEvent("");
         }
 
+        #endregion
 
         #region 통신 관련
         private bool Connect_to_Server()
@@ -133,7 +145,6 @@ namespace CLIENT_wpf
                 {
                     int.TryParse(TBX_PORT.Text, out val.SERV_PORT);
 
-                    Console.WriteLine(val.SERV_PORT);
 
                     sock = PROTOCOL.CREATE_SOCKET(IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
 
@@ -142,7 +153,6 @@ namespace CLIENT_wpf
 
                     buf = Encoding.ASCII.GetBytes(name);
                     sock.Send(buf);
-                    Console.WriteLine("send name data");
 
                     T_msg_recv = new Thread(THREAD_MSG_RECV);
                     T_msg_recv.Start();
@@ -152,7 +162,7 @@ namespace CLIENT_wpf
                     return true;
                 }
                 catch (Exception e) {
-                    Console.WriteLine("soicket creae error");
+                    Console.WriteLine("soicket create error");
                     return false; }
             }
             
@@ -163,6 +173,7 @@ namespace CLIENT_wpf
         {
             Console.WriteLine("Set Action value called");
         }
+
         #endregion
 
         #region UI 이벤트
@@ -179,40 +190,33 @@ namespace CLIENT_wpf
         }
         private void Button_Click_test(object sender,RoutedEventArgs e)
         {
-
             byte[] buf = new byte[VAL.BUF_SZ];
 
             String data = "$" + ID.ToString();
             buf = Encoding.ASCII.GetBytes(data);
             sock.Send(buf);
-
         }
         private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
-        {/*
+        {
+
+
+            /* 
             StartWindow SW = new StartWindow();
             System.Windows.Window.GetWindow(this).Close();
             SW.Show();*/
 
-
-            /**/
             /*
-            if (!InitWebCamera())
-            {
-                //MessageBox.Show("CAM OPEN FALSE");
-            }
-            else
-            {
-                //MessageBox.Show("CAM OPEN OK");
-            }
-
-            //Cv2.NamedWindow("1", WindowMode.AutoSize);
-            CAPTURE_IMG();*/
-
             Console.WriteLine("ChattingWindow -> StartWindow");
-
             DataSendEvent("");
+            System.Windows.Window.GetWindow(this).Close();*/
 
-            System.Windows.Window.GetWindow(this).Close();
+
+            // 서버로부터 내 얼굴 받아보기
+            byte[] buf = new byte[VAL.BUF_SZ];
+
+            String data = "$" + ID.ToString();
+            buf = Encoding.ASCII.GetBytes(data);
+            sock.Send(buf);
 
         }
         // CONNECT 버튼 클릭시
@@ -230,7 +234,11 @@ namespace CLIENT_wpf
 
             buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text + "\n");
             sock.Send(buf);
-            TBX_INPUT.Text = "";
+
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+            {
+                TBX_INPUT.Text = "";
+            }));
 
         }
         // 엔터로 메시지 전송
@@ -251,12 +259,10 @@ namespace CLIENT_wpf
             int len;
             String data = "";
             String temp;
-            while (true)
+            while (isRun)
             {
-                Console.WriteLine("메시지 수신중");
                 len = sock.Receive(buf);
                 temp = Encoding.UTF8.GetString(buf, 0, len);
-                Console.WriteLine("서버로 부터 수신한 메시지 : " + temp);
                 data += temp;
                 while (true)
                 {
@@ -279,28 +285,30 @@ namespace CLIENT_wpf
                     }
                 }
             }
+            Console.WriteLine("메시지 스레드 종료");
         }
         // 수신한 메시지를 프로토콜에 맞게 확인 후 처리하는 함수
         private void MSG_CHECKING(String data)
         {
+            Console.WriteLine("☆[ChattingWindow]"+ data);
             if (data[0] == '#')
             {
-                Console.WriteLine("# - 내 아이디 와 포트 할당받음 !!");
+                // 내 아이디와 포트 할당
                 var token = data.Split(',');
                 ID = UTILITY.Token_Get_Num(token[0], ":");
                 PORT = UTILITY.Token_Get_Num(token[1], ":");
-
-                Console.WriteLine("ID : " + ID + "\nPORT :" + PORT);
-
                 if (isSend)
                 {
                     if (isNew)
                     {
                         try
                         {
-                            int temp = DLL.dll_Get_Socket(IP, PORT, 1); 
-                            T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
-                            T_img_send.Start();
+                            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                            {
+                                int temp = DLL.dll_Get_Socket(IP, PORT, 1);
+                                T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
+                                T_img_send.Start();
+                            })); 
                         }
                         catch(Exception e)
                         {
@@ -316,10 +324,12 @@ namespace CLIENT_wpf
                         //SEND 스레드
                     }
                 }
+            
+            
             }
             else if (data[0] == '$')
             {
-                Console.WriteLine("$ - 다른 유저의 아이디와 포트 할당받음 !!");
+                // 다른 유저 아이디 와 포트 할당
                 var token = data.Split(',');
                 int other_id = UTILITY.Token_Get_Num(token[0], ":");
                 int other_port = UTILITY.Token_Get_Num(token[1], ":");
@@ -329,15 +339,12 @@ namespace CLIENT_wpf
                 data = "$" + other_id.ToString();
                 buf = Encoding.ASCII.GetBytes(data);
                 sock.Send(buf);
-                Console.WriteLine("send to server : " + data + "\n");
                 //PORT 요청 작업
-
             }
             else if (data[0] == '@')
             {
-                Console.WriteLine("@ - Thead를 생성할 PORT를 할당 받음 !!");
+                // @Thread 연결할 port 할당 받음
                 int target_port = UTILITY.Token_Get_Num(data, ":");
-                Console.WriteLine("New port is : " + target_port);
 
                 if (isNew)
                 {
@@ -364,6 +371,7 @@ namespace CLIENT_wpf
         // 이미지 전송 함수 - UI에 출력 되는 버전
         private void THREAD_IMG_SEND(int t_ImgSend_Sock)
         {
+            Console.WriteLine("[ChattingWindow]샌드 스레드 실행됨");
             int size;
 
             cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
@@ -372,7 +380,7 @@ namespace CLIENT_wpf
             cap.Open(0);
             /**/
             Mat mat = new Mat();
-            while (true)
+            while (isRun)
             {
                 cap.Read(mat);
                 size = mat.Channels() * mat.Cols * mat.Rows;
@@ -383,35 +391,41 @@ namespace CLIENT_wpf
                 DLL.DLL_IMG_SEND(b, t_ImgSend_Sock);
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
-
-                    WriteableBitmap wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
-                    image.Source = wb;
-                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-
+                    try
+                    {
+                        WriteableBitmap wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+                        image.Source = wb;
+                        WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+                    }
+                    catch (Exception e) { }
+                
                     //Cv2.ImShow("dfdf", mat);
                 }));
                 int c = Cv2.WaitKey(1000/24);
                 if (c != -1)
                     break;
             }
+            Console.WriteLine("샌드 스레드 종료");
+            DLL.dll_Free_Socket(t_ImgSend_Sock);
+            if (cap != null && cap.IsOpened())
+            {
+                cap.Dispose();
+            }
         }
         // 이미지 수신 함수 - UI에 출력 되는 버전
         private void THREAD_IMG_RECV(int t_ImgRecv_Sock)
         {
-            Console.WriteLine("recv thread start!!");
+            Console.WriteLine("[ChattingWindow]리시브 스레드 실행됨");
             int num = DLL.DLL_SENDING(t_ImgRecv_Sock, "send trigger", "send trigger".Length);
             Mat mat;
             IntPtr ptr;
 
-            while (true)
+            while (isRun)
             {
-
-
                 ptr = DLL.DLL_IMG_RECV(t_ImgRecv_Sock);
                 if (ptr != null)
                 {
                     mat = new Mat(ptr);
-                    Console.WriteLine("mat cols : " + mat.Cols +"/ mat rows : " + mat.Rows);
                     //Cv2.ImShow("qweqwe", mat);
 
                     Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
@@ -425,13 +439,14 @@ namespace CLIENT_wpf
                         catch (Exception e) { }
                     }));
 
-                    int c = Cv2.WaitKey(1000/30);
+                    int c = Cv2.WaitKey(1000 / 30);
                     if (c != -1)
                         break;
                 }
                 else
                     Console.WriteLine("is null~~!");
             }
+            Console.WriteLine("리시브 스레드 종료");
         }
         #endregion
 

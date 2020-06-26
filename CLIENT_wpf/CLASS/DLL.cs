@@ -15,6 +15,8 @@ namespace CLIENT_wpf.CLASS
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int dll_Get_Socket(String serv_ip, int serv_port, int opt);                            // C++ 용 SOCKET 구하는 함수
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        extern public static void dll_Free_Socket(int sock);                                                        // C++ 용 SOCKET 해제하는 함수
+        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int DLL_SENDING(int sock, String msg, int str_len);                                    // C++ 소켓으로 메시지 전송
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void DLL_IMG_SEND(byte[] b, int sock);                                                 // [new] 이미지 전송 스레드

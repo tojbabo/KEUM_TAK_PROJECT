@@ -2,8 +2,8 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.4.0"
-#define RECENT "웬만한 기능 거의 구현"
+#define DLL_VER "1.5.2"
+#define RECENT " - 소켓 삭제 추가"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));
@@ -13,8 +13,7 @@ void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 }
 extern "C" {
 	__declspec(dllexport) void Hi() {
-		cout << "dll version is : " << DLL_VER << endl;
-		cout << RECENT << endl;
+		cout << "dll version is : " << DLL_VER << RECENT << endl;
 
 		WSADATA wsaData;
 		if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR)
@@ -128,6 +127,7 @@ extern "C" {
 	// 소켓 생성 - 연결 후 반환 // opt_0  : tcp, opt_1 : udp
 	__declspec(dllexport) int dll_Get_Socket(String serv_ip, int serv_port, int opt) {
 		// opt-0 : tcp, opt-1 : udp
+		cout << "ip : " << serv_ip << "/ port : " << serv_port << endl;
 		SOCKADDR_IN adr;
 		SOCKET sock;
 
@@ -142,10 +142,12 @@ extern "C" {
 			else if (opt == 0) {
 				sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 				connect(sock, (struct sockaddr*) & adr, sizeof(adr));
-			}cout << "----------------------DLL CREATE SOCKET" << endl;
+			}
+			/*
+			cout << "----------------------DLL CREATE SOCKET" << endl;
 			cout << "ip : " << serv_ip << endl << "port : " << serv_port << endl
 				<< "opt : " << opt << endl << "socket id : " << sock << endl;
-			cout << "---------------------------------------" << endl;
+			cout << "---------------------------------------" << endl;*/
 		}
 		catch (Exception e) {
 			cout << "socket making error" << endl;
@@ -154,6 +156,10 @@ extern "C" {
 		}
 		return sock;
 
+	}
+	__declspec(dllexport) void dll_Free_Socket(SOCKET sock) {
+		closesocket(sock);
+		cout << "소켓 삭제 완료 [" << sock << "]" << endl;
 	}
 
 	__declspec(dllexport) int DLL_SENDING(int sock, char* msg, int str_len) {
