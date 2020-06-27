@@ -2,7 +2,7 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.5.2"
+#define DLL_VER "1.5.3"
 #define RECENT " - 소켓 삭제 추가"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
@@ -167,12 +167,9 @@ extern "C" {
 	}
 	__declspec(dllexport) void DLL_IMG_SEND(BYTE* b1, int sock)
 	{
-		Mat frame = Mat(480, 640, CV_8UC3, b1);
+		Mat frame = Mat(HEIGHT, WIDTH, CV_8UC3, b1);
 		Mat temp;
 		vector<uchar> encoded;
-
-
-		//cout << "[SEND THREAD] - sending start" << endl;
 
 		if (frame.size().width == 0)return;//simple integrity check; skip erroneous data...
 											 // 이미지 사이즈 변환
@@ -203,20 +200,9 @@ extern "C" {
 
 	}
 	__declspec(dllexport) Mat* DLL_IMG_RECV(int sock)
-	{/*
-		Mat frame;
-		VideoCapture cap(0);
-
-		if (!cap.isOpened()) {
-			cerr << "OpenCV Failed to open camera";
-			exit(1);
-		}
-
-		cap >> frame;
-		return new Mat(frame);*/
+	{
 
 		char* msg = new char[BUF_LEN];
-		//char msg[BUF_LEN];
 		int len;
 		do {
 			len = recv(sock, msg, BUF_LEN, 0);
@@ -224,24 +210,18 @@ extern "C" {
 
 		int total_pack = ((int*)msg)[0];
 
-		//cout << "expecting length of packs:" << total_pack << endl;
-		// 패킷의 크기와 수만큼 변수 생성
 		char* longbuf = new char[PACK_SZ * total_pack];
 
-		// 패킷의 수 만큼 데이터 리시브
 		for (int i = 0; i < total_pack; i++) {
 			len = recv(sock, msg, BUF_LEN, 0);
-			// 패킷 사이즈보다 작은 데이터를 수신시 무시
 			if (len != PACK_SZ) {
 				cerr << "Received unexpected size pack:" << len << endl;
-				//continue;
 			}
-			// 연속해서 리시브한 데이터를 하나의 변수로 통합
 
-			//memcpy(&longbuf[i * PACK_SZ], msg, PACK_SZ);
 			memcpy(&longbuf[i * PACK_SZ], msg, len);
 
 		}
+
 
 		Mat rawData = Mat(1, PACK_SZ * total_pack, CV_8UC1, longbuf);
 

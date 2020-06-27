@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" Height="626.403" Width="1020.539"
         Title="MainWindow"  ResizeMode="NoResize" x:Name="_Window"
-        Loaded="Window_Loaded" Closing="Window_Closing">
+        Closing="Window_Closing">
     <Grid >
 
         <Image x:Name="image" Height="240" Width="320" Margin="33,28,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>

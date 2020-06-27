@@ -28,6 +28,7 @@ using CLIENT_wpf.WINDOWS;
 using CLIENT_wpf.FUNC;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Windows.Markup;
 
 namespace CLIENT_wpf
 {
@@ -48,10 +49,15 @@ namespace CLIENT_wpf
         int ID;
         int PORT;
 
+        int EMO_my;
+        int EMO_you;
+
         string IP = "127.0.0.1";
 
         VideoCapture cap;
         WriteableBitmap wb;
+
+        EMOTICON EMO;
 
         Socket sock = null;
 
@@ -66,8 +72,8 @@ namespace CLIENT_wpf
         public ChattingWindow()
         {
             InitializeComponent();
-            UTILITY.START();
             _Window.Title = "Debug";
+            EMO = new EMOTICON();
             //forDEBUG.Visibility = Visibility.Collapsed;
         }
 
@@ -80,14 +86,11 @@ namespace CLIENT_wpf
             TBX_IP.Text = ip;
             IP = ip;
             forDEBUG.Visibility = Visibility.Collapsed;
+            EMO_my = -1;
+            EMO_you = -1;
+            EMO = new EMOTICON();
 
             Connect_to_Server();
-        }
-
-        // 최초 실행되는 커스텀 함수 - 아직 기능 미구현
-        private void Window_Loaded(object sender, RoutedEventArgs e)    
-        {
-            //int num = DLL.dll_Get_Socket(IP, PORT, 1);
         }
 
         // 종료 시 처리할 작업들
@@ -109,16 +112,18 @@ namespace CLIENT_wpf
             UTILITY.Release_thread(T_msg_recv);
             //Console.WriteLine("메시지 종료");
 
-            sock.Shutdown(SocketShutdown.Both);
-            sock.Close();
+            if (sock != null)
+            {
+                sock.Shutdown(SocketShutdown.Both);
+                sock.Close();
+                T_msg_recv.Join();
+            }
 
-
-            T_msg_recv.Join();
-
-
-            bool a = T_img_recv.IsAlive;
-            Console.WriteLine("T_Img_recv is : " + a);
-
+            if (T_img_recv != null)
+            {
+                bool a = T_img_recv.IsAlive;
+                Console.WriteLine("T_Img_recv is : " + a);
+            }
             bool b = T_msg_recv.IsAlive;
             Console.WriteLine("T_msg_recv is : " + b);
 
@@ -147,7 +152,11 @@ namespace CLIENT_wpf
 
 
                     sock = PROTOCOL.CREATE_SOCKET(IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
-
+                    if (sock == null)
+                    {
+                        Console.WriteLine("msg recv 소켓 생성에 에러 발생");
+                        return false;
+                    }
                     String name = "^" + TBX_NAME.Text + "\n";
                     byte[] buf = new byte[VAL.BUF_SZ];
 
@@ -160,10 +169,13 @@ namespace CLIENT_wpf
                     BTN_CONNECT.Content = "DISCONNECT";
                     UTILITY.bool_change(isConnect);
                     return true;
+
                 }
-                catch (Exception e) {
-                    Console.WriteLine("soicket create error");
-                    return false; }
+                catch (Exception e)
+                {
+                    Console.WriteLine("연결 처리 중 에러 발생");
+                    return false;
+                }
             }
             
 
@@ -360,6 +372,25 @@ namespace CLIENT_wpf
                     T_img_recv.Start();
                 }
             }
+            else if (data[0] == '&')
+            {
+                var token = data.Split(',');
+                int.TryParse (token[1], out int id);
+                int.TryParse(token[2], out int emotion);
+
+
+
+                if (id == ID)
+                {
+                    EMO_my = emotion;
+                }
+                else ////////////////////////////////////////////////////////////////// 상대 아이디로 들어왔을때 처리 할것
+                {
+                    EMO_you = emotion;
+                }
+                
+
+            }
             else 
             {   // 일반 메시지
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
@@ -383,17 +414,29 @@ namespace CLIENT_wpf
             while (isRun)
             {
                 cap.Read(mat);
+                Cv2.Resize(mat, mat, new OpenCvSharp.Size(VAL.frameWidth, VAL.frameHeight));
+                
                 size = mat.Channels() * mat.Cols * mat.Rows;
 
                 var b = new byte[size];
                 System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
 
                 DLL.DLL_IMG_SEND(b, t_ImgSend_Sock);
+
+
+
+                if (EMO_my != -1)
+                {
+                    //Console.WriteLine("my emotion is : " + EMO_my);
+                    mat = EMO.image_conversion(mat, EMO_my);
+                }
+
+
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
                     try
                     {
-                        WriteableBitmap wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+                        WriteableBitmap wb = new WriteableBitmap(mat.Cols, mat.Rows, 96, 96, PixelFormats.Bgr24, null);
                         image.Source = wb;
                         WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
                     }
@@ -425,8 +468,17 @@ namespace CLIENT_wpf
                 ptr = DLL.DLL_IMG_RECV(t_ImgRecv_Sock);
                 if (ptr != null)
                 {
+
+
+
                     mat = new Mat(ptr);
                     //Cv2.ImShow("qweqwe", mat);
+                    if(EMO_you != -1)
+                    {
+                        //Console.WriteLine("your emotion is : " + EMO_you);
+                        mat = EMO.image_conversion(mat, EMO_you);
+                    }
+
 
                     Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
                     {

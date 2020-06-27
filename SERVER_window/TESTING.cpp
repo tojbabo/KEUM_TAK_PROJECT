@@ -23,7 +23,9 @@ void three();
 int main() {
 
 	int num;
-	printf("1 : read  / 2 : write / 3 : print>> ");
+	cout << "1, 2 : I01_0 , 3 : KEY1" << endl;
+	cout << "트리거 0일땐 wait, 아닐땐 0으로 바꿈, 1로 만들어 놓고 시작시킴" << endl;
+	printf("1 : 촬영-메모리쓰기  / 2 : 메모리읽기-출력 / 3 : print>> ");
 	scanf("%d", &num);
 	if (num == 1) {
 		two();
@@ -34,7 +36,7 @@ int main() {
 		one();
 }
 void three() {
-	TCHAR szName[] = TEXT("KEY");
+	TCHAR szName[] = TEXT("I01_0");
 
 	HANDLE hMapFile;
 	LPCTSTR pBuf;
@@ -111,7 +113,7 @@ void three() {
 }
 void two() {
 
-	TCHAR szName[] = TEXT("KEY");
+	TCHAR szName[] = TEXT("I01_0");
 
 	HANDLE hMapFile;
 	LPCTSTR pBuf;
@@ -165,6 +167,8 @@ void two() {
 		try {
 			cap >> frame;
 			resize(frame, frame, Size(320, 240), 0, 0, INTER_LINEAR);
+
+
 			size = 1 + (encoded.size() - 1);
 			if (frame.size().width == 0) {
 				continue;
@@ -226,12 +230,13 @@ void one() {
 
 		return;
 	}
+	CopyMemory((PVOID)pBuf, "1", (_tcslen("1") * sizeof(TCHAR)));
 
 	while (1) {
-		if (pBuf[0] == 0)
+		if (pBuf[0] == '0')
 			printf("wait\n");
 		else {
-			printf("%s\n", pBuf);
+			printf("buf is : %s\n", pBuf);
 			CopyMemory((PVOID)pBuf, "0,2,-", (_tcslen("0,2,-") * sizeof(TCHAR)));
 		}
 		Sleep(1000);

@@ -2,8 +2,8 @@
 
 USER::USER() {
 	head = new THREAD_;
-	id = 0;
-	port = 0;
+	id = -1;
+	port = -1;
 }
 std::thread* USER::get_thread(int idx = -1) {
 	THREAD_* ptr = head;

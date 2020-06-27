@@ -20,10 +20,10 @@ int main(int num, char *args[]) {
 	}
 
 	//부모
-	//LOGIC_watting(port);
+	LOGIC_watting(port);
 
 	//자식
-	LOGIC_chatting(port);
+	//LOGIC_chatting(port);
 
 	return 0;
 }

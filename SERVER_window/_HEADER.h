@@ -3,7 +3,7 @@
 #ifndef OJJJ
 #define OJJJ
 
-#define VERSION "1.3.0"
+#define VERSION "1.3.1"
 #define COMMENT "Ω√¿€"
 
 #include<WinSock2.h>

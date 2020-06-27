@@ -94,6 +94,7 @@
     <Compile Include="CLASS\DLL.cs" />
     <Compile Include="CLASS\VAL.cs" />
     <Compile Include="FUNC\CumstomThread.cs" />
+    <Compile Include="FUNC\EMOTICON.cs" />
     <Compile Include="FUNC\PROTOCOL.cs" />
     <Compile Include="FUNC\UTILITY.cs" />
     <Compile Include="WINDOWS\MakingWindow.xaml.cs">
@@ -169,7 +170,15 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="__resource\Angry.PNG" />
+    <Resource Include="__resource\Disgust.PNG" />
+    <Resource Include="__resource\Fear.PNG" />
+    <Resource Include="__resource\Happy.PNG" />
+    <Resource Include="__resource\Neutral.PNG" />
+    <Resource Include="__resource\Sad.PNG" />
+    <Resource Include="__resource\Surprise.PNG" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
