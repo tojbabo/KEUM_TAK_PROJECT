@@ -1,3 +1,5 @@
+신경망 훈련을위한 데이터 세트는 Kaggle에서 호스팅되는 Carrier and Courville Facial Expression Dataset에서 가져 왔습니다.
+
 # 2020-03-03
 
 모델 제작 및 face_tracking 완성  
