@@ -268,9 +268,16 @@ namespace CLIENT_wpf.WINDOWS
 
         private void Recv_From_Child_ReStart(String a)
         {
+            Console.WriteLine(a);
             //다시 연결
             this.Show();
             Init_window();
+
+            if (!a.Equals(""))
+            {
+                var token = a.Split(',');
+                MessageBox.Show(token[0],token[1],MessageBoxButton.OK,MessageBoxImage.Warning);
+            }    
         }
         #endregion
     }

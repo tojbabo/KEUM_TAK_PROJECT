@@ -19,7 +19,7 @@ HANDLE File_Mapping(char* key) {
 		size1,	                 // maximum object size (low-order DWORD)
 		key);					 // name of mapping object
 
-	cout << "mapping file is : " << key << endl;
+	//cout << "mapping file is : " << key << endl;
 	if (hMapFile == NULL)
 	{
 		cout << "Could not create file mapping ojbect" << endl;

@@ -13,7 +13,7 @@ namespace CLIENT_wpf.FUNC
 
         public static void START()
         {
-            Console.WriteLine("0513 - ver1.5.0 - 출력문구 수정");
+            Console.WriteLine("0513 - ver1.5.1 - ");
             DLL.Hi();
         }
         // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수

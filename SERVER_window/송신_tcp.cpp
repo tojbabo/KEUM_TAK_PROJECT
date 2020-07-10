@@ -6,15 +6,15 @@ void OJJJ_Memset(SOCKADDR_IN*, const char*, int);
 int main() {
 
 	FILE* stream;
-	stream = fopen("config.txt","r");
+	stream = fopen("config.txt", "r");
 	char reader[100];
 	fread(reader, 100, 1, stream);
 	char* ip = get_value(reader, strlen(reader), "ip:", strlen("ip:"));
 	int fps;
 	char* fps_ = get_value(reader, strlen(reader), "fps:", strlen("fps:"));
 	fps = atoi(fps_);
-	cout << "ip is : "<<ip << endl;
-	cout << "fps is : "<<fps << endl;
+	cout << "ip is : " << ip << endl;
+	cout << "fps is : " << fps << endl;
 	fclose(stream);
 
 	cout << "송신자\n";
@@ -25,9 +25,9 @@ int main() {
 	SOCKADDR_IN serv;
 	SOCKET sock;
 
-	OJJJ_Memset(&serv, ip,PORT);
+	OJJJ_Memset(&serv, ip, PORT);
 
-	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	connect(sock, (struct sockaddr*) & serv, sizeof(serv));
 
 	int jpegqual = ENCODE_QUALITY; // Compression Parameter
@@ -70,14 +70,14 @@ int main() {
 		// 통지한 패킷 수 만큼 데이터 전송
 		for (int i = 0; i < total_pack; i++)
 			send(sock, (char*)&encoded[i * PACK_SIZE], PACK_SIZE, 0);
-		waitKey(1000/fps);
+		waitKey(1000 / fps);
 
 		//puts("sending");
 	}
 	return 0;
 
 }
-void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
+void OJJJ_Memset(SOCKADDR_IN* adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));
 	adr->sin_family = AF_INET;
 	adr->sin_addr.s_addr = inet_addr(ip);

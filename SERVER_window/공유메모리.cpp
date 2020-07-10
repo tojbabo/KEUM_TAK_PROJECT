@@ -1,4 +1,4 @@
-	#include<stdio.h>
+#include<stdio.h>
 #include<Windows.h>
 #include<tchar.h>
 #include<iostream>
@@ -16,9 +16,9 @@
 using namespace std;
 using namespace cv;
 
-void one();
-void two();
-void three();
+void SH_print();
+void SH_CapAndWrite();
+void SH_ReadAndShow();
 
 int main() {
 
@@ -28,14 +28,14 @@ int main() {
 	printf("1 : 촬영-메모리쓰기  / 2 : 메모리읽기-출력 / 3 : print>> ");
 	scanf("%d", &num);
 	if (num == 1) {
-		two();
+		SH_CapAndWrite();
 	}
 	else if (num == 2)
-		three();
+		SH_ReadAndShow();
 	else
-		one();
+		SH_print();
 }
-void three() {
+void SH_ReadAndShow() {
 	TCHAR szName[] = TEXT("I01_0");
 
 	HANDLE hMapFile;
@@ -111,7 +111,7 @@ void three() {
 	UnmapViewOfFile(pBuf);
 	CloseHandle(hMapFile);
 }
-void two() {
+void SH_CapAndWrite() {
 
 	TCHAR szName[] = TEXT("I01_0");
 
@@ -193,7 +193,7 @@ void two() {
 	UnmapViewOfFile(pBuf);
 	CloseHandle(hMapFile);
 }
-void one() {
+void SH_print() {
 
 	TCHAR szName[] = TEXT("KEY1");
 

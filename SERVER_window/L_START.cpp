@@ -95,38 +95,28 @@ ROOM* _Create_ROOM(list<ROOM>* List_, int room_num, char* str) {
 	char str_temp[15];
 	char _title[100];
 	char _passwd[100];
-	ROOM* temp;
+	ROOM* temp=NULL;
 	
 	strcpy(str_temp, str);
-
 
 	char* ptr = strtok(str, ",");
 	ptr = strtok(NULL, ",");
 	sscanf(ptr, "%s", _title);
-	cout << "str is : " << str << strlen(str) << endl;
-
-	if (str_temp[strlen(str_temp) - 2] == ',') {
-		cout << "pass is null" << endl;
+	//cout << "str is : " << str << strlen(str) << endl;
+	ptr = strtok(NULL, ",");
+	if (ptr[0] == '@') {
 		sprintf(_passwd, "");
 	}
 	else {
-		ptr = strtok(NULL, ",");
 		sscanf(ptr, "%s", _passwd);
 	}
-		
 	String passwd(_passwd);
 	String title(_title);
-
-	cout << "password is  : " << passwd << endl;
-	temp = new ROOM(room_num, 0, title, passwd);
-
-	//감정 값 셋팅
-
 
 	if (room_num > List_->back().Get_ID() || List_->size() == 0) {
 		// 새로 발급된 아이디가 맨 마지막놈보다 뒤다 크다
 		// 그럼 맨 뒤로
-		cout << "최대 인덱스보다 크거나 최초의 노드임" << endl;
+		//cout << "최대 인덱스보다 크거나 최초의 노드임" << endl;
 		temp = new ROOM(room_num, 0, title, passwd);
 		List_->push_back(*temp);
 		temp->Show();
@@ -153,8 +143,22 @@ ROOM* _Create_ROOM(list<ROOM>* List_, int room_num, char* str) {
 			}
 		}
 	}
-
-
+	if (temp != NULL) {
+		ptr = strtok(NULL, ","); // 화 1
+		temp->emo[0] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 역 2
+		temp->emo[1] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 무 3
+		temp->emo[2] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 행 4
+		temp->emo[3] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 자 5
+		temp->emo[4] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 슬 6
+		temp->emo[5] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 놀 7
+		temp->emo[6] = atoi(ptr);
+	}
 	return temp;
 }
 
@@ -218,6 +222,7 @@ int _EnterRoom(SOCKET sock, list<ROOM> List_, char* str) {
 	}
 
 	_Hash_Task(sock, ptr->Get_TITLE(),result);
+	return 0;
 		
 }
 
@@ -310,14 +315,16 @@ void LOGIC_watting(int PORT) {
 							// @,TITLE,PASSWD - 방 생성
 							int temp = _Create_ROOM_ID(list_room);
 							ROOM* room =_Create_ROOM(&list_room, temp, buf);
-							
-							char child_port[10];
-							sprintf(child_port, "%d", room->Get_PORT());
+
+
+							char child_port[100];
+							sprintf(child_port, "%d %d %d %d %d %d %d %d"
+								, room->Get_PORT(),room->emo[0], room->emo[1], room->emo[2], 
+								room->emo[3], room->emo[4], room->emo[5], room->emo[6]);
+
 							
 							cout << "자식 프로세스 생성 ~!!~!"<<endl;
-							//cout << "int is : " << child_port << endl;
-							//cout << "string is : " << temp << endl;
-							ShellExecute(GetDesktopWindow(), _T("open"), _T("temp.exe"),child_port, 0, SW_SHOWDEFAULT);
+							ShellExecute(GetDesktopWindow(), _T("open"), _T("temp.exe"),child_port, 0, SW_SHOWDEFAULT); 
 
 							//_Hash_Task(read.fd_array[i], temp);
 							_Hash_Task(read.fd_array[i], room->Get_TITLE(),room->Get_PORT());

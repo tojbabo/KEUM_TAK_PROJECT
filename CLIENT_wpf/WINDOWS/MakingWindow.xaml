@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CLIENT_wpf.WINDOWS"
         mc:Ignorable="d"
-        Title="MakingWindow" Height="249.375" Width="270.875" ResizeMode="NoResize">
+        Title="방 만들기" Height="382.375" Width="279.875" ResizeMode="NoResize">
+
     <Grid>
 
-        <Button Content="취소" HorizontalAlignment="Left" Height="36" Margin="140,166,0,0" VerticalAlignment="Top" Width="101" Click="Click_No"/>
-        <Button Content="확인" HorizontalAlignment="Left" Height="36" Margin="34,166,0,0" VerticalAlignment="Top" Width="100" Click="Click_Yes"/>
-        <TextBox x:Name="TB_TITLE" HorizontalAlignment="Left" Height="22" Margin="34,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" >
+        <Button Content="취소" HorizontalAlignment="Left" Height="36" Margin="140,281,0,0" VerticalAlignment="Top" Width="101" Click="Click_No"/>
+        <Button Content="확인" HorizontalAlignment="Left" Height="36" Margin="34,281,0,0" VerticalAlignment="Top" Width="100" Click="Click_Yes"/>
+        <TextBox x:Name="TB_TITLE" HorizontalAlignment="Left" Height="22" Margin="34,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" Grid.ColumnSpan="2" >
             <TextBox.Style>
                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                     <Style.Resources>
@@ -34,7 +35,7 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <TextBox x:Name="TB_PASSWD" HorizontalAlignment="Left" Height="22" Margin="34,37,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" >
+        <TextBox x:Name="TB_PASSWD" HorizontalAlignment="Left" Height="22" Margin="34,37,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" Grid.ColumnSpan="2" >
             <TextBox.Style>
                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                     <Style.Resources>
@@ -58,14 +59,23 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <ComboBox x:Name="A1" HorizontalAlignment="Left" Height="15" Margin="145,78,0,0" VerticalAlignment="Top" Width="96"/>
-        <ComboBox x:Name="A2" HorizontalAlignment="Left" Height="15" Margin="145,98,0,0" VerticalAlignment="Top" Width="96"/>
-        <ComboBox x:Name="A3" HorizontalAlignment="Left" Height="15" Margin="145,118,0,0" VerticalAlignment="Top" Width="96"/>
-        <ComboBox x:Name="A4" HorizontalAlignment="Left" Height="15" Margin="145,138,0,0" VerticalAlignment="Top" Width="96"/>
-        <CheckBox x:Name="E1" Content="감정 1" HorizontalAlignment="Left" Margin="34,78,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="E2"  Content="감정 2" HorizontalAlignment="Left" Margin="34,98,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="E3" Content="감정 3" HorizontalAlignment="Left" Margin="34,118,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="E4" Content="감정 4" HorizontalAlignment="Left" Margin="34,138,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="A1" HorizontalAlignment="Left" Height="23" Margin="145,70,0,0" VerticalAlignment="Top" Width="96" IsEnabled ="False" DisplayMemberPath="name" SelectedValuePath="val"/>
+        <ComboBox x:Name="A2" HorizontalAlignment="Left" Height="23" Margin="145,98,0,0" VerticalAlignment="Top" Width="96" IsEnabled ="False" DisplayMemberPath="name" SelectedValuePath="val"/>
+        <ComboBox x:Name="A3" HorizontalAlignment="Left" Height="23" Margin="145,126,0,0" VerticalAlignment="Top" Width="96" IsEnabled ="False" DisplayMemberPath="name" SelectedValuePath="val"/>
+        <ComboBox x:Name="A4" HorizontalAlignment="Left" Height="23" Margin="145,154,0,0" VerticalAlignment="Top" Width="96" IsEnabled ="False" DisplayMemberPath="name" SelectedValuePath="val"/>
+        <ComboBox x:Name="A5" HorizontalAlignment="Left" Height="23" Margin="145,182,0,0" VerticalAlignment="Top" Width="96" IsEnabled ="False" DisplayMemberPath="name" SelectedValuePath="val"/>
+        <ComboBox x:Name="A6" HorizontalAlignment="Left" Height="23" Margin="145,210,0,0" VerticalAlignment="Top" Width="96" IsEnabled ="False" DisplayMemberPath="name" SelectedValuePath="val"/>
+        <ComboBox x:Name="A7" HorizontalAlignment="Left" Height="23" Margin="145,238,0,0" VerticalAlignment="Top" Width="96" IsEnabled ="False" DisplayMemberPath="name" SelectedValuePath="val"/>
+
+
+
+        <CheckBox x:Name="E1" Content="Angry" HorizontalAlignment="Left" Margin="34,70,0,0" VerticalAlignment="Top"  Checked="E1_Checked" Unchecked="E1_Checked"/>
+        <CheckBox x:Name="E2" Content="Disgust" HorizontalAlignment="Left" Margin="34,98,0,0" VerticalAlignment="Top"  Checked="E2_Checked" Unchecked="E2_Checked"/>
+        <CheckBox x:Name="E3" Content="Fear" HorizontalAlignment="Left" Margin="34,126,0,0" VerticalAlignment="Top"  Checked="E3_Checked" Unchecked="E3_Checked"/>
+        <CheckBox x:Name="E4" Content="Happy" HorizontalAlignment="Left" Margin="34,154,0,0" VerticalAlignment="Top" Checked="E4_Checked" Unchecked="E4_Checked"/>
+        <CheckBox x:Name="E5" Content="Neutral" HorizontalAlignment="Left" Margin="34,182,0,0" VerticalAlignment="Top"  Checked="E5_Checked" Unchecked="E5_Checked"/>
+        <CheckBox x:Name="E6" Content="Sad" HorizontalAlignment="Left" Margin="34,210,0,0" VerticalAlignment="Top"  Checked="E6_Checked" Unchecked="E6_Checked"/>
+        <CheckBox x:Name="E7" Content="Suprise" HorizontalAlignment="Left" Margin="34,238,0,0" VerticalAlignment="Top" Checked="E7_Checked" Unchecked="E7_Checked"/>
 
 
     </Grid>

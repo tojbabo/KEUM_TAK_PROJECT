@@ -36,11 +36,9 @@ namespace CLIENT_wpf
     public partial class ChattingWindow : System.Windows.Window
     {
         public DataGetEventHandler DataSendEvent;
+        string MsgToParents="";
 
-        // 디버깅용 - 보낼지 말지
-        bool isSend = true;
-        // 디버깅용 - UI에 그릴지 말지
-        bool isNew = true;
+
         // 디버기용 - 연결 체크 여부 확인
         bool isConnect = false;
 
@@ -74,6 +72,8 @@ namespace CLIENT_wpf
             InitializeComponent();
             _Window.Title = "Debug";
             EMO = new EMOTICON();
+            EMO_my = -1;
+            EMO_you = -1;
             //forDEBUG.Visibility = Visibility.Collapsed;
         }
 
@@ -124,10 +124,14 @@ namespace CLIENT_wpf
                 bool a = T_img_recv.IsAlive;
                 Console.WriteLine("T_Img_recv is : " + a);
             }
-            bool b = T_msg_recv.IsAlive;
-            Console.WriteLine("T_msg_recv is : " + b);
 
-            DataSendEvent("");
+            if (T_img_send != null)
+            {
+                bool b = T_msg_recv.IsAlive;
+                Console.WriteLine("T_msg_recv is : " + b);
+            }
+
+            DataSendEvent(MsgToParents);
         }
 
         #endregion
@@ -192,13 +196,9 @@ namespace CLIENT_wpf
         // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (isSend == false) { isSend = true; button.Content = "YES SHOW"; }
-            else { isSend = false; button.Content = "NO SHOW"; }
         }
         private void Button_Click_change(object sender, RoutedEventArgs e)
         {
-            if (isNew) { isNew = false; BTN_CHANGE.Content = "OLD"; }
-            else { isNew = true; BTN_CHANGE.Content = "NEW"; }
         }
         private void Button_Click_test(object sender,RoutedEventArgs e)
         {
@@ -210,8 +210,6 @@ namespace CLIENT_wpf
         }
         private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
         {
-
-
             /* 
             StartWindow SW = new StartWindow();
             System.Windows.Window.GetWindow(this).Close();
@@ -219,10 +217,9 @@ namespace CLIENT_wpf
 
             /*
             Console.WriteLine("ChattingWindow -> StartWindow");
-            DataSendEvent("");
-            System.Windows.Window.GetWindow(this).Close();*/
+            System.Windows.Window.GetWindow(this).Close();
 
-
+            /**/
             // 서버로부터 내 얼굴 받아보기
             byte[] buf = new byte[VAL.BUF_SZ];
 
@@ -235,6 +232,7 @@ namespace CLIENT_wpf
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
             val.SERV_IP = TBX_IP.Text;
+            IP = TBX_IP.Text;
             Connect_to_Server();
         }
 
@@ -302,43 +300,22 @@ namespace CLIENT_wpf
         // 수신한 메시지를 프로토콜에 맞게 확인 후 처리하는 함수
         private void MSG_CHECKING(String data)
         {
-            Console.WriteLine("☆[ChattingWindow]"+ data);
+            Console.Write("☆[ChattingWindow] "+ data);
             if (data[0] == '#')
             {
                 // 내 아이디와 포트 할당
                 var token = data.Split(',');
                 ID = UTILITY.Token_Get_Num(token[0], ":");
                 PORT = UTILITY.Token_Get_Num(token[1], ":");
-                if (isSend)
+
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
-                    if (isNew)
-                    {
-                        try
-                        {
-                            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                            {
-                                int temp = DLL.dll_Get_Socket(IP, PORT, 1);
-                                T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
-                                T_img_send.Start();
-                            })); 
-                        }
-                        catch(Exception e)
-                        {
-                            Console.WriteLine("에러 발생 ChattigWindow - dll get socket");
-                            MSG_CHECKING(data);
-                        }
-                        
-                    }
-                    else
-                    {
-                        T_img_send = new Thread(() => DLL.dll_IMG_SEND_THREAD(IP, PORT));
-                        T_img_send.Start();
-                        //SEND 스레드
-                    }
-                }
-            
-            
+                    int temp = DLL.dll_Get_Socket(IP, PORT, 0);
+                    T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
+                    T_img_send.Start();
+                }));
             }
+
             else if (data[0] == '$')
             {
                 // 다른 유저 아이디 와 포트 할당
@@ -358,40 +335,53 @@ namespace CLIENT_wpf
                 // @Thread 연결할 port 할당 받음
                 int target_port = UTILITY.Token_Get_Num(data, ":");
 
-                if (isNew)
-                {
-                    int temp = DLL.dll_Get_Socket(IP, target_port, 1);
-                    T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
-                    T_img_recv.Start();
-                }
 
-                else
-                {
-                    //RECV 스레드
-                    T_img_recv = new Thread(() => DLL.dll_IMG_RECV_THREAD(IP, target_port));
-                    T_img_recv.Start();
-                }
+
+                int temp = DLL.dll_Get_Socket(IP, target_port, 0);
+                T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
+                T_img_recv.Start();
+
             }
             else if (data[0] == '&')
             {
                 var token = data.Split(',');
-                int.TryParse (token[1], out int id);
+                int.TryParse(token[1], out int id);
                 int.TryParse(token[2], out int emotion);
 
 
 
                 if (id == ID)
                 {
+                    Console.WriteLine("My emotion : " + emotion);
                     EMO_my = emotion;
                 }
-                else ////////////////////////////////////////////////////////////////// 상대 아이디로 들어왔을때 처리 할것
+                else 
                 {
+                    Console.WriteLine("your emotion : " + emotion);
                     EMO_you = emotion;
                 }
-                
+
 
             }
-            else 
+            else if (data[0] == '*')
+            {
+                var token = data.Split(',');
+                int.TryParse(token[1], out int Event);
+                if (Event == 1)
+                {
+                    MsgToParents = "[룰 위반]퇴장 당했습니다. ,웃지마";
+                    Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                    {
+                        this.Hide();
+                        System.Windows.Window.GetWindow(this).Close();
+                    }));
+
+                }
+
+
+            }
+
+            else
             {   // 일반 메시지
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -444,7 +434,7 @@ namespace CLIENT_wpf
                 
                     //Cv2.ImShow("dfdf", mat);
                 }));
-                int c = Cv2.WaitKey(1000/24);
+                int c = Cv2.WaitKey(1000/20);
                 if (c != -1)
                     break;
             }
@@ -459,44 +449,40 @@ namespace CLIENT_wpf
         private void THREAD_IMG_RECV(int t_ImgRecv_Sock)
         {
             Console.WriteLine("[ChattingWindow]리시브 스레드 실행됨");
-            int num = DLL.DLL_SENDING(t_ImgRecv_Sock, "send trigger", "send trigger".Length);
             Mat mat;
             IntPtr ptr;
 
             while (isRun)
             {
                 ptr = DLL.DLL_IMG_RECV(t_ImgRecv_Sock);
-                if (ptr != null)
+
+                if (ptr == null)
+                    continue;
+
+                mat = new Mat(ptr);
+                if (mat == null)
+                    continue;
+                if (mat.Cols != 320 && mat.Rows != 240) { continue; }
+
+                //Cv2.ImShow("qweqwe", mat);
+                if (EMO_you != -1)
                 {
-
-
-
-                    mat = new Mat(ptr);
-                    //Cv2.ImShow("qweqwe", mat);
-                    if(EMO_you != -1)
-                    {
-                        //Console.WriteLine("your emotion is : " + EMO_you);
-                        mat = EMO.image_conversion(mat, EMO_you);
-                    }
-
-
-                    Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
-                    {
-                        try
-                        {
-                            WriteableBitmap wb = new WriteableBitmap(mat.Cols, mat.Rows, 96, 96, PixelFormats.Bgr24, null);
-                            image2.Source = wb;
-                            WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-                        }
-                        catch (Exception e) { }
-                    }));
-
-                    int c = Cv2.WaitKey(1000 / 30);
-                    if (c != -1)
-                        break;
+                    mat = EMO.image_conversion(mat, EMO_you);
                 }
-                else
-                    Console.WriteLine("is null~~!");
+
+
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    WriteableBitmap wb = new WriteableBitmap(mat.Cols, mat.Rows, 96, 96, PixelFormats.Bgr24, null);
+                    image2.Source = wb;
+                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+
+                }));
+
+                int c = Cv2.WaitKey(1);
+                if (c != -1)
+                    break;
+
             }
             Console.WriteLine("리시브 스레드 종료");
         }

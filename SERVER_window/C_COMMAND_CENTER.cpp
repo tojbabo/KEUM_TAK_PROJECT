@@ -94,6 +94,17 @@ void  COMMAND_CENTER::input_name_(char* name, int id) {
 	int index = Get_index(id);
 	users[index].set_name(name);
 }
+
+int COMMAND_CENTER::User_Num() {
+	int sum = 0;
+	for (int i = 0; i < MAXIMUM_USER; i++) {
+		if (ids[i] != -1)
+			sum++;
+	}
+	return sum;
+}
+
+
 char* COMMAND_CENTER::Get_Name(int id) {
 	int index = Get_index(id);
 

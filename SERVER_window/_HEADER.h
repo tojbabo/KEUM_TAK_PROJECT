@@ -6,7 +6,9 @@
 #define VERSION "1.3.1"
 #define COMMENT "시작"
 
-#include<WinSock2.h>
+
+#include <WinSock2.h>
+
 #include <opencv2/opencv.hpp>
 #include <iostream>          // For cout and cerr
 #include <cstdlib>           // For atoi()
@@ -32,5 +34,6 @@
 // ^ : 클라이언트의 이름 지정
 // $ : 새로운 접속에 대한 신호 - 새로운 접속 / 새로 연결된 클라이언트에 대한 요청
 // # : 자신의 아이디, 포트를 부여하는 신호
+// & : 감정 판단결과 부여하는 신호
 // <%s> inet_ntoa(adr.sin_addr) - IP주소 , <%d> ntohs(adr.sin_port) - PORT 번호
 #endif

@@ -54,27 +54,31 @@ namespace CLIENT_wpf.FUNC
             int x_pos = 320-60;               // 이모티콘이 들어갈 position
             int y_pos = 240-60;                 // 
             Mat tmp = new Mat();
-            Cv2.Resize(emoticon[num], tmp, new Size(size, size));       // 이모티콘 사이즈 변환
-
-            for (int x = x_pos; x < x_pos + size; x++)    // 이모티콘이 들어갈 x 좌표 loop
+            if (num < 7 && num >= 0)
             {
+                Cv2.Resize(emoticon[num], tmp, new Size(size, size));       // 이모티콘 사이즈 변환
 
-                for (int y = y_pos; y < y_pos + size; y++) // y loop
+
+                for (int x = x_pos; x < x_pos + size; x++)    // 이모티콘이 들어갈 x 좌표 loop
                 {
-                    var pt = img.At<Vec3b>(y, x);                                       // 3 channel
-                    var ptr2 = tmp.At<Vec3b>(y - y_pos, x - x_pos);    // 이모티콘의 3 channel
 
-                    // 이미지 대체
-                    pt.Item0 = (byte)ptr2.Item0;
-                    pt.Item1 = (byte)ptr2.Item1;
-                    pt.Item2 = (byte)ptr2.Item2;
+                    for (int y = y_pos; y < y_pos + size; y++) // y loop
+                    {
+                        var pt = img.At<Vec3b>(y, x);                                       // 3 channel
+                        var ptr2 = tmp.At<Vec3b>(y - y_pos, x - x_pos);    // 이모티콘의 3 channel
 
-                    img.Set<Vec3b>(y, x, pt);
+                        // 이미지 대체
+                        pt.Item0 = (byte)ptr2.Item0;
+                        pt.Item1 = (byte)ptr2.Item1;
+                        pt.Item2 = (byte)ptr2.Item2;
+
+                        img.Set<Vec3b>(y, x, pt);
+                    }
                 }
             }
-
-            // 반환
             return img;
+            
+            // 반환
         }
     }
 }

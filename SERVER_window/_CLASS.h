@@ -62,7 +62,6 @@ protected:
 	int ids[MAXIMUM_USER];
 	int ports[MAXIMUM_USER];
 	char Names[MAXIMUM_USER][20];
-
 	USER users[MAXIMUM_USER];
 
 public:
@@ -87,6 +86,8 @@ public:
 	void input_name_(char* client_name, int client_id);
 	// 둘 중 하나로 픽스 박아야됨
 
+	int User_Num();
+
 	char* Get_Name(int client_id);
 	USER Get_user(int client_index_no_id);
 };
@@ -100,6 +101,7 @@ private:
 	string passwd;
 	string title;
 public:
+	int emo[7];
 
 	ROOM();
 	// 방 생성

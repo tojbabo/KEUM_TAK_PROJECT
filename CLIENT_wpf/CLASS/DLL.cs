@@ -8,10 +8,10 @@ namespace CLIENT_wpf.CLASS
     {
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static void Hi();                                                                             // 버전 체크 및 DLL 연결 확인
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 전송 스레드
-        [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
-        extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 수신 스레드
+        //[DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        //extern public static void dll_IMG_SEND_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 전송 스레드
+        //[DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
+        //extern public static void dll_IMG_RECV_THREAD(String serv_ip, int serv_port);                               // [old] 이미지 수신 스레드
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]
         extern public static int dll_Get_Socket(String serv_ip, int serv_port, int opt);                            // C++ 용 SOCKET 구하는 함수
         [DllImport("forDDL.dll", CallingConvention = CallingConvention.Cdecl)]

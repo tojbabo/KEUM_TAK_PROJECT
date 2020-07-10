@@ -13,38 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\함수">
-      <UniqueIdentifier>{f3a60769-4e61-436c-b27a-0223f6f5c586}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\클래스">
       <UniqueIdentifier>{6d278c10-9cb8-4bc7-bfe1-5b72086c96a1}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\메인로직">
       <UniqueIdentifier>{9266576a-93eb-47d5-82c1-7c8d86004f03}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\함수">
+      <UniqueIdentifier>{f3a60769-4e61-436c-b27a-0223f6f5c586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\_테스트용">
+      <UniqueIdentifier>{087ae485-b113-49dd-8341-eabc89ed0adc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="연습용.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="수신.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="송신.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="TESTING.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="F_UTILITY.cpp">
-      <Filter>소스 파일\함수</Filter>
-    </ClCompile>
-    <ClCompile Include="F_AI.cpp">
-      <Filter>소스 파일\함수</Filter>
-    </ClCompile>
-    <ClCompile Include="F_SHARED.cpp">
-      <Filter>소스 파일\함수</Filter>
-    </ClCompile>
     <ClCompile Include="C_COMMAND_CENTER.cpp">
       <Filter>소스 파일\클래스</Filter>
     </ClCompile>
@@ -54,8 +36,14 @@
     <ClCompile Include="C_USER.cpp">
       <Filter>소스 파일\클래스</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>소스 파일\메인로직</Filter>
+    <ClCompile Include="F_AI.cpp">
+      <Filter>소스 파일\함수</Filter>
+    </ClCompile>
+    <ClCompile Include="F_SHARED.cpp">
+      <Filter>소스 파일\함수</Filter>
+    </ClCompile>
+    <ClCompile Include="F_UTILITY.cpp">
+      <Filter>소스 파일\함수</Filter>
     </ClCompile>
     <ClCompile Include="L_CHATcpp.cpp">
       <Filter>소스 파일\메인로직</Filter>
@@ -63,11 +51,32 @@
     <ClCompile Include="L_START.cpp">
       <Filter>소스 파일\메인로직</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>소스 파일\메인로직</Filter>
+    </ClCompile>
+    <ClCompile Include="송신.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
+    <ClCompile Include="공유메모리.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
+    <ClCompile Include="멀티프로세스.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
+    <ClCompile Include="수신.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
+    <ClCompile Include="paper.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
+    <ClCompile Include="송신_tcp.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
+    <ClCompile Include="수신_tcp.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="temp.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="_UTILITY.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -84,7 +93,10 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="OJJJ.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClInclude>
+    <ClInclude Include="temp.h">
+      <Filter>소스 파일\_테스트용</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
