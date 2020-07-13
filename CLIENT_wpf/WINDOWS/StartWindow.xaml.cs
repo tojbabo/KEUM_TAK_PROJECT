@@ -27,15 +27,17 @@ namespace CLIENT_wpf.WINDOWS
         ChattingWindow CW;
 
         public DataPushEventHandler DataSendEvent;
-
         private class DATA
         {
             public int id { get; set; }
             public string title { get; set; }
             public string man { get; set; }
-
         }
-        
+
+
+
+    
+
         #region 윈도우 관련작업
 
         public StartWindow()
@@ -43,6 +45,7 @@ namespace CLIENT_wpf.WINDOWS
             InitializeComponent();
             UTILITY.START();
             Init_window();
+            Console.WriteLine("data is : " + SINGLETON.instance.num);
         }
         private void Init_window()
         {
@@ -156,10 +159,6 @@ namespace CLIENT_wpf.WINDOWS
             {
                 len = sock.Receive(buf);
                 temp = Encoding.UTF8.GetString(buf, 0, len);
-
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                {
-                }));
                 data += temp;
                 while (true)
                 {

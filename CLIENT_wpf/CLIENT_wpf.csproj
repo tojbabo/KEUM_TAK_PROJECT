@@ -92,6 +92,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CLASS\DLL.cs" />
+    <Compile Include="CLASS\SINGLETON.cs" />
     <Compile Include="CLASS\VAL.cs" />
     <Compile Include="FUNC\CumstomThread.cs" />
     <Compile Include="FUNC\EMOTICON.cs" />

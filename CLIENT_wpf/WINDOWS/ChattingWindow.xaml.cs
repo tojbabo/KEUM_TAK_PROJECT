@@ -70,10 +70,13 @@ namespace CLIENT_wpf
         public ChattingWindow()
         {
             InitializeComponent();
-            _Window.Title = "Debug";
+            _Window.Title = "DEBUG";
             EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
+            Console.WriteLine("data is : "+ SINGLETON.instance.num);
+            SINGLETON.instance.num = 6;
+            
             //forDEBUG.Visibility = Visibility.Collapsed;
         }
 
@@ -86,9 +89,9 @@ namespace CLIENT_wpf
             TBX_IP.Text = ip;
             IP = ip;
             forDEBUG.Visibility = Visibility.Collapsed;
+            EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
-            EMO = new EMOTICON();
 
             Connect_to_Server();
         }
@@ -131,7 +134,16 @@ namespace CLIENT_wpf
                 Console.WriteLine("T_msg_recv is : " + b);
             }
 
-            DataSendEvent(MsgToParents);
+            if (DataSendEvent != null)
+            {
+                DataSendEvent(MsgToParents);
+            }
+            else
+            {
+                StartWindow SW = new StartWindow();
+                SW.Show();
+            }
+
         }
 
         #endregion
@@ -208,6 +220,13 @@ namespace CLIENT_wpf
             buf = Encoding.ASCII.GetBytes(data);
             sock.Send(buf);
         }
+        // CONNECT 버튼 클릭시
+        private void CLICK_CONNECT(object sender, RoutedEventArgs e)
+        {
+            val.SERV_IP = TBX_IP.Text;
+            IP = TBX_IP.Text;
+            Connect_to_Server();
+        }
         private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
         {
             /* 
@@ -228,13 +247,8 @@ namespace CLIENT_wpf
             sock.Send(buf);
 
         }
-        // CONNECT 버튼 클릭시
-        private void CLICK_CONNECT(object sender, RoutedEventArgs e)
-        {
-            val.SERV_IP = TBX_IP.Text;
-            IP = TBX_IP.Text;
-            Connect_to_Server();
-        }
+        // --------------------------------------------------------------------- 여기까지 디버그용
+
 
         // 서버로 메시지 보내는 함수
         private void BTN_MSG_SEND_Click(object sender, RoutedEventArgs e)
@@ -413,14 +427,11 @@ namespace CLIENT_wpf
 
                 DLL.DLL_IMG_SEND(b, t_ImgSend_Sock);
 
-
-
                 if (EMO_my != -1)
                 {
                     //Console.WriteLine("my emotion is : " + EMO_my);
                     mat = EMO.image_conversion(mat, EMO_my);
                 }
-
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -469,7 +480,6 @@ namespace CLIENT_wpf
                 {
                     mat = EMO.image_conversion(mat, EMO_you);
                 }
-
 
                 Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -539,8 +549,6 @@ namespace CLIENT_wpf
 
             }
         }
-
-       
     }
 }
   
