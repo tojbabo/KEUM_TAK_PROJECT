@@ -3,9 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:VM="clr-namespace:CLIENT_wpf.VIEWMODEL"
         mc:Ignorable="d"
         Title="방 목록" Height="450" Width="800" ResizeMode="NoResize"
         Closing="Window_Closing">
+
     <Grid>
         <ListView 
             x:Name="ListView" HorizontalAlignment="Left" 
@@ -21,7 +23,7 @@
         </ListView>
         <Button x:Name="btn" Content="참가" HorizontalAlignment="Left" Height="37" Margin="653,54,0,0" VerticalAlignment="Top" Width="101" Click="Click_Join"/>
         <Button Content="방만들기" HorizontalAlignment="Left" Height="37" Margin="547,54,0,0" VerticalAlignment="Top" Width="101" Click="Click_MakingRoom"/>
-        <TextBox x:Name="TB_IP" Text="127.0.0.1" HorizontalAlignment="Left" Height="23" Margin="128,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" />
+        <TextBox x:Name="TB_IP" Text="{Binding IP}" HorizontalAlignment="Left" Height="23" Margin="128,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" />
         <Button Content="새로고침" HorizontalAlignment="Left" Margin="49,54,0,0" VerticalAlignment="Top" Width="74" Height="37" Click="Click_F5"/>
         <Button x:Name="BTN_CONNECT" Content="연결요청" HorizontalAlignment="Left" Height="39" Margin="49,10,0,0" VerticalAlignment="Top" Width="74" RenderTransformOrigin="-0.044,0.491"  Click="Click_CONNECT"/>
 

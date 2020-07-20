@@ -45,9 +45,6 @@
     <ClCompile Include="F_UTILITY.cpp">
       <Filter>소스 파일\함수</Filter>
     </ClCompile>
-    <ClCompile Include="L_CHATcpp.cpp">
-      <Filter>소스 파일\메인로직</Filter>
-    </ClCompile>
     <ClCompile Include="L_START.cpp">
       <Filter>소스 파일\메인로직</Filter>
     </ClCompile>
@@ -75,6 +72,18 @@
     <ClCompile Include="수신_tcp.cpp">
       <Filter>소스 파일\_테스트용</Filter>
     </ClCompile>
+    <ClCompile Include="F_DEBUG.cpp">
+      <Filter>소스 파일\함수</Filter>
+    </ClCompile>
+    <ClCompile Include="C_CORE.cpp">
+      <Filter>소스 파일\클래스</Filter>
+    </ClCompile>
+    <ClCompile Include="garbage.cpp">
+      <Filter>소스 파일\_테스트용</Filter>
+    </ClCompile>
+    <ClCompile Include="L_CHAT.cpp">
+      <Filter>소스 파일\메인로직</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_UTILITY.h">
@@ -97,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="temp.h">
       <Filter>소스 파일\_테스트용</Filter>
+    </ClInclude>
+    <ClInclude Include="_DEBUG.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

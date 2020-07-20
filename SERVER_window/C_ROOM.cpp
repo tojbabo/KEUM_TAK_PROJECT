@@ -1,4 +1,4 @@
-#include"_CLASS.h"
+#include "_CLASS.h"
 
 
 
@@ -35,13 +35,13 @@ int ROOM::Enter(char* pass) {
 	cout << pass << "/" << passwd << endl;
 
 	if (passwd != pass)
-		return 1;
+		return CANNOT_ACCESS_PASSWD;
 
 	if (person_num == limit)
-		return 2;									// 사람 꽉 참
+		return CANNOT_ACCESS_PASSWD;				// 사람 꽉 참
 
 	person_num++;
-	return 0;										// 접근 ㅇㅋ
+	return room_port;										// 접근 ㅇㅋ
 }
 
 void ROOM::Show() {

@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Threading;
 using CLIENT_wpf.CLASS;
 using CLIENT_wpf.FUNC;
+using CLIENT_wpf.VIEWMODEL;
 using CLIENT_wpf.WINDOWS;
 
 namespace CLIENT_wpf.WINDOWS
@@ -18,7 +19,6 @@ namespace CLIENT_wpf.WINDOWS
 
     public partial class StartWindow : Window
     {
-        VAL val = new VAL();
         List<DATA> listData;
         Thread Msg_recv_thread;
         Socket sock;
@@ -27,36 +27,39 @@ namespace CLIENT_wpf.WINDOWS
         ChattingWindow CW;
 
         public DataPushEventHandler DataSendEvent;
+
         private class DATA
         {
             public int id { get; set; }
             public string title { get; set; }
             public string man { get; set; }
         }
-
-
-
-    
-
+        
         #region 윈도우 관련작업
 
         public StartWindow()
-        {
+        { 
             InitializeComponent();
             UTILITY.START();
-            Init_window();
-            Console.WriteLine("data is : " + SINGLETON.instance.num);
+            CTRL.initProperty();
+
+            UTILITY.Read_File();
+
+            this.DataContext = CTRL.DATA;
+
+            if(CTRL.DATA.AutoConnect) Init_window();
         }
         private void Init_window()
         {
-            sock = PROTOCOL.CREATE_SOCKET(val.SERV_IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
+            sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, CTRL.DATA.PORT, VAL.TCP, VAL.CONNECT);
 
             if (sock == null)
             {
-                Console.WriteLine("서버가 열려있지 않습니다. 혹은 연결되지 않습니다.");
-                Console.WriteLine("서버를 확인한 후 수동으로 연결하세요");
+                Console.WriteLine("연결이 성공적으로 작동하지 않았습니다.");
+                Console.WriteLine($"---IP[{CTRL.DATA.IP}]/PORT[{CTRL.DATA.PORT}]/OPT[{VAL.TCP}/{VAL.CONNECT}]---\n");
                 return;
             }
+
             BTN_CONNECT.IsEnabled = false;
             listData = new List<DATA>();
             Msg_recv_thread = new Thread(THREAD_MSG_RECV);
@@ -68,8 +71,6 @@ namespace CLIENT_wpf.WINDOWS
         {
             _Window_Close(); 
         }
-
-
         private void _Window_Close()
         {
             if (sock != null)
@@ -85,6 +86,7 @@ namespace CLIENT_wpf.WINDOWS
         #endregion
 
         #region UI - 이벤트
+
         private void Click_Join(object sender, RoutedEventArgs e)
         {
             if (ListView.SelectedItem != null)
@@ -98,18 +100,11 @@ namespace CLIENT_wpf.WINDOWS
             }
             else
             {
-                Console.WriteLine("eror");
+                Console.WriteLine("★☆★☆★☆DEBUG MODE☆★☆★☆★");
                 CW = new ChattingWindow();
                 CW.Show();
                 this.Close();
             }
-
-
-
-
-            /* ChattingWindow CW = new ChattingWindow();
-             Window.GetWindow(this).Close();
-             CW.Show();*/
         }
 
         private void Click_MakingRoom(object sender, RoutedEventArgs e)
@@ -132,7 +127,6 @@ namespace CLIENT_wpf.WINDOWS
 
         private void Click_CONNECT(object sender, RoutedEventArgs e)
         {
-            val.SERV_IP = TB_IP.Text;
             Init_window();
         }
 
@@ -223,7 +217,7 @@ namespace CLIENT_wpf.WINDOWS
 
                     _Window_Close();
                     String IP = TB_IP.Text;
-                    CW = new ChattingWindow(IP, PORT, title);
+                    CW = new ChattingWindow(PORT, title);
                     this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
                     CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_ReStart);
                     CW.Show();
@@ -241,7 +235,6 @@ namespace CLIENT_wpf.WINDOWS
                 MessageBox.Show(token[1] + token[2]);
             }
         }
-
 
         #endregion
 
@@ -270,7 +263,7 @@ namespace CLIENT_wpf.WINDOWS
             Console.WriteLine(a);
             //다시 연결
             this.Show();
-            Init_window();
+            if(CTRL.DATA.AutoConnect) Init_window();
 
             if (!a.Equals(""))
             {

@@ -23,7 +23,7 @@
             </Grid.ColumnDefinitions>
             <Button x:Name="button" Content="YES SHOW" HorizontalAlignment="Left" Margin="609,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click" Height="40" Grid.Column="1"/>
             <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="759,478,0,0" VerticalAlignment="Top" Width="145" Click="CLICK_CONNECT" Height="40" Grid.Column="1"/>
-            <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="309,450,0,0" TextWrapping="Wrap" Text="127.0.0.1" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
+            <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="309,450,0,0" TextWrapping="Wrap" Text="{Binding IP}" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
             <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="459,450,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
             <TextBox x:Name="TBX_NAME" HorizontalAlignment="Left" Height="23" Margin="609,450,0,0" TextWrapping="Wrap" Text="USER" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
             <Button x:Name="BTN_CHANGE" Content="NEW" HorizontalAlignment="Left" Margin="459,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_change" Height="40" Grid.Column="1"/>

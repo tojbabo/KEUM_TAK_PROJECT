@@ -1,7 +1,5 @@
-#pragma once
-
-#ifndef OJJJ
-#define OJJJ
+#ifndef HEADER
+#define HEADER
 
 #define VERSION "1.3.1"
 #define COMMENT "Ω√¿€"
@@ -14,6 +12,7 @@
 #include <cstdlib>           // For atoi()
 #include <thread>
 #include <string.h>
+#include <tchar.h>
 
 #define FRAME_HEIGHT 240
 #define FRAME_WIDTH 320
@@ -23,6 +22,13 @@
 
 #define BUF_LEN 65540 // Larger than maximum UDP packet size
 #define BUF_SIZE 1024
+
+
+#define SAVED 1
+#define NOT_SAVED 0
+#define INTERRUPT -1
+
+
 
 //#define IP "127.0.0.1"
 #define IP "0.0.0.0"

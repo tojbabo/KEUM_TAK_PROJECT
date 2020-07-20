@@ -1,10 +1,11 @@
 #include "_UTILITY.h"
 #include <string>
+
 using namespace cv;
 using namespace std;
 
 // 주어진 포트와 옵션으로 소켓 생성
-SOCKET Initialize(int port, int opt) {
+SOCKET Initialize_(int port, int opt) {
 	// opt -- 1: TCP , 2 : UDP
 	SOCKADDR_IN bind_adr;
 	Memset_(&bind_adr, IP, port);
@@ -34,6 +35,14 @@ void Memset_(SOCKADDR_IN* adr, const char* ip, int port) {
 	adr->sin_addr.s_addr = inet_addr(ip);
 	adr->sin_port = htons(port);
 }
+
+// 시스템 메시지를 소켓으로 보내는 함수
+void SysMsgSend_(SOCKET sock, const char* str) {
+	char msg[BUF_SIZE];
+	sprintf(msg, "$,System Message,%s\n", str);
+	send(sock, msg, strlen(msg), 0);
+}
+
 
 void Error_(const char* str) {
 	cout << "*************[ERROR]"<<str<<endl;

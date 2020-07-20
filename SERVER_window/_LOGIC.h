@@ -1,5 +1,8 @@
-#pragma once
-#include"_HEADER.h"
+//#ifndef LOGIC
+//#define LOGIC
 
-void LOGIC_watting( int PORT);
+#include"_HEADER.h"
+int LOGIC_watting( int PORT);
 int LOGIC_chatting( int PORT, int* EMOTION);
+
+//#endif

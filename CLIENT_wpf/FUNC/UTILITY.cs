@@ -1,7 +1,9 @@
 ﻿using CLIENT_wpf.CLASS;
+using CLIENT_wpf.VIEWMODEL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,18 +21,29 @@ namespace CLIENT_wpf.FUNC
         // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
         public static int Token_Get_Num(String Base, String target)
         {
-            /*
-            Console.WriteLine("BASE : " + Base);
-            Console.WriteLine("Target : " + target);*/
+            int num = Base.IndexOf(target) + target.Length;
+            String sub_str = Base.Substring(num);
+            int ber = sub_str.IndexOf("\n");
 
-            int num;
-            num = Base.IndexOf(target);
-            String sub_str = Base.Substring(num + 1);
+            if (ber != -1) sub_str = sub_str.Substring(0,ber);
+
             if (int.TryParse(sub_str, out num))
                 return num;
 
             return -1;
+        }
 
+        public static string Token_Get_Str(String Base, String target)
+        {
+            int num = Base.IndexOf(target) + target.Length;
+            String sub_str = Base.Substring(num);
+            int ber = sub_str.IndexOf("\n");
+
+            if (ber != -1) sub_str = sub_str.Substring(0, ber-1);
+
+
+
+            return sub_str;
         }
 
         // 문자열의 특정 문자의 위치를 얻어오는 함수
@@ -57,6 +70,38 @@ namespace CLIENT_wpf.FUNC
                 //Console.WriteLine("인터럽트 전");
             //t.Interrupt();
             t.Abort();
+        }
+
+        public static void Read_File()
+        {
+            string path = "config.txt";
+            try
+            {
+                string File_string = System.IO.File.ReadAllText(path);
+                CTRL.DATA.PORT = Token_Get_Num(File_string, "port:");
+                CTRL.DATA.IP = Token_Get_Str(File_string, "ip:");
+                CTRL.DATA.Fps = Token_Get_Num(File_string, "fps:");
+                CTRL.DATA.AutoConnect = (Token_Get_Num(File_string, "auto_connect:") == 1) ? true : false;
+
+                Console.WriteLine($"----------------- setting [{path}] -----------------");
+                Console.WriteLine($"--- server ip     is : {CTRL.DATA.IP}");
+                Console.WriteLine($"--- server port   is : {CTRL.DATA.PORT}");
+                Console.WriteLine($"--- frame per sec is : {CTRL.DATA.Fps}");
+                Console.WriteLine($"--- auto connect  is : {CTRL.DATA.AutoConnect}");
+                Console.WriteLine("--------------------------------------------------------");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("파일 읽기 실패. config.txt 파일 필요. 기본 정보 대체 ");
+
+                Console.WriteLine($"----------------- setting  [기본정보] -----------------");
+                Console.WriteLine($"--- server ip     is : {CTRL.DATA.IP}");
+                Console.WriteLine($"--- server port   is : {CTRL.DATA.PORT}");
+                Console.WriteLine($"--- frame per sec is : {CTRL.DATA.Fps}");
+                Console.WriteLine($"--- auto connect  is : {CTRL.DATA.AutoConnect}");
+                Console.WriteLine("--------------------------------------------------------");
+            }
+
         }
 
         public static bool bool_change(bool data)

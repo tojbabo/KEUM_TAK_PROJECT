@@ -26,8 +26,7 @@ int main(int num, char* args[]) {
 	cout << "port : " << port << endl;
 
 	//부모
-	//LOGIC_watting(port);
-	//return 0;
+	//return LOGIC_watting(port);
 	//자식
 	return LOGIC_chatting(port,opt);
 

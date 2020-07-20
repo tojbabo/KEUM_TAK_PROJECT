@@ -1,23 +1,24 @@
 #include "_CLASS.h"
 
-USER::USER() {
+USER::USER(int id, int port) {
+	head = new THREAD_;
+	id = id;
+	port = port;
+}
+void USER::release() {
 	head = new THREAD_;
 	id = -1;
-	port = -1;
+	port = port - port%10;
 }
-std::thread* USER::get_thread(int idx = -1) {
+std::thread* USER::get_thread(int other) {
 	THREAD_* ptr = head;
-	int num = 0;
 	while (1) {
-		if (ptr->link == NULL && idx == -1) {
+		if (ptr->link == NULL ) {
 			make_thread(ptr);
-			return ptr->get_thread();
+			return ptr->get_thread(id,other);
 		}
-		else if (idx == num)
-			return ptr->get_thread();
 		else {
 			ptr = ptr->link;
-			num++;
 		}
 	}
 }

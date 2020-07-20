@@ -1,0 +1,155 @@
+#include "_CLASS.h"
+
+using namespace std;
+
+void CORE::Notify_Enter(SOCKET sock, string title, int port) {
+	if (port == CANNOT_ACCESS_LIMIT) {
+		// 사람 꽉참
+		SysMsgSend_(sock, "POOLBANG.");
+	}
+	else if (port == CANNOT_ACCESS_PASSWD) {
+		// 비번 틀림
+		SysMsgSend_(sock, "Not fit Password.");
+	}
+	else {
+		// 포트 번호 부여
+		//_System_Msg_Send(sock, "Enter the room.");
+		char msg[BUF_SIZE];
+		sprintf(msg, "#,%s,%d\n", title, port);
+		send(sock, msg, strlen(msg), 0);
+	}
+}
+
+// 방 번호 생성 후 반환
+int CORE::Create_RoomID() {
+	
+	if (RoomList.size() == 0)
+		return 1;
+
+	int num = 1;
+	list<ROOM>::iterator ptr;
+
+	for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++) {
+		if (num != ptr->Get_ID())
+			break;
+		num++;
+	}
+	return num;
+}
+
+// 방 목록 전달 함수
+void CORE::Response_List(SOCKET sock) {
+	list<ROOM>::iterator ptr;
+	string total = "";
+	string temp;
+	const char* buf;
+	for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++) {
+		temp = ptr->Get_State();
+		total += temp;
+	}
+	buf = total.c_str();
+
+	send(sock, buf, strlen(buf), 0);
+}
+
+// 방 생성 함수
+ROOM CORE::Create_Room(char* str) {
+	char str_temp[15];
+	char _title[100];
+	char _passwd[100];
+	ROOM* temp=NULL;
+
+	int room_num = Create_RoomID();
+	
+	strcpy(str_temp, str);
+
+	char* ptr = strtok(str, ",");
+	ptr = strtok(NULL, ",");
+	sscanf(ptr, "%s", _title);
+	ptr = strtok(NULL, ",");
+	if (ptr[0] == '@') {
+		sprintf(_passwd, "");
+	}
+	else {
+		sscanf(ptr, "%s", _passwd);
+	}
+	string passwd(_passwd);
+	string title(_title);
+
+	if (room_num > RoomList.back().Get_ID() || RoomList.size() == 0) {
+		temp = new ROOM(room_num, 0, title, passwd);
+		RoomList.push_back(*temp);
+		temp->Show();
+	}
+	else {
+		list<ROOM>::iterator ptr;
+		for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++) {
+			if (ptr->Get_ID() < room_num) {
+				cout << "번호가 더 낮음" << endl;
+				continue;
+			}
+			else if (ptr->Get_ID() == room_num) {
+				cout << "일치하는 번호 존재" << endl;
+				continue;
+			}
+			else {
+				cout << "생성중" << endl;
+				temp = new ROOM(room_num, 0, title, passwd);
+				RoomList.insert(ptr, *temp);
+				temp->Show();
+				break;
+			}
+		}
+	}
+	if (temp != NULL) {
+		ptr = strtok(NULL, ","); // 화 1
+		temp->emo[0] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 역 2
+		temp->emo[1] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 무 3
+		temp->emo[2] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 행 4
+		temp->emo[3] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 자 5
+		temp->emo[4] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 슬 6
+		temp->emo[5] = atoi(ptr);
+		ptr = strtok(NULL, ","); // 놀 7
+		temp->emo[6] = atoi(ptr);
+	}
+	return *temp;
+}
+
+// 방 접근 함수
+void CORE::IsEnterRoom(SOCKET sock,char* str) {
+	int id;
+	char passwd[10];
+	char str_temp[15];
+	strcpy(str_temp, str);
+
+	char* c_ptr = strtok(str, ",");
+	c_ptr = strtok(NULL, ",");
+	sscanf(c_ptr, "%d", &id);
+
+	if (str_temp[strlen(str_temp) - 2] == ',') {
+		cout << "pass is null" << endl;
+		sprintf(passwd, "");
+	}
+	else {
+		c_ptr = strtok(NULL, ",");
+		sscanf(c_ptr, "%s", &passwd);
+	}
+
+	ROOM target = Search_Room(id);
+	Notify_Enter(sock, target.Get_TITLE(), target.Enter(passwd));
+}
+
+ROOM CORE::Search_Room(int ID) {
+	list<ROOM>::iterator ptr;
+	int i = 0;
+	for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++, i++) {
+		if (ptr->Get_ID() == ID)
+			return *ptr;
+	}
+	return *ptr;
+}

@@ -13,7 +13,7 @@ void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 }
 extern "C" {
 	__declspec(dllexport) void Hi() {
-		cout << "dll version is : " << DLL_VER << RECENT << endl;
+		cout << "dll version is : " << DLL_VER << RECENT << endl<<endl;
 
 		WSADATA wsaData;
 		if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR)
@@ -66,13 +66,13 @@ extern "C" {
 	}
 
 	// 이미지를 C++ 소켓을 통해 전송
-	__declspec(dllexport) void DLL_IMG_SEND(BYTE* b1, int sock)
+	__declspec(dllexport) bool DLL_IMG_SEND(BYTE* b1, int sock)
 	{
 		Mat frame = Mat(HEIGHT, WIDTH, CV_8UC3, b1);
 		Mat temp;
 		vector<uchar> encoded;
 
-		if (frame.size().width == 0)return;
+		if (frame.size().width == 0) return true;
 		resize(frame, temp, Size(WIDTH, HEIGHT), 0, 0, INTER_LINEAR);
 
 		vector < int > compression_params;
@@ -85,15 +85,23 @@ extern "C" {
 		int ibuf[1];
 		ibuf[0] = total_pack;
 
+		int len;
 		// 전송에 앞서 패킷 수 통지
-		send(sock, (char*)ibuf, sizeof(int), 0);
+		len = send(sock, (char*)ibuf, sizeof(int), 0);
+		if (len == 0 || len == -1)
+			return false;
+
 
 		// 통지한 패킷 수 만큼 데이터 전송
-		for (int i = 0; i < total_pack; i++)
-			send(sock, (char*)&encoded[i * PACK_SZ], PACK_SZ, 0);
+		for (int i = 0; i < total_pack; i++) {
+			len = send(sock, (char*)&encoded[i * PACK_SZ], PACK_SZ, 0);
+			if (len == 0 || len == -1)
+				return false;
+		}
+
 		//waitKey(FRAME_INTERVAL);
 		//puts("sending");
-
+		return true;
 	}
 
 	// 이미지를 C++ 소켓을 통해 수신
@@ -103,40 +111,41 @@ extern "C" {
 		int len;
 		do {
 			len = recv(sock, msg, BUF_LEN, 0);
+			if (len > 20) {
+				continue;
+			}
+			else if (len == 0 || len == -1) {
+				return NULL;
+			}
 		} while (len > sizeof(int));
 
 		int total_pack = ((int*)msg)[0];
 		int img_sz = PACK_SZ * total_pack;
 
 		char* longbuf = new char[img_sz];
-		/*
-		for (int i = 0; i < total_pack; i++) {
-			len = recv(sock, msg, BUF_LEN, 0);
-			if (len != PACK_SZ) {
-				cerr << "Received unexpected size pack:" << len << endl;
-			}
-			memcpy(&longbuf[i * PACK_SZ], msg, len);
-		}
-		*/
 
 		int max_sz = 0;
 		while (1) {
 			len = recv(sock, msg, BUF_LEN, 0);
-			cout << "recv msg : <" << len << "/" << img_sz << "> ";
+			//cout << "recv msg : <" << len << "/" << img_sz << "> ";
 			memcpy(&longbuf[max_sz], msg, len);
+			if (len == 0 || len == -1) {
+				free(longbuf);
+				return NULL;
+			}
 
 			if (max_sz + len < img_sz) {
-				cout << "데이터 계속 받는 중" << endl;
+				//cout << "데이터 계속 받는 중" << endl;
 				memcpy(&longbuf[max_sz], msg, len);
 				max_sz += len;
 			}
 			else if (max_sz + len == img_sz) {
-				cout << "모든 데이터 받음" << endl;
+				//cout << "모든 데이터 받음" << endl;
 				memcpy(&longbuf[max_sz], msg, len);
 				break;
 			}
 			else {
-				cout << "데이터 넘어갔습니다. 다시 시작하겠습니다." << endl;
+				//cout << "데이터 넘어갔습니다. 다시 시작하겠습니다." << endl;
 				free(longbuf);
 				return NULL;
 			}

@@ -17,9 +17,5 @@ namespace CLIENT_wpf.CLASS
         public const int ENCODE_QUALITY = 80;
         public const int frameWidth = 320;
         public const int frameHeight = 240;
-        public const double FRAME_INTERVAL = (1000 / 24);
-
-        public String SERV_IP = "127.0.0.1";
-        public int SERV_PORT = 9000;
     }
 }

@@ -91,23 +91,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CLASS\DLL.cs" />
-    <Compile Include="CLASS\SINGLETON.cs" />
-    <Compile Include="CLASS\VAL.cs" />
-    <Compile Include="FUNC\CumstomThread.cs" />
+    <Compile Include="VAL\DLL.cs" />
+    <Compile Include="VAL\VAL.cs" />
     <Compile Include="FUNC\EMOTICON.cs" />
     <Compile Include="FUNC\PROTOCOL.cs" />
     <Compile Include="FUNC\UTILITY.cs" />
-    <Compile Include="WINDOWS\MakingWindow.xaml.cs">
+    <Compile Include="VIEWMODEL\CTRL.cs" />
+    <Compile Include="VAL\_DATA.cs" />
+    <Compile Include="VAL\_MOTHER.cs" />
+    <Compile Include="VIEW\MakingWindow.xaml.cs">
       <DependentUpon>MakingWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WINDOWS\PasswdWindow.xaml.cs">
+    <Compile Include="VIEW\PasswdWindow.xaml.cs">
       <DependentUpon>PasswdWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WINDOWS\StartWindow.xaml.cs">
+    <Compile Include="VIEW\StartWindow.xaml.cs">
       <DependentUpon>StartWindow.xaml</DependentUpon>
     </Compile>
-    <Page Include="WINDOWS\ChattingWindow.xaml">
+    <Page Include="VIEW\ChattingWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -115,19 +116,19 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="WINDOWS\ChattingWindow.xaml.cs">
+    <Compile Include="VIEW\ChattingWindow.xaml.cs">
       <DependentUpon>ChattingWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="WINDOWS\MakingWindow.xaml">
+    <Page Include="VIEW\MakingWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WINDOWS\PasswdWindow.xaml">
+    <Page Include="VIEW\PasswdWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WINDOWS\StartWindow.xaml">
+    <Page Include="VIEW\StartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -29,6 +29,7 @@ using CLIENT_wpf.FUNC;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Windows.Markup;
+using CLIENT_wpf.VIEWMODEL;
 
 namespace CLIENT_wpf
 {
@@ -50,10 +51,7 @@ namespace CLIENT_wpf
         int EMO_my;
         int EMO_you;
 
-        string IP = "127.0.0.1";
-
         VideoCapture cap;
-        WriteableBitmap wb;
 
         EMOTICON EMO;
 
@@ -70,25 +68,24 @@ namespace CLIENT_wpf
         public ChattingWindow()
         {
             InitializeComponent();
+            CTRL.initProperty();
             _Window.Title = "DEBUG";
+
+            this.DataContext = CTRL.DATA;
             EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
-            Console.WriteLine("data is : "+ SINGLETON.instance.num);
-            SINGLETON.instance.num = 6;
-            
-            //forDEBUG.Visibility = Visibility.Collapsed;
+
         }
 
-        public ChattingWindow(String ip,String port, String name="DEBUG")
+        public ChattingWindow(String port, String name="DEBUG")
         { 
             InitializeComponent();
-            _Window.Title = name;
-            int.TryParse(port, out PORT);
-            TBX_PORT.Text = port; 
-            TBX_IP.Text = ip;
-            IP = ip;
             forDEBUG.Visibility = Visibility.Collapsed;
+            _Window.Title = name;
+            TBX_PORT.Text = port;
+
+            this.DataContext = CTRL.DATA;
             EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
@@ -103,37 +100,26 @@ namespace CLIENT_wpf
         }
         public void _Window_Closing()
         {
-
-
             isRun = false;
-
-            // Console.WriteLine("리시브 종료 시작");
             UTILITY.Release_thread(T_img_recv);
-            //Console.WriteLine("리시브 종료");
             //UTILITY.Release_thread(T_img_send); 
-            //Console.WriteLine("샌드 종료");
             UTILITY.Release_thread(T_msg_recv);
-            //Console.WriteLine("메시지 종료");
-
             if (sock != null)
             {
                 sock.Shutdown(SocketShutdown.Both);
                 sock.Close();
                 T_msg_recv.Join();
             }
-
             if (T_img_recv != null)
             {
                 bool a = T_img_recv.IsAlive;
                 Console.WriteLine("T_Img_recv is : " + a);
             }
-
             if (T_img_send != null)
             {
                 bool b = T_msg_recv.IsAlive;
                 Console.WriteLine("T_msg_recv is : " + b);
             }
-
             if (DataSendEvent != null)
             {
                 DataSendEvent(MsgToParents);
@@ -143,7 +129,6 @@ namespace CLIENT_wpf
                 StartWindow SW = new StartWindow();
                 SW.Show();
             }
-
         }
 
         #endregion
@@ -162,39 +147,29 @@ namespace CLIENT_wpf
             }
             else
             {
-                try
+                int.TryParse(TBX_PORT.Text, out PORT);
+
+                sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, PORT, VAL.TCP, VAL.CONNECT);
+                if (sock == null)
                 {
-                    int.TryParse(TBX_PORT.Text, out val.SERV_PORT);
-
-
-                    sock = PROTOCOL.CREATE_SOCKET(IP, val.SERV_PORT, VAL.TCP, VAL.CONNECT);
-                    if (sock == null)
-                    {
-                        Console.WriteLine("msg recv 소켓 생성에 에러 발생");
-                        return false;
-                    }
-                    String name = "^" + TBX_NAME.Text + "\n";
-                    byte[] buf = new byte[VAL.BUF_SZ];
-
-                    buf = Encoding.ASCII.GetBytes(name);
-                    sock.Send(buf);
-
-                    T_msg_recv = new Thread(THREAD_MSG_RECV);
-                    T_msg_recv.Start();
-
-                    BTN_CONNECT.Content = "DISCONNECT";
-                    UTILITY.bool_change(isConnect);
-                    return true;
-
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("연결 처리 중 에러 발생");
+                    Console.WriteLine("서버가 열려있지 않습니다. 혹은 연결되지 않습니다.");
+                    Console.WriteLine("서버를 확인한 후 수동으로 연결하세요");
                     return false;
                 }
-            }
-            
+                String name = "^" + TBX_NAME.Text + "\n";
+                byte[] buf = new byte[VAL.BUF_SZ];
 
+                buf = Encoding.ASCII.GetBytes(name);
+                sock.Send(buf);
+
+                T_msg_recv = new Thread(THREAD_MSG_RECV);
+                T_msg_recv.Start();
+
+                BTN_CONNECT.Content = "DISCONNECT";
+                UTILITY.bool_change(isConnect);
+                return true;
+
+            }
         }
 
         public void Recv_From_Parent(string param)
@@ -223,8 +198,6 @@ namespace CLIENT_wpf
         // CONNECT 버튼 클릭시
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
-            val.SERV_IP = TBX_IP.Text;
-            IP = TBX_IP.Text;
             Connect_to_Server();
         }
         private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
@@ -324,7 +297,7 @@ namespace CLIENT_wpf
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
-                    int temp = DLL.dll_Get_Socket(IP, PORT, 0);
+                    int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, PORT, 0);
                     T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
                     T_img_send.Start();
                 }));
@@ -349,9 +322,7 @@ namespace CLIENT_wpf
                 // @Thread 연결할 port 할당 받음
                 int target_port = UTILITY.Token_Get_Num(data, ":");
 
-
-
-                int temp = DLL.dll_Get_Socket(IP, target_port, 0);
+                int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, target_port, 0);
                 T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
                 T_img_recv.Start();
 
@@ -391,10 +362,7 @@ namespace CLIENT_wpf
                     }));
 
                 }
-
-
             }
-
             else
             {   // 일반 메시지
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
@@ -425,7 +393,8 @@ namespace CLIENT_wpf
                 var b = new byte[size];
                 System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
 
-                DLL.DLL_IMG_SEND(b, t_ImgSend_Sock);
+                if (!(DLL.DLL_IMG_SEND(b, t_ImgSend_Sock)))
+                    break;
 
                 if (EMO_my != -1)
                 {
@@ -471,8 +440,10 @@ namespace CLIENT_wpf
                     continue;
 
                 mat = new Mat(ptr);
+
                 if (mat == null)
                     continue;
+
                 if (mat.Cols != 320 && mat.Rows != 240) { continue; }
 
                 //Cv2.ImShow("qweqwe", mat);
@@ -497,58 +468,6 @@ namespace CLIENT_wpf
             Console.WriteLine("리시브 스레드 종료");
         }
         #endregion
-
-        // 최초 카메라 셋팅
-        private bool InitWebCamera()
-        {
-            try
-            {
-                cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
-                cap.FrameWidth = VAL.frameWidth;
-                cap.FrameHeight = VAL.frameHeight;
-                cap.Open(0);
-                wb = new WriteableBitmap(cap.FrameWidth, cap.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
-
-                image.Source = wb;
-                image2.Source = wb;
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        // 윈도우 상에 이미지 출력 관련 함수
-        private void CAPTURE_IMG()
-        {
-            Mat mat = new Mat();
-            OpenCvSharp.Size size = new OpenCvSharp.Size(640, 480);
-            Mat dst = new Mat();
-
-            while (true)
-            {
-                if (cap.Read(mat))
-                {
-
-
-                    Cv2.Resize(mat, dst, size);
-
-                    var b = new byte[mat.Channels() * mat.Cols * mat.Rows];
-                    System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, mat.Channels() * mat.Cols * mat.Rows);
-                    //testhree(b);
-                    //Cv2.ImShow("2", mat);
-
-                    WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
-
-                }
-
-                int c = Cv2.WaitKey(10);
-                if (c != -1)
-                    break;
-
-            }
-        }
     }
 }
   
