@@ -1,9 +1,9 @@
 #include "_CLASS.h"
 
 	
-COMMAND_CENTER::COMMAND_CENTER() {
+COMMAND_CENTER::COMMAND_CENTER(int port) {
 	for (int i = 0; i < MAXIMUM_USER; i++) {
-		users[i].input_data(-1, 9010 + (i * 10));
+		users[i].input_data(-1, port + (i * 10) + 1);
 	}
 }
 
@@ -22,6 +22,7 @@ int COMMAND_CENTER::Connect_New_Client(int client_id) {
 
 	sprintf(msg, "#ID:%d,PORT:%d\n", client_id, users[i].get_port());
 	send(client_id, msg, strlen(msg), 0);
+	
 
 	return users[i].get_port();
 }
@@ -60,6 +61,7 @@ void COMMAND_CENTER::Check_Client(int target, int port) {
 	char msg[BUF_SIZE];
 	puts("[sysetm] client checking");
 	for (int i = 0; i < MAXIMUM_USER; i++) {
+
 		int temp_id=users[i].get_id();
 		int temp_port = users[i].get_port();
 		if (temp_id != -1 && temp_port != port) {

@@ -70,6 +70,8 @@ namespace CLIENT_wpf.FUNC
                 //Console.WriteLine("인터럽트 전");
             //t.Interrupt();
             t.Abort();
+
+            Console.WriteLine("스레드 종료 완료");
         }
 
         public static void Read_File()

@@ -26,6 +26,7 @@ namespace CLIENT_wpf.WINDOWS
         MakingWindow MW;
         ChattingWindow CW;
 
+        bool isRun = true;
         public DataPushEventHandler DataSendEvent;
 
         private class DATA
@@ -48,6 +49,7 @@ namespace CLIENT_wpf.WINDOWS
             this.DataContext = CTRL.DATA;
 
             if(CTRL.DATA.AutoConnect) Init_window();
+
         }
         private void Init_window()
         {
@@ -62,6 +64,7 @@ namespace CLIENT_wpf.WINDOWS
 
             BTN_CONNECT.IsEnabled = false;
             listData = new List<DATA>();
+            isRun = true;
             Msg_recv_thread = new Thread(THREAD_MSG_RECV);
             Msg_recv_thread.Start();
         }
@@ -119,9 +122,7 @@ namespace CLIENT_wpf.WINDOWS
         private void Click_F5(object sender, RoutedEventArgs e)
         {
             listData = new List<DATA>();
-            byte[] buf = new byte[VAL.BUF_SZ];
-
-            buf = Encoding.ASCII.GetBytes("!request\n");
+            byte[] buf = Encoding.ASCII.GetBytes("!request\n");
             sock.Send(buf);
         }
 
@@ -149,7 +150,7 @@ namespace CLIENT_wpf.WINDOWS
             int len;
             String data = "";
             String temp;
-            while (true)
+            while (isRun)
             {
                 len = sock.Receive(buf);
                 temp = Encoding.UTF8.GetString(buf, 0, len);
@@ -175,6 +176,7 @@ namespace CLIENT_wpf.WINDOWS
                     }
                 }
             }
+            Console.WriteLine($"[StartWindow] 메시지 스레드 종료");
         }
 
         private void MSG_CHECKING(String data)
@@ -212,18 +214,17 @@ namespace CLIENT_wpf.WINDOWS
                 var token = data.Split(',');
                 String title = token[1];
                 String PORT = token[2];
+
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
-
                     _Window_Close();
-                    String IP = TB_IP.Text;
+                    // IP = TB_IP.Text;
                     CW = new ChattingWindow(PORT, title);
                     this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
                     CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_Child_ReStart);
                     CW.Show();
                     this.Hide();
-                    //_Window_Close();
-                    //this.Close();
+                    isRun = false;
                     Console.WriteLine("StartWindow -> ChattingWindow");
                 }));
             }
@@ -241,18 +242,14 @@ namespace CLIENT_wpf.WINDOWS
         #region 자식 프로세스 관련
         private void Recv_From_Child_SendMakingData(string item)
         {
-            byte[] buf = new byte[VAL.BUF_SZ];
-
-
-            buf = Encoding.ASCII.GetBytes(item);
+            byte[] buf = Encoding.ASCII.GetBytes(item);
             sock.Send(buf);
         }
 
         private void Recv_From_Child_PasswdData(string passwd)
         {
             int id = ((DATA)ListView.SelectedItem).id;
-            byte[] buf = new byte[VAL.BUF_SZ];
-            buf = Encoding.ASCII.GetBytes("#," + id + "," + passwd + "\n");
+            byte[] buf = Encoding.ASCII.GetBytes("#," + id + "," + passwd + "\n");
             Console.WriteLine("★" + "#," + id + "," + passwd + "\n");
 
             sock.Send(buf);

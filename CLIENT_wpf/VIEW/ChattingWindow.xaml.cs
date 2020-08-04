@@ -61,7 +61,6 @@ namespace CLIENT_wpf
         Thread T_img_recv;
         Thread T_msg_recv;
 
-        VAL val = new VAL();
 
         #region 윈도우 관련
 
@@ -75,7 +74,6 @@ namespace CLIENT_wpf
             EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
-
         }
 
         public ChattingWindow(String port, String name="DEBUG")
@@ -89,7 +87,6 @@ namespace CLIENT_wpf
             EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
-
             Connect_to_Server();
         }
 
@@ -98,11 +95,10 @@ namespace CLIENT_wpf
         {
             _Window_Closing();   
         }
+
         public void _Window_Closing()
         {
             isRun = false;
-            UTILITY.Release_thread(T_img_recv);
-            //UTILITY.Release_thread(T_img_send); 
             UTILITY.Release_thread(T_msg_recv);
             if (sock != null)
             {
@@ -110,6 +106,11 @@ namespace CLIENT_wpf
                 sock.Close();
                 T_msg_recv.Join();
             }
+
+            //UTILITY.Release_thread(T_img_send); 
+
+            /*
+            UTILITY.Release_thread(T_img_recv);
             if (T_img_recv != null)
             {
                 bool a = T_img_recv.IsAlive;
@@ -120,6 +121,9 @@ namespace CLIENT_wpf
                 bool b = T_msg_recv.IsAlive;
                 Console.WriteLine("T_msg_recv is : " + b);
             }
+            */
+
+
             if (DataSendEvent != null)
             {
                 DataSendEvent(MsgToParents);
@@ -152,8 +156,8 @@ namespace CLIENT_wpf
                 sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, PORT, VAL.TCP, VAL.CONNECT);
                 if (sock == null)
                 {
-                    Console.WriteLine("서버가 열려있지 않습니다. 혹은 연결되지 않습니다.");
-                    Console.WriteLine("서버를 확인한 후 수동으로 연결하세요");
+                    Console.WriteLine("연결이 성공적으로 작동하지 않았습니다.");
+                    Console.WriteLine($"---IP[{CTRL.DATA.IP}]/PORT[{PORT}]/OPT[{VAL.TCP}/{VAL.CONNECT}]---\n");
                     return false;
                 }
                 String name = "^" + TBX_NAME.Text + "\n";
@@ -282,7 +286,7 @@ namespace CLIENT_wpf
                     }
                 }
             }
-            Console.WriteLine("메시지 스레드 종료");
+            Console.WriteLine("[ChattingWindow] 메시지 스레드 종료");
         }
         // 수신한 메시지를 프로토콜에 맞게 확인 후 처리하는 함수
         private void MSG_CHECKING(String data)
@@ -295,9 +299,12 @@ namespace CLIENT_wpf
                 ID = UTILITY.Token_Get_Num(token[0], ":");
                 PORT = UTILITY.Token_Get_Num(token[1], ":");
 
+                //Console.WriteLine($"{CTRL.DATA.IP}/{ID}/{PORT}");
+                //Console.ReadKey();
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
-                    int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, PORT, 0);
+                    Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}");
+                    int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, PORT, VAL.TCP);
                     T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
                     T_img_send.Start();
                 }));
@@ -322,8 +329,9 @@ namespace CLIENT_wpf
                 // @Thread 연결할 port 할당 받음
                 int target_port = UTILITY.Token_Get_Num(data, ":");
 
-                int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, target_port, 0);
-                T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
+                Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}");
+                int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, target_port, VAL.TCP);
+                Thread T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
                 T_img_recv.Start();
 
             }
@@ -334,19 +342,16 @@ namespace CLIENT_wpf
                 int.TryParse(token[2], out int emotion);
 
 
-
                 if (id == ID)
                 {
                     Console.WriteLine("My emotion : " + emotion);
                     EMO_my = emotion;
                 }
-                else 
+                else
                 {
                     Console.WriteLine("your emotion : " + emotion);
                     EMO_you = emotion;
                 }
-
-
             }
             else if (data[0] == '*')
             {
@@ -360,7 +365,6 @@ namespace CLIENT_wpf
                         this.Hide();
                         System.Windows.Window.GetWindow(this).Close();
                     }));
-
                 }
             }
             else
@@ -375,19 +379,20 @@ namespace CLIENT_wpf
         private void THREAD_IMG_SEND(int t_ImgSend_Sock)
         {
             Console.WriteLine("[ChattingWindow]샌드 스레드 실행됨");
+            
             int size;
 
             cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
             cap.FrameWidth = VAL.frameWidth;
             cap.FrameHeight = VAL.frameHeight;
             cap.Open(0);
-            /**/
+            
             Mat mat = new Mat();
             while (isRun)
             {
                 cap.Read(mat);
                 Cv2.Resize(mat, mat, new OpenCvSharp.Size(VAL.frameWidth, VAL.frameHeight));
-                
+
                 size = mat.Channels() * mat.Cols * mat.Rows;
 
                 var b = new byte[size];
@@ -411,24 +416,23 @@ namespace CLIENT_wpf
                         WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
                     }
                     catch (Exception e) { }
-                
-                    //Cv2.ImShow("dfdf", mat);
                 }));
-                int c = Cv2.WaitKey(1000/20);
+                int c = Cv2.WaitKey(1000 / 20);
                 if (c != -1)
                     break;
             }
-            Console.WriteLine("샌드 스레드 종료");
-            DLL.dll_Free_Socket(t_ImgSend_Sock);
+            Console.WriteLine("[ChattingWindow] 샌드 스레드 종료");
             if (cap != null && cap.IsOpened())
             {
                 cap.Dispose();
             }
+            DLL.dll_Free_Socket(t_ImgSend_Sock);
         }
         // 이미지 수신 함수 - UI에 출력 되는 버전
         private void THREAD_IMG_RECV(int t_ImgRecv_Sock)
         {
             Console.WriteLine("[ChattingWindow]리시브 스레드 실행됨");
+            
             Mat mat;
             IntPtr ptr;
 
@@ -465,7 +469,8 @@ namespace CLIENT_wpf
                     break;
 
             }
-            Console.WriteLine("리시브 스레드 종료");
+            Console.WriteLine("[ChattingWindow]리시브 스레드 종료");
+            DLL.dll_Free_Socket(t_ImgRecv_Sock);
         }
         #endregion
     }

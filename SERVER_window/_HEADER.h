@@ -2,7 +2,7 @@
 #define HEADER
 
 #define VERSION "1.3.1"
-#define COMMENT "시작"
+#define COMMENT "대기방 - 채팅방 변환 안정화"
 
 
 #include <WinSock2.h>

@@ -23,35 +23,23 @@ extern "C" {
 	// 소켓 생성 - 연결 후 반환 // opt_0  : tcp, opt_1 : udp
 	__declspec(dllexport) int dll_Get_Socket(String serv_ip, int serv_port, int opt) {
 		// opt-0 : tcp, opt-1 : udp
-		cout << "ip : " << serv_ip << "/ port : " << serv_port << endl;
+		cout << "이거 출력 안되면 에러 발생할 것임 : - " << serv_ip << endl;
 		SOCKADDR_IN adr;
-		SOCKET sock;
+		SOCKET sock = -1;
 
-		try {
-			OJJJ_Memset(&adr, serv_ip.c_str(), serv_port);
+		OJJJ_Memset(&adr, serv_ip.c_str(), serv_port);
 
+		if (opt == 1) sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		else if (opt == 0)sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-			if (opt == 1) {
-				sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-				connect(sock, (struct sockaddr*) & adr, sizeof(adr));
-			}
-			else if (opt == 0) {
-				sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-				connect(sock, (struct sockaddr*) & adr, sizeof(adr));
-			}
-			/*
-			cout << "----------------------DLL CREATE SOCKET" << endl;
-			cout << "ip : " << serv_ip << endl << "port : " << serv_port << endl
-				<< "opt : " << opt << endl << "socket id : " << sock << endl;
-			cout << "---------------------------------------" << endl;*/
-		}
-		catch (Exception e) {
-			cout << "socket making error" << endl;
-			Sleep(1000);
-			sock = dll_Get_Socket(serv_ip, serv_port, opt);
+		int a = connect(sock, (struct sockaddr*) & adr, sizeof(adr));
+		cout << "연결 후 - " << a << endl;
+		if (a == -1) {
+			cout << "소켓 생성에 에러가 발생했습니다." << endl;
+			//closesocket(sock);
+			return -1;
 		}
 		return sock;
-
 	}
 
 	// 소켓 릴리즈

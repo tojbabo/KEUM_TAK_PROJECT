@@ -6,6 +6,8 @@ USER::USER(int id, int port) {
 	port = port;
 }
 void USER::release() {
+
+
 	head = new THREAD_;
 	id = -1;
 	port = port - port%10;
@@ -29,9 +31,13 @@ void USER::make_thread(THREAD_* p) {
 }
 void USER::release_thread() {
 	THREAD_* ptr = head;
+	THREAD_* pre = NULL;
 	while (1) {
-		if (ptr == NULL)
+		if (ptr->link == NULL)
 			break;
+		pre = ptr;
+		ptr = ptr->link;
+		
 	}
 }
 void USER::input_data(int id_, int port_) {

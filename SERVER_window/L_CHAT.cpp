@@ -12,13 +12,13 @@ int isSAVE[MAXIMUM_USER] = { NOT_SAVED };
 bool isREAD = true;
 int EMOTION[MAXIMUM_USER];
 
-COMMAND_CENTER cmd_ctr;
+COMMAND_CENTER* cmd_ctr;
 
 void Thread_Recv_TCP(int port, int index) {
 #pragma region 변수 초기화
 
 	printf("[RECEIVER] Thread START<%d>\n", port);
-	USER* user = &cmd_ctr.Get_user_idx(index);
+	USER* user = &cmd_ctr->Get_user_idx(index);
 	//SOCKET sock = Initialize(port, 2);
 	SOCKET sock = Initialize_(port, 1);
 	Mat rawData;
@@ -44,7 +44,7 @@ void Thread_Recv_TCP(int port, int index) {
 
 	while (1) {
 #pragma region 통신
-
+		
 		try {
 			do {
 				recvMsgSize = recv(sock_, buffer, BUF_LEN, 0);
@@ -53,7 +53,7 @@ void Thread_Recv_TCP(int port, int index) {
 					continue;
 				}
 				else if (recvMsgSize == -1 || recvMsgSize == 0) {
-					cout << "[RECEIVER] Disconnected" << endl;
+					cout << "[RECEIVER] Disconnected -> end" << endl;
 					isSAVE[index] = INTERRUPT;
 					return;
 				}
@@ -65,6 +65,7 @@ void Thread_Recv_TCP(int port, int index) {
 
 			max_sz = 0;
 			while (1) {
+				
 				recvMsgSize = recv(sock_, buffer, BUF_LEN, 0);
 				//cout << "recv msg : <" << recvMsgSize << "/" << img_sz << "> ...........["<<index<<"] ";
 				if (recvMsgSize == -1 || recvMsgSize == 0) {
@@ -98,25 +99,22 @@ void Thread_Recv_TCP(int port, int index) {
 #pragma endregion
 
 #pragma region 데이터 변환 - 저장
-
+			
 			rawData = Mat(1, PACK_SIZE * total_pack, CV_8UC1, longbuf);
-			//MATS[index] = rawData;
 			frame = imdecode(rawData, IMREAD_COLOR);
 
 			if (frame.size().width != 320 && frame.size().height != 240) {
 				//cout << "데이터 사이즈 틀림" << endl;
 				continue;
 			}
-			//imshow("erer",frame);
 
 			user->lock.write_lock();
 			memcpy(&MATS[index], &frame, sizeof(Mat));
 			user->lock.write_unlock();
-
-			//ttt = frame;
+		
 
 			isSAVE[index] = SAVED;
-
+			
 			free(longbuf);
 			waitKey(1);
 		}
@@ -133,7 +131,7 @@ void Thread_Send_TCP(int port, int index) {
 #pragma region 변수 초기화
 
 	printf("[SENDER] Thread START<%d / %d>\n", port, index);
-	USER* user = &cmd_ctr.Get_user_idx(index);
+	USER* user = &cmd_ctr->Get_user_idx(index);
 	SOCKET sock = Initialize_(port, 1);
 	SOCKADDR_IN target_adr;
 	memset(&target_adr, 0, sizeof(target_adr));
@@ -302,17 +300,14 @@ void OJJJ_Thread_AI(int PORT) {
 				break;
 			}
 			else if (isSAVE[i] == SAVED) {																// 수신되는 이미지가 존재할 경우
-				user = &cmd_ctr.Get_user_idx(i);
+				user = &cmd_ctr->Get_user_idx(i);
 				try {
 					user->lock.read_lock();
 					memcpy(&temp, &MATS[i], sizeof(Mat));												// 이미지 데이터 가져옴
 					user->lock.read_unlock();
 
-
-					Mat frame = imdecode(temp, IMREAD_COLOR);
-
 					size = 1 + (encoded.size() - 1);
-					if (frame.size().width == 0) {
+					if (temp.size().width == 0) {
 						//cout << "sz is small" << endl;
 						//CopyMemory((PVOID)C_Sbuf, "0,1,2,-", strlen("0,1,2,-"));
 						continue;
@@ -321,7 +316,7 @@ void OJJJ_Thread_AI(int PORT) {
 					// 변수 설정
 					compression_params.push_back(IMWRITE_JPEG_QUALITY);
 					compression_params.push_back(ENCODE_QUALITY);
-					imencode(".jpg", frame, encoded, compression_params);
+					imencode(".jpg", temp, encoded, compression_params);
 
 					CopyMemory((PVOID)Sbuf[i], &encoded[0], size);										// 공유메모리에 이미지 데이터 적음
 
@@ -360,6 +355,8 @@ int LOGIC_chatting(int PORT,int* opt) {
 	cout << "[EVENT] 놀람 : " << opt[6] << endl;
 
 	//thread t_ai = thread(OJJJ_Thread_AI, PORT);
+
+	cmd_ctr = new COMMAND_CENTER(PORT);
 
 	WSADATA wsaData;
 	if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR)
@@ -405,21 +402,21 @@ int LOGIC_chatting(int PORT,int* opt) {
 			if (!isREAD) {																		// 감정을 읽은 경우
 				char temp_msg[5];
 				for (int j = 0; j < MAXIMUM_USER; j++) {
-					if (EMOTION[j] != -1&&cmd_ctr.Get_user_idx(j).get_id()!=-1) {					// 감정이 인식되고 사용자가 접속되어 있는 경우
+					if (EMOTION[j] != -1&&cmd_ctr->Get_user_idx(j).get_id()!=-1) {					// 감정이 인식되고 사용자가 접속되어 있는 경우
 						if (opt[EMOTION[j]] == 1) {
 							// * : 강제퇴장
 							// 특정 사용자의 감정이
 							// 방 설정된 이벤트 ( 1 : 강퇴 )일 경우
 							// 강제 퇴장 시킴
-							cmd_ctr.Get_user_idx(j).Send_Msg((char*)"*,1\n");
+							cmd_ctr->Get_user_idx(j).Send_Msg((char*)"*,1\n");
 							continue;
 						}
 
 						
 						sprintf(temp_msg, "&,%d,%d\n", 
-							cmd_ctr.Get_user_idx(j).get_id(), EMOTION[j]);							// 인식된 특정 사용자의 감정을 전체 사용자에게 알림
+							cmd_ctr->Get_user_idx(j).get_id(), EMOTION[j]);							// 인식된 특정 사용자의 감정을 전체 사용자에게 알림
 						for (int k = 0; k < read.fd_count; k++) {
-							cmd_ctr.Get_user_idx(k).Send_Msg(temp_msg);
+							cmd_ctr->Get_user_idx(k).Send_Msg(temp_msg);
 						}
 					}
 				}
@@ -442,14 +439,15 @@ int LOGIC_chatting(int PORT,int* opt) {
 
 					FD_SET(client_sock, &read);													// select 배열에 해당 소켓 설정
 					printf("[MAIN]New Connect user :			%d\n", client_sock);
-					connected_client_port = cmd_ctr.Connect_New_Client(client_sock);
+					connected_client_port = cmd_ctr->Connect_New_Client(client_sock);
+
 					if (connected_client_port == -1)
 						printf("더 이상 클라이언트를 받을 수 없다.\n");
 					else {
-						*cmd_ctr.Get_user_id(client_sock).get_thread(client_sock)
-							= thread(Thread_Recv_TCP, connected_client_port, cmd_ctr.Get_index(client_sock));
+						*cmd_ctr->Get_user_id(client_sock).get_thread(client_sock)
+							= thread(Thread_Recv_TCP, connected_client_port, cmd_ctr->Get_index(client_sock));
 					}
-					cmd_ctr.Check_Client(client_sock, connected_client_port);
+					cmd_ctr->Check_Client(client_sock, connected_client_port);
 				}
 #pragma endregion
 
@@ -461,9 +459,9 @@ int LOGIC_chatting(int PORT,int* opt) {
 					if (len == 0 || len == -1) {
 						FD_CLR(read.fd_array[i], &read);
 						// 쓰레드 종료 만들기
-						cmd_ctr.DisConnected_Client(read.fd_array[i]);
+						cmd_ctr->DisConnected_Client(read.fd_array[i]);
 
-						if (cmd_ctr.User_Num() == 0) {
+						if (cmd_ctr->User_Num() == 0) {
 							cout << "모든 사용자가 나감" << endl << "프로세스 종료됨" << endl;
 							system("pause");
 							return 999;
@@ -475,22 +473,21 @@ int LOGIC_chatting(int PORT,int* opt) {
 
 #pragma region 사용자 정상 요청 부분
 
-
 					else {
 						Socket_Buffer[len] = 0;
 						printf("[MAIN]recv message :				%s<%d>\n", Socket_Buffer, read.fd_array[i]);
 						if (Socket_Buffer[0] == '$') {													// 이미지 수신 요청 
 
 							sscanf(Socket_Buffer, "$%d", &target_id);
-							target_port = cmd_ctr.Get_port(target_id);
+							target_port = cmd_ctr->Get_port(target_id);
 
 							if (target_port == -1)
 								continue;
 
 							sprintf(Socket_Buffer, "@PORT:%d\n", target_port);
 
-							*cmd_ctr.Get_user_id(read.fd_array[i]).get_thread(target_id)
-								= thread(Thread_Send_TCP, target_port, cmd_ctr.Get_index(target_id));
+						//	*cmd_ctr->Get_user_id(read.fd_array[i]).get_thread(target_id)
+						//		= thread(Thread_Send_TCP, target_port, cmd_ctr->Get_index(target_id));
 
 							send(read.fd_array[i], Socket_Buffer, strlen(Socket_Buffer), 0);
 							continue;
@@ -498,11 +495,11 @@ int LOGIC_chatting(int PORT,int* opt) {
 						else if (Socket_Buffer[0] == '^') {												// 사용자 아이디 선언
 							char user_name[20];
 							sscanf(Socket_Buffer, "^%s", user_name);
-							cmd_ctr.Input_name(user_name, read.fd_array[i]);
+							cmd_ctr->Input_name(user_name, read.fd_array[i]);
 							continue;
 						}
 					
-						sprintf(Socket_Buffer, "[%s]%s", cmd_ctr.Get_Name(read.fd_array[i]), Socket_Buffer);
+						sprintf(Socket_Buffer, "[%s]%s", cmd_ctr->Get_Name(read.fd_array[i]), Socket_Buffer);
 						for (int i = 1; i < read.fd_count; i++) {
 							send(read.fd_array[i], Socket_Buffer, strlen(Socket_Buffer), 0);
 

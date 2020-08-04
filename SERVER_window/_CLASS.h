@@ -88,7 +88,7 @@ class COMMAND_CENTER {
 protected:
 	USER users[MAXIMUM_USER];
 public:
-	COMMAND_CENTER();
+	COMMAND_CENTER(int port = 9010);
 	// 새로 연결된 클라이언트에게 id와 포트번호를 통지하고 저장을 하는 함수
 	int Connect_New_Client(int new_client_id);
 	// 클라이언트가 종료될 때
