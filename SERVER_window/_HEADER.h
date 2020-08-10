@@ -13,6 +13,7 @@
 #include <thread>
 #include <string.h>
 #include <tchar.h>
+#include <list>
 
 #define FRAME_HEIGHT 240
 #define FRAME_WIDTH 320

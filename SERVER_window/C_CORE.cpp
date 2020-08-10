@@ -2,22 +2,13 @@
 
 using namespace std;
 
-void CORE::Notify_Enter(SOCKET sock, string title, int port) {
-	if (port == CANNOT_ACCESS_LIMIT) {
-		// 사람 꽉참
-		SysMsgSend_(sock, "POOLBANG.");
-	}
-	else if (port == CANNOT_ACCESS_PASSWD) {
-		// 비번 틀림
-		SysMsgSend_(sock, "Not fit Password.");
-	}
-	else {
-		// 포트 번호 부여
-		//_System_Msg_Send(sock, "Enter the room.");
-		char msg[BUF_SIZE];
-		sprintf(msg, "#,%s,%d\n", title, port);
-		send(sock, msg, strlen(msg), 0);
-	}
+void CORE::Notify_Enter(SOCKET sock, ROOM r) {
+	// 포트 번호 부여
+	//_System_Msg_Send(sock, "Enter the room.");
+	char msg[BUF_SIZE];
+	sprintf(msg, "#,%d,%s,%d\n",r.Get_ID(), r.Get_TITLE(), r.Get_PORT());
+	send(sock, msg, strlen(msg), 0);
+
 }
 
 // 방 번호 생성 후 반환
@@ -77,7 +68,7 @@ ROOM CORE::Create_Room(char* str) {
 	string title(_title);
 
 	if (room_num > RoomList.back().Get_ID() || RoomList.size() == 0) {
-		temp = new ROOM(room_num, 0, title, passwd);
+		temp = new ROOM(room_num, 1, title, passwd);
 		RoomList.push_back(*temp);
 		temp->Show();
 	}
@@ -85,11 +76,9 @@ ROOM CORE::Create_Room(char* str) {
 		list<ROOM>::iterator ptr;
 		for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++) {
 			if (ptr->Get_ID() < room_num) {
-				cout << "번호가 더 낮음" << endl;
 				continue;
 			}
 			else if (ptr->Get_ID() == room_num) {
-				cout << "일치하는 번호 존재" << endl;
 				continue;
 			}
 			else {
@@ -121,7 +110,7 @@ ROOM CORE::Create_Room(char* str) {
 }
 
 // 방 접근 함수
-void CORE::IsEnterRoom(SOCKET sock,char* str) {
+void CORE::IsEnterRoom(SOCKET sock, char* str) {
 	int id;
 	char passwd[10];
 	char str_temp[15];
@@ -140,16 +129,34 @@ void CORE::IsEnterRoom(SOCKET sock,char* str) {
 		sscanf(c_ptr, "%s", &passwd);
 	}
 
-	ROOM target = Search_Room(id);
-	Notify_Enter(sock, target.Get_TITLE(), target.Enter(passwd));
+	ROOM target = *Search_Room(id);
+
+	int temp = target.Enter(passwd);
+	if (temp == CANNOT_ACCESS_LIMIT) {
+		// 사람 꽉참
+		SysMsgSend_(sock, "POOLBANG.");
+	}
+	else if (temp == CANNOT_ACCESS_PASSWD) {
+		// 비번 틀림
+		SysMsgSend_(sock, "Not fit Password.");
+	}
+	else {
+
+		Notify_Enter(sock, target);
+	}
 }
 
-ROOM CORE::Search_Room(int ID) {
+void CORE::Delete_Room(int id){
+	cout << "deleted room id is : " << Search_Room(id)->Get_ID() << endl;;
+	RoomList.erase(Search_Room(id));
+}
+
+list<ROOM>::iterator CORE::Search_Room(int ID) {
 	list<ROOM>::iterator ptr;
 	int i = 0;
 	for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++, i++) {
 		if (ptr->Get_ID() == ID)
-			return *ptr;
+			return ptr;
 	}
-	return *ptr;
+	return ptr;
 }

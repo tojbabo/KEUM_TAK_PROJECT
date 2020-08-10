@@ -2,8 +2,8 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.6.0"
-#define RECENT " - 함수 정리"
+#define DLL_VER "1.6.1"
+#define RECENT " - 출력문 정리 / 한글 깨짐 처리 / 각종 예외 처리 중"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));
@@ -23,7 +23,6 @@ extern "C" {
 	// 소켓 생성 - 연결 후 반환 // opt_0  : tcp, opt_1 : udp
 	__declspec(dllexport) int dll_Get_Socket(String serv_ip, int serv_port, int opt) {
 		// opt-0 : tcp, opt-1 : udp
-		cout << "이거 출력 안되면 에러 발생할 것임 : - " << serv_ip << endl;
 		SOCKADDR_IN adr;
 		SOCKET sock = -1;
 
@@ -33,7 +32,6 @@ extern "C" {
 		else if (opt == 0)sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 		int a = connect(sock, (struct sockaddr*) & adr, sizeof(adr));
-		cout << "연결 후 - " << a << endl;
 		if (a == -1) {
 			cout << "소켓 생성에 에러가 발생했습니다." << endl;
 			//closesocket(sock);
@@ -45,7 +43,7 @@ extern "C" {
 	// 소켓 릴리즈
 	__declspec(dllexport) void dll_Free_Socket(SOCKET sock) {
 		closesocket(sock);
-		cout << "소켓 삭제 완료 [" << sock << "]" << endl;
+		//cout << "소켓 삭제 완료 [" << sock << "]" << endl;
 	}
 
 	// C++ 소켓을 통해 메시지를 보내는 함수

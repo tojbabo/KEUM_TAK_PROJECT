@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace CLIENT_wpf.VIEWMODEL
 {
+
     public class _DATA : _MOTHER
     {
         #region Life Cycle
@@ -39,7 +40,7 @@ namespace CLIENT_wpf.VIEWMODEL
         }
         #endregion
 
-        #region Property
+        #region Property_Option
         
         private string _IP = "127.0.0.1";
         public string IP {
@@ -86,5 +87,27 @@ namespace CLIENT_wpf.VIEWMODEL
         }
 
         #endregion
+
+
+        #region Property_Data
+        private List<DATA> _List;
+        public List<DATA> List
+        {
+            get => _List;
+            set
+            {
+                _List = value;
+                OnPropertyChanged(nameof(List));
+            }
+        }
+        
+        #endregion
+    }
+
+    public class DATA
+    {
+        public int id { get; set; }
+        public string title { get; set; }
+        public string man { get; set; }
     }
 }

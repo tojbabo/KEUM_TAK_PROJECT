@@ -57,8 +57,6 @@ namespace CLIENT_wpf
 
         Socket sock = null;
 
-        Thread T_img_send;
-        Thread T_img_recv;
         Thread T_msg_recv;
 
 
@@ -106,24 +104,6 @@ namespace CLIENT_wpf
                 sock.Close();
                 T_msg_recv.Join();
             }
-
-            //UTILITY.Release_thread(T_img_send); 
-
-            /*
-            UTILITY.Release_thread(T_img_recv);
-            if (T_img_recv != null)
-            {
-                bool a = T_img_recv.IsAlive;
-                Console.WriteLine("T_Img_recv is : " + a);
-            }
-            if (T_img_send != null)
-            {
-                bool b = T_msg_recv.IsAlive;
-                Console.WriteLine("T_msg_recv is : " + b);
-            }
-            */
-
-
             if (DataSendEvent != null)
             {
                 DataSendEvent(MsgToParents);
@@ -156,14 +136,14 @@ namespace CLIENT_wpf
                 sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, PORT, VAL.TCP, VAL.CONNECT);
                 if (sock == null)
                 {
-                    Console.WriteLine("연결이 성공적으로 작동하지 않았습니다.");
+                    Console.WriteLine("연결이 성공적으로 작동하지 않았습니다. - ChattingWindow/Connect_to_Server()");
                     Console.WriteLine($"---IP[{CTRL.DATA.IP}]/PORT[{PORT}]/OPT[{VAL.TCP}/{VAL.CONNECT}]---\n");
                     return false;
                 }
                 String name = "^" + TBX_NAME.Text + "\n";
                 byte[] buf = new byte[VAL.BUF_SZ];
 
-                buf = Encoding.ASCII.GetBytes(name);
+                buf = Encoding.Default.GetBytes(name);
                 sock.Send(buf);
 
                 T_msg_recv = new Thread(THREAD_MSG_RECV);
@@ -196,7 +176,7 @@ namespace CLIENT_wpf
             byte[] buf = new byte[VAL.BUF_SZ];
 
             String data = "$" + ID.ToString();
-            buf = Encoding.ASCII.GetBytes(data);
+            buf = Encoding.Default.GetBytes(data);
             sock.Send(buf);
         }
         // CONNECT 버튼 클릭시
@@ -220,7 +200,7 @@ namespace CLIENT_wpf
             byte[] buf = new byte[VAL.BUF_SZ];
 
             String data = "$" + ID.ToString();
-            buf = Encoding.ASCII.GetBytes(data);
+            buf = Encoding.Default.GetBytes(data);
             sock.Send(buf);
 
         }
@@ -233,8 +213,9 @@ namespace CLIENT_wpf
             TBX_INPUT.Focus();
             byte[] buf = new byte[VAL.BUF_SZ];
 
-            buf = Encoding.ASCII.GetBytes(TBX_INPUT.Text + "\n");
+            buf = Encoding.Default.GetBytes(TBX_INPUT.Text + "\n");
             sock.Send(buf);
+
 
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
             {
@@ -263,30 +244,38 @@ namespace CLIENT_wpf
             while (isRun)
             {
                 len = sock.Receive(buf);
-                temp = Encoding.UTF8.GetString(buf, 0, len);
-                data += temp;
-                while (true)
+                if (len == 0 || len == -1)
                 {
-                    int num = UTILITY.Token_Get_Index(data, "\n");                                                  // \n으로 메시지 구분
-                    if (num == -1)                                                                          // \n이 없는 경우 -> 메시지를 완전히 수신 안한 경우 다음 메시지에 추가 됨
+                    Console.WriteLine("[ChattingWindow] 서버로 부터 연결이 끊겼습니다. ");
+                    _Window_Closing();
+                }
+                else
+                {
+                    temp = Encoding.Default.GetString(buf, 0, len);
+                    data += temp;
+                    while (true)
                     {
-                        break;
-                    }
-                    else if (num == data.Length - 1)                                                        // \n이 문자열 맨 마지막인 경우 -> 메시지 정상 수신
-                    {
-                        MSG_CHECKING(data);
-                        data = "";
-                        break;
-                    }
-                    else                                                                                    // \n이 문자열 사이에 존재 -> 메시지 동시에 수신
-                    {
-                        temp = data.Substring(0, num);                                                      // \n기준으로 왼쪽 : 현재 메시지로 판단
-                        data = data.Substring(num + 1);                                                       // \n기준으로 오른쪽 : 다음 수신 메시지로 판단
-                        MSG_CHECKING(temp);
+                        int num = UTILITY.Token_Get_Index(data, "\n");                                                  // \n으로 메시지 구분
+                        if (num == -1)                                                                          // \n이 없는 경우 -> 메시지를 완전히 수신 안한 경우 다음 메시지에 추가 됨
+                        {
+                            break;
+                        }
+                        else if (num == data.Length - 1)                                                        // \n이 문자열 맨 마지막인 경우 -> 메시지 정상 수신
+                        {
+                            MSG_CHECKING(data);
+                            data = "";
+                            break;
+                        }
+                        else                                                                                    // \n이 문자열 사이에 존재 -> 메시지 동시에 수신
+                        {
+                            temp = data.Substring(0, num);                                                      // \n기준으로 왼쪽 : 현재 메시지로 판단
+                            data = data.Substring(num + 1);                                                       // \n기준으로 오른쪽 : 다음 수신 메시지로 판단
+                            MSG_CHECKING(temp);
+                        }
                     }
                 }
             }
-            Console.WriteLine("[ChattingWindow] 메시지 스레드 종료");
+            Console.WriteLine("[ChattingWindow]메시지 스레드 종료");
         }
         // 수신한 메시지를 프로토콜에 맞게 확인 후 처리하는 함수
         private void MSG_CHECKING(String data)
@@ -299,14 +288,19 @@ namespace CLIENT_wpf
                 ID = UTILITY.Token_Get_Num(token[0], ":");
                 PORT = UTILITY.Token_Get_Num(token[1], ":");
 
-                //Console.WriteLine($"{CTRL.DATA.IP}/{ID}/{PORT}");
-                //Console.ReadKey();
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
                     Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}");
                     int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, PORT, VAL.TCP);
-                    T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
-                    T_img_send.Start();
+                    if (temp != -1)
+                    {
+                        Thread T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
+                        T_img_send.Start();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"소켓 생성에 문제가 발생 스레드 생성 중단.");
+                    }
                 }));
             }
 
@@ -320,7 +314,7 @@ namespace CLIENT_wpf
 
 
                 data = "$" + other_id.ToString();
-                buf = Encoding.ASCII.GetBytes(data);
+                buf = Encoding.Default.GetBytes(data);
                 sock.Send(buf);
                 //PORT 요청 작업
             }
@@ -331,8 +325,15 @@ namespace CLIENT_wpf
 
                 Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}");
                 int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, target_port, VAL.TCP);
-                Thread T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
-                T_img_recv.Start();
+                if (temp != -1)
+                {
+                    Thread T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
+                    T_img_recv.Start();
+                }
+                else
+                {
+                    Console.WriteLine($"소켓 생성에 문제가 발생 스레드 생성 중단.");
+                }
 
             }
             else if (data[0] == '&')
@@ -378,7 +379,7 @@ namespace CLIENT_wpf
         // 이미지 전송 함수 - UI에 출력 되는 버전
         private void THREAD_IMG_SEND(int t_ImgSend_Sock)
         {
-            Console.WriteLine("[ChattingWindow]샌드 스레드 실행됨");
+            Console.WriteLine("[ChattingWindow]샌드 스레드 실행");
             
             int size;
 
@@ -421,7 +422,7 @@ namespace CLIENT_wpf
                 if (c != -1)
                     break;
             }
-            Console.WriteLine("[ChattingWindow] 샌드 스레드 종료");
+            Console.WriteLine("[ChattingWindow]샌드 스레드 종료");
             if (cap != null && cap.IsOpened())
             {
                 cap.Dispose();
@@ -431,7 +432,7 @@ namespace CLIENT_wpf
         // 이미지 수신 함수 - UI에 출력 되는 버전
         private void THREAD_IMG_RECV(int t_ImgRecv_Sock)
         {
-            Console.WriteLine("[ChattingWindow]리시브 스레드 실행됨");
+            Console.WriteLine("[ChattingWindow]리시브 스레드 실행");
             
             Mat mat;
             IntPtr ptr;
@@ -450,7 +451,7 @@ namespace CLIENT_wpf
 
                 if (mat.Cols != 320 && mat.Rows != 240) { continue; }
 
-                //Cv2.ImShow("qweqwe", mat);
+
                 if (EMO_you != -1)
                 {
                     mat = EMO.image_conversion(mat, EMO_you);

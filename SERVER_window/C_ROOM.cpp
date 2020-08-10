@@ -44,6 +44,14 @@ int ROOM::Enter(char* pass) {
 	return room_port;										// Á¢±Ù ¤·¤»
 }
 
+int ROOM::Exit() {
+	person_num--;
+	cout << "person num is :  " << person_num << endl;
+	if (person_num == 0)
+		return -1;
+	return 0;
+}
+
 void ROOM::Show() {
 	cout << "============================" << endl;
 	cout << "room number : " << room_id << endl;
