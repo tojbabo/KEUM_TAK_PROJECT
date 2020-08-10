@@ -15,7 +15,7 @@ namespace CLIENT_wpf.FUNC
 
         public static void START()
         {
-            Console.WriteLine("0513 - ver1.5.1 - ");
+            Console.WriteLine("0807 - ver1.6 - ");
             DLL.Hi();
         }
         // 문자열에서 특정 문자 뒤의 숫자를 얻어오는 함수
@@ -71,7 +71,7 @@ namespace CLIENT_wpf.FUNC
             //t.Interrupt();
             t.Abort();
 
-            Console.WriteLine("스레드 종료 완료");
+            Console.WriteLine("스레드 강제 종료");
         }
 
         public static void Read_File()

@@ -133,13 +133,20 @@ public:
 	string Get_State();
 	// 방에 접근
 	int Enter(char* room_password);
+	// 방에서 나감
+	int Exit();
 	// 해당 방 정보보기
 	void Show();
 };
 
 class CORE {
 	list<ROOM> RoomList;
+	bool flag = false;
 public:
+	void LOCK() { while (flag) { Sleep(200); cout << " core - 락 걸림" << endl; } flag = true; }
+	void UNLOCK() { flag = false; }
+
+
 	// 방에 설정될 아이디 생성
 	int Create_RoomID();
 	// 모든 방에 대한 정보 소켓으로 전달
@@ -149,8 +156,10 @@ public:
 	// 방에 접근 가능한지 여부 체크
 	void IsEnterRoom(SOCKET sock, char* str);
 	// 해당 방 탐색
-	ROOM Search_Room(int Room_ID);
+	list<ROOM>::iterator Search_Room(int Room_ID);
+	// 방 삭제
+	void Delete_Room(int Room_ID);
 	// 방에 대한 정보 소켓으로 알림
-	void Notify_Enter(SOCKET sock, string title, int port);
+	void Notify_Enter(SOCKET sock, ROOM room);
 };
 #endif

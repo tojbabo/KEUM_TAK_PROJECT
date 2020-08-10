@@ -375,6 +375,7 @@ int LOGIC_chatting(int PORT,int* opt) {
 
 	int re;
 	char Socket_Buffer[BUF_SIZE];
+	char msg[BUF_SIZE];
 	int connected_client_port;
 
 	int target_id;
@@ -438,8 +439,8 @@ int LOGIC_chatting(int PORT,int* opt) {
 					SOCKET client_sock = accept(sock, (SOCKADDR*)&client_adr, &size);			// 소켓을 추가 생성
 
 					FD_SET(client_sock, &read);													// select 배열에 해당 소켓 설정
-					printf("[MAIN]New Connect user :			%d\n", client_sock);
 					connected_client_port = cmd_ctr->Connect_New_Client(client_sock);
+					printf("[MAIN]New Connect user :			%d.....[%d]\n", client_sock,cmd_ctr->User_Num());
 
 					if (connected_client_port == -1)
 						printf("더 이상 클라이언트를 받을 수 없다.\n");
@@ -452,18 +453,20 @@ int LOGIC_chatting(int PORT,int* opt) {
 #pragma endregion
 
 				else {																			// 반응된 소켓이 메인 소켓이 아닌 일반 소켓일 경우
-					int len = recv(read.fd_array[i], Socket_Buffer, sizeof(Socket_Buffer), 0);						// 읽기
+					int len = recv(read.fd_array[i], Socket_Buffer, sizeof(Socket_Buffer), 0);	// 읽기
 
 #pragma region 사용자의 연결이 종료된 부분
 
 					if (len == 0 || len == -1) {
 						FD_CLR(read.fd_array[i], &read);
 						// 쓰레드 종료 만들기
+
 						cmd_ctr->DisConnected_Client(read.fd_array[i]);
+						printf("[MAIN]User Disconnected :            %d.....[%d]\n", read.fd_array[i], cmd_ctr->User_Num());
 
 						if (cmd_ctr->User_Num() == 0) {
 							cout << "모든 사용자가 나감" << endl << "프로세스 종료됨" << endl;
-							system("pause");
+							Sleep(3000);
 							return 999;
 						}
 						closesocket(temp.fd_array[i]);
@@ -486,23 +489,21 @@ int LOGIC_chatting(int PORT,int* opt) {
 
 							sprintf(Socket_Buffer, "@PORT:%d\n", target_port);
 
-						//	*cmd_ctr->Get_user_id(read.fd_array[i]).get_thread(target_id)
-						//		= thread(Thread_Send_TCP, target_port, cmd_ctr->Get_index(target_id));
+							*cmd_ctr->Get_user_id(read.fd_array[i]).get_thread(target_id)
+								= thread(Thread_Send_TCP, target_port, cmd_ctr->Get_index(target_id));
 
 							send(read.fd_array[i], Socket_Buffer, strlen(Socket_Buffer), 0);
-							continue;
 						}
 						else if (Socket_Buffer[0] == '^') {												// 사용자 아이디 선언
 							char user_name[20];
 							sscanf(Socket_Buffer, "^%s", user_name);
 							cmd_ctr->Input_name(user_name, read.fd_array[i]);
-							continue;
 						}
-					
-						sprintf(Socket_Buffer, "[%s]%s", cmd_ctr->Get_Name(read.fd_array[i]), Socket_Buffer);
-						for (int i = 1; i < read.fd_count; i++) {
-							send(read.fd_array[i], Socket_Buffer, strlen(Socket_Buffer), 0);
-
+						else {
+							sprintf(msg, "[%s]%s", cmd_ctr->Get_Name(read.fd_array[i]), Socket_Buffer);
+							for (int i = 1; i < read.fd_count; i++) {
+								send(read.fd_array[i], msg, strlen(msg), 0);
+							}
 						}
 					}
 

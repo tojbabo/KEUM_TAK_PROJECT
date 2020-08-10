@@ -19,7 +19,7 @@ int LOGIC_watting(int PORT) {
 		Error_("WSAStartup Error in START.cpp");
 
 	SOCKET sock = Initialize_(PORT, 1);
-	if (listen(sock, 5) == SOCKET_ERROR)
+	if (listen(sock, 30) == SOCKET_ERROR)
 		Error_("SOCKET Listen Error in START.cpp");
 
 	fd_set read, temp;
@@ -43,7 +43,7 @@ int LOGIC_watting(int PORT) {
 
 		re = select(NULL, &temp, NULL, NULL, &time);											// re에 select 설정
 		if (re == SOCKET_ERROR) break;
-		if (re == 0) continue;
+		if (re == 0) 	continue;
 
 		for (int i = 0; i < read.fd_count; i++) {												// select 사이즈 만큼 반복
 
@@ -59,8 +59,6 @@ int LOGIC_watting(int PORT) {
 
 					FD_SET(client_sock, &read);													// select 배열에 해당 소켓 설정
 					printf("[start.cpp]New Connect user :			%d\n", client_sock);
-
-					core.Response_List(client_sock);
 					
 				}
 #pragma endregion
@@ -79,11 +77,15 @@ int LOGIC_watting(int PORT) {
 						printf("[start.cpp]recv message :				%s<%d>\n", Socket_Buffer, read.fd_array[i]);
 
 						if (Socket_Buffer[0] == '!') {													// !request - 리스트 요청
+							core.LOCK();
 							core.Response_List(read.fd_array[i]);
+							core.UNLOCK();
 						}
 
 						else if (Socket_Buffer[0] == '@') {												// @,TITLE,PASSWD - 방 생성
+							core.LOCK();
 							ROOM room = core.Create_Room(Socket_Buffer);
+							core.UNLOCK();
 
 							char MessageToChild[100];
 							sprintf(MessageToChild, "%d %d %d %d %d %d %d %d"
@@ -93,12 +95,30 @@ int LOGIC_watting(int PORT) {
 							cout << "자식 프로세스 생성 ~!!~!"<<endl;
 							ShellExecute(GetDesktopWindow(), _T("open"), _T("temp.exe"),MessageToChild, 0, SW_SHOWDEFAULT); 
 
-							core.Notify_Enter(read.fd_array[i], room.Get_TITLE(), room.Get_PORT());
+							core.LOCK();
+							core.Notify_Enter(read.fd_array[i], room);
+							core.UNLOCK();
+
+
+
 						}
 
-						else if (Socket_Buffer[0] = '#') {												// #,ID,PASSWD  - 방 참여
+						else if (Socket_Buffer[0] == '#') {												// #,ID,PASSWD  - 방 참여
 							core.IsEnterRoom(read.fd_array[i],Socket_Buffer);
 							
+						}
+
+						else if (Socket_Buffer[0] == '$') {												// #,ID - 방에서 사용자 나옴
+							int fromWhere;
+							sscanf(Socket_Buffer, "$,%d", &fromWhere);
+							int num = core.Search_Room(fromWhere)->Exit();
+							cout << "numt is : " << num << endl;
+							if (num == -1) {
+								core.Delete_Room(fromWhere);
+							}
+							core.LOCK();
+							core.Response_List(read.fd_array[i]);
+							core.UNLOCK();
 						}
 
 						else {/* garvage data*/ }
