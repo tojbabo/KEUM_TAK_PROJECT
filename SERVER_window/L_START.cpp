@@ -27,6 +27,21 @@ int LOGIC_watting(int PORT) {
 	FD_ZERO(&read);
 	FD_SET(sock, &read);
 
+	char temp1[] = "@,첫번째_방,,@,0,0,0,0,0,0,0";
+	char temp2[] = "@,욕설_금지방,,@,0,0,0,0,0,0,0";
+	char temp3[] = "@,ㅋㅋㅋ크루킄ㅋㅋ,,@,0,0,0,0,0,0,0";
+	char temp4[] = "@,외로운_사람만,,@,0,0,0,0,0,0,0";
+	char temp5[] = "@,18男_메이플_여친괌,,@,0,0,0,0,0,0,0";
+	char temp6[] = "@,니들은_이런거_배우지마라,,@,0,0,0,0,0,0,0";
+	char temp7[] = "@,운세_봐드립니다.,,@,0,0,0,0,0,0,0";
+	core.Create_Room(temp1);
+	core.Create_Room(temp2);
+	core.Create_Room(temp3);
+	core.Create_Room(temp4);
+	core.Create_Room(temp5);
+	core.Create_Room(temp6);
+	core.Create_Room(temp7);
+
 	int re;
 	char Socket_Buffer[BUF_SIZE];
 
@@ -75,22 +90,25 @@ int LOGIC_watting(int PORT) {
 					else {
 						Socket_Buffer[len] = 0;
 						printf("[start.cpp]recv message :				%s<%d>\n", Socket_Buffer, read.fd_array[i]);
-
-						if (Socket_Buffer[0] == '!') {													// !request - 리스트 요청
+						
+						// !request - 리스트 요청
+						if (Socket_Buffer[0] == '!') {													
 							core.LOCK();
 							core.Response_List(read.fd_array[i]);
 							core.UNLOCK();
 						}
-
-						else if (Socket_Buffer[0] == '@') {												// @,TITLE,PASSWD - 방 생성
+						
+						// @,TITLE,PASSWD - 방 생성
+						else if (Socket_Buffer[0] == '@') {		
+							cout << "방 생성임다 " << Socket_Buffer << endl;
 							core.LOCK();
 							ROOM room = core.Create_Room(Socket_Buffer);
 							core.UNLOCK();
 
 							char MessageToChild[100];
-							sprintf(MessageToChild, "%d %d %d %d %d %d %d %d"
+							sprintf(MessageToChild, "%d %d %d %d %d %d %d %d %s"
 								, room.Get_PORT(),room.emo[0], room.emo[1], room.emo[2], 
-								room.emo[3], room.emo[4], room.emo[5], room.emo[6]);
+								room.emo[3], room.emo[4], room.emo[5], room.emo[6],room.Get_TITLE());
 							
 							cout << "자식 프로세스 생성 ~!!~!"<<endl;
 							ShellExecute(GetDesktopWindow(), _T("open"), _T("temp.exe"),MessageToChild, 0, SW_SHOWDEFAULT); 
@@ -103,12 +121,14 @@ int LOGIC_watting(int PORT) {
 
 						}
 
-						else if (Socket_Buffer[0] == '#') {												// #,ID,PASSWD  - 방 참여
+						// #,RoomID,PASSWD  - 방 참여
+						else if (Socket_Buffer[0] == '#') {												
 							core.IsEnterRoom(read.fd_array[i],Socket_Buffer);
 							
 						}
 
-						else if (Socket_Buffer[0] == '$') {												// #,ID - 방에서 사용자 나옴
+						// $,RoomID - 방에서 사용자 나옴
+						else if (Socket_Buffer[0] == '$') {												
 							int fromWhere;
 							sscanf(Socket_Buffer, "$,%d", &fromWhere);
 							int num = core.Search_Room(fromWhere)->Exit();
@@ -119,6 +139,16 @@ int LOGIC_watting(int PORT) {
 							core.LOCK();
 							core.Response_List(read.fd_array[i]);
 							core.UNLOCK();
+						}
+
+						// ^,Roomid - 로그인 하려는 방 선택
+						else if (Socket_Buffer[0] == '^') {												
+							int id;
+							sscanf(Socket_Buffer, "^,%d", &id);
+							ROOM r = *core.Search_Room(id);
+
+							if (r.IsFree()) core.Notify_Enter(read.fd_array[i], r);
+							else { core.RequestPasswd(read.fd_array[i], r); }
 						}
 
 						else {/* garvage data*/ }

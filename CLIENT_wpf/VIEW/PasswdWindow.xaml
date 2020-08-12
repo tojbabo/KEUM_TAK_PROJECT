@@ -3,11 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CLIENT_wpf.WINDOWS"
+        xmlns:local="clr-namespace:CLIENT_wpf.WINDOWS" x:Name="_Window"
         mc:Ignorable="d"
-        Title="PasswdWindow" Height="135.938" Width="243.125">
+        Title="PasswdWindow" Height="138.605" Width="243.125">
     <Grid>
-        <TextBox x:Name="TB_Passwd" HorizontalAlignment="Left" Height="23" Margin="30,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="173" />
-        <Button Content="확인" HorizontalAlignment="Left" Height="29" Margin="30,57,0,0" VerticalAlignment="Top" Width="173" Click="Click_OK"/>
+        <TextBox x:Name="TB_Passwd" HorizontalAlignment="Left" Height="23" Margin="30,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="173" />
+        <Button Content="확인" HorizontalAlignment="Left" Height="29" Margin="30,63,0,0" VerticalAlignment="Top" Width="173" Click="Click_OK"/>
+        <TextBlock HorizontalAlignment="Left" Margin="30,11,0,0" TextWrapping="Wrap" Text="암호를 입력하세요" VerticalAlignment="Top" Height="19" Width="173"/>
     </Grid>
 </Window>

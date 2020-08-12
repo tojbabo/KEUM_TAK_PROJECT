@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -19,29 +11,22 @@ using System.Net.Sockets;
 using System.Windows.Threading;
 using System.Threading;
 
-using System.Runtime.InteropServices;
-using System.Drawing;
-using System.IO;
-using System.Reflection;
-using CLIENT_wpf.CLASS;
 using CLIENT_wpf.WINDOWS;
 using CLIENT_wpf.FUNC;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Windows.Markup;
 using CLIENT_wpf.VIEWMODEL;
+using CLIENT_wpf.VAL;
+using System.Drawing;
+using System.Windows.Shapes;
 
 namespace CLIENT_wpf
 {
 
     public partial class ChattingWindow : System.Windows.Window
     {
+        #region 멤버 변수
         public DataGetEventHandler DataSendEvent;
         string MsgToParents="";
 
-
-        // 디버기용 - 연결 체크 여부 확인
-        bool isConnect = false;
 
         bool isRun = true;
 
@@ -58,7 +43,7 @@ namespace CLIENT_wpf
         Socket sock = null;
 
         Thread T_msg_recv;
-
+        #endregion
 
         #region 윈도우 관련
 
@@ -66,25 +51,26 @@ namespace CLIENT_wpf
         {
             InitializeComponent();
             CTRL.initProperty();
-            _Window.Title = "DEBUG";
 
             this.DataContext = CTRL.DATA;
             EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
         }
 
         public ChattingWindow(String port, String name="DEBUG")
         { 
             InitializeComponent();
             forDEBUG.Visibility = Visibility.Collapsed;
-            _Window.Title = name;
+            CTRL.DATA.Title = name;
             TBX_PORT.Text = port;
 
             this.DataContext = CTRL.DATA;
             EMO = new EMOTICON();
             EMO_my = -1;
             EMO_you = -1;
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             Connect_to_Server();
         }
 
@@ -120,28 +106,29 @@ namespace CLIENT_wpf
         #region 통신 관련
         private bool Connect_to_Server()
         {
-            if (isConnect)
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_TRYCONNECT);
+            if (CTRL.DATA.IsConnect)
             {
                 sock.Close();
                 _Window_Closing();
 
-                BTN_CONNECT.Content = "CONNECT";
-                UTILITY.bool_change(isConnect);
+                CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
                 return true;
             }
             else
             {
                 int.TryParse(TBX_PORT.Text, out PORT);
 
-                sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, PORT, VAL.TCP, VAL.CONNECT);
+                sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, PORT, CONSTANTS.TCP, CONSTANTS.CONNECT);
                 if (sock == null)
                 {
                     Console.WriteLine("연결이 성공적으로 작동하지 않았습니다. - ChattingWindow/Connect_to_Server()");
-                    Console.WriteLine($"---IP[{CTRL.DATA.IP}]/PORT[{PORT}]/OPT[{VAL.TCP}/{VAL.CONNECT}]---\n");
+                    Console.WriteLine($"---IP[{CTRL.DATA.IP}]/PORT[{PORT}]/OPT[{CONSTANTS.TCP}/{CONSTANTS.CONNECT}]---\n");
+                    CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
                     return false;
                 }
-                String name = "^" + TBX_NAME.Text + "\n";
-                byte[] buf = new byte[VAL.BUF_SZ];
+                String name = "^" + CTRL.DATA.NAME + "\n";
+                byte[] buf = new byte[CONSTANTS.BUF_SZ];
 
                 buf = Encoding.Default.GetBytes(name);
                 sock.Send(buf);
@@ -149,10 +136,8 @@ namespace CLIENT_wpf
                 T_msg_recv = new Thread(THREAD_MSG_RECV);
                 T_msg_recv.Start();
 
-                BTN_CONNECT.Content = "DISCONNECT";
-                UTILITY.bool_change(isConnect);
+                CTRL.ConnectionStateChange(CONSTANTS.STATE_CONNECTING);
                 return true;
-
             }
         }
 
@@ -173,7 +158,7 @@ namespace CLIENT_wpf
         }
         private void Button_Click_test(object sender,RoutedEventArgs e)
         {
-            byte[] buf = new byte[VAL.BUF_SZ];
+            byte[] buf = new byte[CONSTANTS.BUF_SZ];
 
             String data = "$" + ID.ToString();
             buf = Encoding.Default.GetBytes(data);
@@ -197,7 +182,7 @@ namespace CLIENT_wpf
 
             /**/
             // 서버로부터 내 얼굴 받아보기
-            byte[] buf = new byte[VAL.BUF_SZ];
+            byte[] buf = new byte[CONSTANTS.BUF_SZ];
 
             String data = "$" + ID.ToString();
             buf = Encoding.Default.GetBytes(data);
@@ -211,7 +196,7 @@ namespace CLIENT_wpf
         private void BTN_MSG_SEND_Click(object sender, RoutedEventArgs e)
         {
             TBX_INPUT.Focus();
-            byte[] buf = new byte[VAL.BUF_SZ];
+            byte[] buf = new byte[CONSTANTS.BUF_SZ];
 
             buf = Encoding.Default.GetBytes(TBX_INPUT.Text + "\n");
             sock.Send(buf);
@@ -237,7 +222,7 @@ namespace CLIENT_wpf
         // 메시지 수신 쓰레드
         private void THREAD_MSG_RECV()
         {
-            byte[] buf = new byte[VAL.BUF_SZ];
+            byte[] buf = new byte[CONSTANTS.BUF_SZ];
             int len;
             String data = "";
             String temp;
@@ -247,6 +232,7 @@ namespace CLIENT_wpf
                 if (len == 0 || len == -1)
                 {
                     Console.WriteLine("[ChattingWindow] 서버로 부터 연결이 끊겼습니다. ");
+                    CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
                     _Window_Closing();
                 }
                 else
@@ -291,7 +277,7 @@ namespace CLIENT_wpf
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
                     Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}");
-                    int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, PORT, VAL.TCP);
+                    int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, PORT, CONSTANTS.TCP);
                     if (temp != -1)
                     {
                         Thread T_img_send = new Thread(() => THREAD_IMG_SEND(temp));
@@ -310,7 +296,7 @@ namespace CLIENT_wpf
                 var token = data.Split(',');
                 int other_id = UTILITY.Token_Get_Num(token[0], ":");
                 int other_port = UTILITY.Token_Get_Num(token[1], ":");
-                byte[] buf = new byte[VAL.BUF_SZ];
+                byte[] buf = new byte[CONSTANTS.BUF_SZ];
 
 
                 data = "$" + other_id.ToString();
@@ -324,7 +310,7 @@ namespace CLIENT_wpf
                 int target_port = UTILITY.Token_Get_Num(data, ":");
 
                 Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId}");
-                int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, target_port, VAL.TCP);
+                int temp = DLL.dll_Get_Socket(CTRL.DATA.IP, target_port, CONSTANTS.TCP);
                 if (temp != -1)
                 {
                     Thread T_img_recv = new Thread(() => THREAD_IMG_RECV(temp));
@@ -384,15 +370,16 @@ namespace CLIENT_wpf
             int size;
 
             cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
-            cap.FrameWidth = VAL.frameWidth;
-            cap.FrameHeight = VAL.frameHeight;
+            cap.FrameWidth = CONSTANTS.frameWidth;
+            cap.FrameHeight = CONSTANTS.frameHeight;
             cap.Open(0);
-            
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_CONNECTING, CTRL.DATA.MyState);
+
             Mat mat = new Mat();
             while (isRun)
             {
                 cap.Read(mat);
-                Cv2.Resize(mat, mat, new OpenCvSharp.Size(VAL.frameWidth, VAL.frameHeight));
+                Cv2.Resize(mat, mat, new OpenCvSharp.Size(CONSTANTS.frameWidth, CONSTANTS.frameHeight));
 
                 size = mat.Channels() * mat.Cols * mat.Rows;
 
@@ -402,11 +389,16 @@ namespace CLIENT_wpf
                 if (!(DLL.DLL_IMG_SEND(b, t_ImgSend_Sock)))
                     break;
 
+                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
+                CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
+                /*
                 if (EMO_my != -1)
                 {
                     //Console.WriteLine("my emotion is : " + EMO_my);
                     mat = EMO.image_conversion(mat, EMO_my);
-                }
+                    CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
+                }*/
+                //mat = EMO.image_conversion(mat, 1);
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -422,6 +414,8 @@ namespace CLIENT_wpf
                 if (c != -1)
                     break;
             }
+
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_DISCONNECT, CTRL.DATA.MyState);
             Console.WriteLine("[ChattingWindow]샌드 스레드 종료");
             if (cap != null && cap.IsOpened())
             {
@@ -436,6 +430,9 @@ namespace CLIENT_wpf
             
             Mat mat;
             IntPtr ptr;
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_CONNECTING, CTRL.DATA.YourState);
+
+
 
             while (isRun)
             {
@@ -451,10 +448,14 @@ namespace CLIENT_wpf
 
                 if (mat.Cols != 320 && mat.Rows != 240) { continue; }
 
+                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.YourState);
+                CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
+
 
                 if (EMO_you != -1)
                 {
                     mat = EMO.image_conversion(mat, EMO_you);
+                    CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
                 }
 
                 Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
@@ -470,7 +471,9 @@ namespace CLIENT_wpf
                     break;
 
             }
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_DISCONNECT, CTRL.DATA.YourState);
             Console.WriteLine("[ChattingWindow]리시브 스레드 종료");
+
             DLL.dll_Free_Socket(t_ImgRecv_Sock);
         }
         #endregion

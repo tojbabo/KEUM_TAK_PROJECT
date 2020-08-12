@@ -4,12 +4,11 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Windows;
-using System.Windows.Documents;
+using System.Windows.Controls;
 using System.Windows.Threading;
-using CLIENT_wpf.CLASS;
 using CLIENT_wpf.FUNC;
 using CLIENT_wpf.VIEWMODEL;
-using CLIENT_wpf.WINDOWS;
+using CLIENT_wpf.VAL;
 
 namespace CLIENT_wpf.WINDOWS
 {
@@ -26,13 +25,11 @@ namespace CLIENT_wpf.WINDOWS
         MakingWindow MW;
         ChattingWindow CW;
 
-        bool isRun = true;
         int Current_room_number = -1;
         public DataPushEventHandler DataSendEvent;
 
 
         #endregion
-
 
         #region 윈도우 관련작업
 
@@ -46,36 +43,42 @@ namespace CLIENT_wpf.WINDOWS
 
             this.DataContext = CTRL.DATA;
             CTRL.DATA.List = new List<DATA>();
+            CTRL.DATA.Title = "대기 방";
 
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             if (CTRL.DATA.AutoConnect) Init_window();
+
             
         }
-        private void Init_window(string msg="")
+        private bool Init_window(string msg="")
         {
-            sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, CTRL.DATA.PORT, VAL.TCP, VAL.CONNECT);
 
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_TRYCONNECT);
+
+            sock = PROTOCOL.CREATE_SOCKET(CTRL.DATA.IP, CTRL.DATA.PORT, CONSTANTS.TCP, CONSTANTS.CONNECT);
             if (sock == null)
             {
                 Console.WriteLine("연결이 성공적으로 작동하지 않았습니다.");
-                Console.WriteLine($"---IP[{CTRL.DATA.IP}]/PORT[{CTRL.DATA.PORT}]/OPT[{VAL.TCP}/{VAL.CONNECT}]---\n");
-                return;
+                Console.WriteLine($"---IP[{CTRL.DATA.IP}]/PORT[{CTRL.DATA.PORT}]/OPT[{CONSTANTS.TCP}/{CONSTANTS.CONNECT}]---\n");
+                CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
+                return false;
             }
 
-
-            BTN_CONNECT.IsEnabled = false;
-            isRun = true;
             Msg_recv_thread = new Thread(THREAD_MSG_RECV);
             Msg_recv_thread.Start();
 
-            if(msg != "")
+            if (msg != "")
             {
                 byte[] buf = Encoding.Default.GetBytes(msg);
                 sock.Send(buf);
 
             }
 
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_CONNECTING);
 
             RequestRoomList();
+
+            return true;
         }
         
         // 종료 시 처리할 작업들
@@ -85,14 +88,13 @@ namespace CLIENT_wpf.WINDOWS
         }
         private void _Window_Close()
         {
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             if (sock != null)
             {
                 sock.Shutdown(SocketShutdown.Both);
-                sock.Close();
             }
             UTILITY.Release_thread(Msg_recv_thread);
 
-            BTN_CONNECT.IsEnabled = true;
         }
 
         #endregion
@@ -104,11 +106,8 @@ namespace CLIENT_wpf.WINDOWS
             if (ListView.SelectedItem != null)
             {
                 int id = ((DATA)ListView.SelectedItem).id;
-
-                PW = new PasswdWindow();
-                this.DataSendEvent += new DataPushEventHandler(PW.Recv_From_Parent);
-                PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_PasswdWindow);
-                PW.Show();
+                byte[] buf = Encoding.Default.GetBytes($"^,{id}\n");
+                sock.Send(buf);
             }
             else
             {
@@ -130,7 +129,7 @@ namespace CLIENT_wpf.WINDOWS
 
         private void Click_F5(object sender, RoutedEventArgs e)
         {
-            RequestRoomList();
+            if (CTRL.DATA.IsConnect == true) RequestRoomList();
         }
 
         private void RequestRoomList()
@@ -141,37 +140,66 @@ namespace CLIENT_wpf.WINDOWS
             sock.Send(buf);
         }
 
+        private void Click_Setting(object sender, RoutedEventArgs e)
+        {
+            if (Grid_Setting.Visibility == Visibility.Hidden)
+                Grid_Setting.Visibility = Visibility.Visible;
+            else
+                Grid_Setting.Visibility = Visibility.Hidden;
+        }
+
         private void Click_CONNECT(object sender, RoutedEventArgs e)
         {
-            Init_window();
+
+            Grid_Setting.Visibility = Visibility.Hidden;
+
+            if (CTRL.DATA.IsConnect ==false)
+            {
+                if (Init_window())
+                {
+                    CTRL.ConnectionStateChange(CONSTANTS.STATE_CONNECTING);
+                    return;
+                }
+            }
+            else
+            {
+                if (sock != null)
+                {
+                    sock.Shutdown(SocketShutdown.Both);
+                    sock.Close();
+                }
+                UTILITY.Release_thread(Msg_recv_thread);
+                CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
+            }
         }
 
         private void ListView_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            int id = ((DATA)ListView.SelectedItem).id;
+            if (ListView.SelectedItems != null)
+            {
+                int id = ((DATA)ListView.SelectedItem).id;
+                byte[] buf = Encoding.Default.GetBytes($"^,{id}\n");
+                sock.Send(buf);
+            }
 
-            PW = new PasswdWindow();
-            this.DataSendEvent += new DataPushEventHandler(PW.Recv_From_Parent);
-            PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_PasswdWindow);
-            PW.Show();
-        }
+        } 
 
         #endregion
 
         #region 페이지 스레드
         private void THREAD_MSG_RECV()
         {
-            byte[] buf = new byte[VAL.BUF_SZ];
+            byte[] buf = new byte[CONSTANTS.BUF_SZ];
             int len;
             String data = "";
             String temp;
-            while (isRun)
+            while ( CTRL.DATA.IsConnect == true)
             {
                 len = sock.Receive(buf);
                 if (len == 0 || len == -1)
                 {
                     Console.WriteLine($"서버로 부터 연결이 끊어졌습니다.");
-                    BTN_CONNECT.IsEnabled = true;
+                    CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
                     break;
                 }
                 else
@@ -209,6 +237,8 @@ namespace CLIENT_wpf.WINDOWS
 
             if (data == null)
                 return;
+
+            // !,roomID,roomTITLE,roomPERSON - 방 리스트 수신
             else if (data[0] == '!')
             {
                 var token = data.Split(',');
@@ -218,15 +248,26 @@ namespace CLIENT_wpf.WINDOWS
                 String PERSON = token[3];
                 CTRL.DATA.List.Add(new DATA() { id = ID, title = TITLE, man = PERSON });
             }
+
+            // @,roomID - 해당 방의 비밀번호 요청
             else if (data[0] == '@')
             {
-                //비밀 번호 요청
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    var token = data.Split(',');
+                    int.TryParse(token[1], out int target_id);
+                    String target_title = token[2];
 
+                    PW = new PasswdWindow(target_title);
+                    this.DataSendEvent += new DataPushEventHandler(PW.Recv_From_Parent);
+                    PW.DataSendEvent += new DataGetEventHandler(this.Recv_From_PasswdWindow);
+                    PW.Show();
+                }));
             }
+
+            // #,roomTITLE,roomPORT - 방에 접근하시오
             else if (data[0] == '#')
             {
-                // 방 접근하세요 #,title,port
-
                 var token = data.Split(',');
 
                 int.TryParse(token[1], out Current_room_number);
@@ -243,10 +284,10 @@ namespace CLIENT_wpf.WINDOWS
                     this.Hide();
                 }));
             }
+
+            // $,Message1,Message2 - 서버로부터 제어 메시지 수신
             else if (data[0] == '$')
             {
-                // 방 접근하세요 #,메시지종류,메시지내용
-
                 var token = data.Split(',');
                 MessageBox.Show(token[1] + token[2]);
             }
@@ -285,8 +326,10 @@ namespace CLIENT_wpf.WINDOWS
                 msg = $"$,{Current_room_number}";
                 Current_room_number = -1;
             }
+            CTRL.DATA.Title = "대기 방";
 
             if (CTRL.DATA.AutoConnect) Init_window(msg);
+            else CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
         }
         #endregion
     }

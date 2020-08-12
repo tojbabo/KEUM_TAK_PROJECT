@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 
-namespace CLIENT_wpf.CLASS
+namespace CLIENT_wpf.VAL
 {
     public class DLL
     {

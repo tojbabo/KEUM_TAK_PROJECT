@@ -1,4 +1,5 @@
-﻿using CLIENT_wpf.CLASS;
+﻿
+using CLIENT_wpf.VAL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace CLIENT_wpf.FUNC
             // type : TCP(1) / UDP(2)
             // opt : 1 - 연결 UDP / 그 외: 일반 UDP
             Socket temp_sock;
-            if (type == VAL.TCP)
+            if (type == CONSTANTS.TCP)
             {
                 temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
                 //temp_sock.ReceiveTimeout = 2000;
@@ -33,7 +34,7 @@ namespace CLIENT_wpf.FUNC
                 }
 
             }
-            else if (type == VAL.UDP)
+            else if (type == CONSTANTS.UDP)
             {
                 temp_sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 //temp_sock.ReceiveTimeout = 2000;

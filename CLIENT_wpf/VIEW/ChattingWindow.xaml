@@ -3,31 +3,42 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" Height="626.403" Width="1020.539"
-        Title="MainWindow"  ResizeMode="NoResize" x:Name="_Window"
+        mc:Ignorable="d" Height="626.403" Width="1047.039"
+        Title="{Binding Title}"  ResizeMode="NoResize"
+        xmlns:converter="clr-namespace:CLIENT_wpf.VAL"
         Closing="Window_Closing">
+    <Window.Resources>
+        <converter:MCC x:Key="Converter"></converter:MCC>
+        <converter:SCC x:Key="Checking"></converter:SCC>
+    </Window.Resources>
     <Grid >
 
         <Image x:Name="image" Height="240" Width="320" Margin="33,28,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Image x:Name="image2" Height="240" Width="320" Margin="33,280,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <Button x:Name="BTN_EXIT" Content="EXIT" HorizontalAlignment="Left" Margin="33,525,0,0" VerticalAlignment="Top" Width="320" Click="BTN_EXIT_Click" Height="43"/>
+        <Button x:Name="BTN_EXIT" Content="EXIT" HorizontalAlignment="Left" Margin="33,525,0,0" VerticalAlignment="Top" Width="126" Click="BTN_EXIT_Click" Height="43"/>
 
 
-        <TextBox x:Name="TBX_MESSAGE" Margin="376,28,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="619" Height="492" VerticalAlignment="Top"/>
-        <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="43" Margin="376,525,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="483" KeyDown="TBX_INPUT_KeyDown"/>
-        <Button x:Name="BTN_MSG_SEND" Content="SEND" HorizontalAlignment="Left" Margin="864,525,0,0" VerticalAlignment="Top" Width="131" Click="BTN_MSG_SEND_Click" Height="43"/>
-        <Grid x:Name="forDEBUG">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="95*"/>
-                <ColumnDefinition Width="1304*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="button" Content="YES SHOW" HorizontalAlignment="Left" Margin="609,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click" Height="40" Grid.Column="1"/>
-            <Button x:Name="BTN_CONNECT" Content="CONNECT" HorizontalAlignment="Left" Margin="759,478,0,0" VerticalAlignment="Top" Width="145" Click="CLICK_CONNECT" Height="40" Grid.Column="1"/>
-            <TextBox x:Name="TBX_IP" HorizontalAlignment="Left" Height="23" Margin="309,450,0,0" TextWrapping="Wrap" Text="{Binding IP}" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
-            <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="459,450,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
-            <TextBox x:Name="TBX_NAME" HorizontalAlignment="Left" Height="23" Margin="609,450,0,0" TextWrapping="Wrap" Text="USER" VerticalAlignment="Top" Width="145" Grid.Column="1"/>
-            <Button x:Name="BTN_CHANGE" Content="NEW" HorizontalAlignment="Left" Margin="459,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_change" Height="40" Grid.Column="1"/>
-            <Button x:Name="BTN_TEST" Content="TEST" HorizontalAlignment="Left" Margin="309,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_test" Height="40" Grid.Column="1"/>
+        <Ellipse Fill="Red" HorizontalAlignment="Left" Height="16" Margin="405,31,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding R, Converter={StaticResource Converter}}" />
+        <Ellipse Fill="Orange" HorizontalAlignment="Left" Height="16" Margin="425,31,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding Y, Converter={StaticResource Converter}}" />
+        <Ellipse Fill="Green" HorizontalAlignment="Left" Height="16" Margin="445,31,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding G, Converter={StaticResource Converter}}" />
+
+
+
+        <TextBox x:Name="TBX_MESSAGE" Margin="404,55,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="619" Height="465" VerticalAlignment="Top" IsReadOnly="True"/>
+        <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="43" Margin="404,525,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="483" KeyDown="TBX_INPUT_KeyDown"/>
+        <Button Content="SEND" HorizontalAlignment="Left" Margin="892,525,0,0" VerticalAlignment="Top" Width="131" Click="BTN_MSG_SEND_Click" Height="43"/>
+
+        <TextBlock HorizontalAlignment="Left" Height="22" Margin="471,28,0,0" Text="{Binding Title}" VerticalAlignment="Top" Width="552" Background="#dddddd" Padding="10,3,0,0"/>
+        <Grid x:Name="forDEBUG" Margin="96,0,0,0">
+            <Button Content="YES SHOW" HorizontalAlignment="Left" Margin="609,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click" Height="40" />
+            <Button Content="{Binding IsConnect, Converter={StaticResource Converter}}" HorizontalAlignment="Left" Margin="759,478,0,0" VerticalAlignment="Top" Width="145" Click="CLICK_CONNECT" Height="40" />
+            <TextBox HorizontalAlignment="Left" Height="23" Margin="309,450,0,0" TextWrapping="Wrap" Text="{Binding IP}" VerticalAlignment="Top" Width="145" />
+            <TextBox x:Name="TBX_PORT" HorizontalAlignment="Left" Height="23" Margin="459,450,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="145"/>
+            <TextBox HorizontalAlignment="Left" Height="23" Margin="609,450,0,0" TextWrapping="Wrap" Text="{Binding NAME}" VerticalAlignment="Top" Width="145" />
+            <Button Content="NEW" HorizontalAlignment="Left" Margin="459,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_change" Height="40" />
+            <Button Content="TEST" HorizontalAlignment="Left" Margin="309,478,0,0" VerticalAlignment="Top" Width="145" Click="Button_Click_test" Height="40" />
         </Grid>
+        <Ellipse Fill="{Binding MyState.State, Converter={StaticResource Checking}}" HorizontalAlignment="Left" Height="16" Margin="358,252,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Visibility="{Binding MyState.Connection, Converter={StaticResource Checking}}" />
+        <Ellipse Fill="{Binding YourState.State, Converter={StaticResource Checking}}" HorizontalAlignment="Left" Height="16" Margin="358,504,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Visibility="{Binding YourState.Connection, Converter={StaticResource Checking}}" />
     </Grid>
 </Window>

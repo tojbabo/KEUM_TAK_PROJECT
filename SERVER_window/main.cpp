@@ -9,9 +9,12 @@ int main(int num, char* args[]) {
 	cout << COMMENT << endl;
 	int port = 9000;
 	int opt[7] = { 0,0,0,0,0,0,0 };
-	
+
+	system("title 부모 프로세스");
+
 	if (num <= 1) cout << "default\n";
 	else { 
+		char title[50];
 		sscanf(args[1], "%d", &port);
 		sscanf(args[2], "%d", &opt[0]);
 		sscanf(args[3], "%d", &opt[1]);
@@ -20,6 +23,8 @@ int main(int num, char* args[]) {
 		sscanf(args[6], "%d", &opt[4]);
 		sscanf(args[7], "%d", &opt[5]);
 		sscanf(args[8], "%d", &opt[6]);
+		sprintf(title, "title %s", args[9]);
+		system(title);
 	}
 	
 	cout << "ip : " << IP << endl;

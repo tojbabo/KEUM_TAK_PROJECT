@@ -146,6 +146,13 @@ void CORE::IsEnterRoom(SOCKET sock, char* str) {
 	}
 }
 
+
+void CORE:: RequestPasswd(SOCKET sock, ROOM room) {
+	char msg[50];
+	sprintf(msg, "@,%d,%s\n", room.Get_ID(),room.Get_TITLE());
+	send(sock, msg, strlen(msg), 0);
+}
+
 void CORE::Delete_Room(int id){
 	cout << "deleted room id is : " << Search_Room(id)->Get_ID() << endl;;
 	RoomList.erase(Search_Room(id));

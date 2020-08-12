@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CLIENT_wpf.CLASS
+namespace CLIENT_wpf.VAL
 {
-    public class VAL
+    public class CONSTANTS
     {
         public const int CONNECT = 1;
         public const int TCP = 0;
@@ -17,5 +17,12 @@ namespace CLIENT_wpf.CLASS
         public const int ENCODE_QUALITY = 80;
         public const int frameWidth = 320;
         public const int frameHeight = 240;
+
+        public const int STATE_DISCONNECT = 1;
+        public const int STATE_TRYCONNECT = 2;
+        public const int STATE_CONNECTING = 3;
+        public const int STATE_BAD = 4;
+        public const int STATE_SOSO = 5;
+        public const int STATE_GOOD = 6;
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Windows;
 
-namespace CLIENT_wpf.VIEWMODEL
+namespace CLIENT_wpf.VAL
 {
     public class _MOTHER : INotifyPropertyChanged
     {

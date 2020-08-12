@@ -1,10 +1,11 @@
-﻿using System;
+﻿using CLIENT_wpf.MODEL;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CLIENT_wpf.VIEWMODEL
+namespace CLIENT_wpf.VAL
 {
 
     public class _DATA : _MOTHER
@@ -74,6 +75,18 @@ namespace CLIENT_wpf.VIEWMODEL
             }
         }
 
+
+        private string _NAME = "USER";
+        public string NAME
+        {
+            get => _NAME;
+            set
+            {
+                _NAME = value;
+                OnPropertyChanged(nameof(NAME));
+            }
+        }
+
         private bool _AutoConnect=false;
         public bool AutoConnect { 
             get => _AutoConnect;
@@ -88,7 +101,6 @@ namespace CLIENT_wpf.VIEWMODEL
 
         #endregion
 
-
         #region Property_Data
         private List<DATA> _List;
         public List<DATA> List
@@ -100,7 +112,82 @@ namespace CLIENT_wpf.VIEWMODEL
                 OnPropertyChanged(nameof(List));
             }
         }
-        
+
+        private string _Title = "DEBUG";
+        public string Title {
+            get => _Title;
+            set
+            {
+                _Title = value;
+                OnPropertyChanged(nameof(Title));
+
+            }
+        }
+
+        private bool _IsConnect = false;
+        public bool IsConnect
+        {
+            get => _IsConnect;
+            set
+            {
+                _IsConnect = value;
+                OnPropertyChanged(nameof(IsConnect));
+            }
+        }
+
+        private int _R = 2;
+        public int R
+        {
+            get => _R;
+            set
+            {
+                _R = value;
+                OnPropertyChanged(nameof(R));
+            }
+        }
+        private int _Y = 2;
+        public int Y
+        {
+            get => _Y;
+            set
+            {
+                _Y = value;
+                OnPropertyChanged(nameof(Y));
+            }
+        }
+        private int _G = 2;
+        public int G
+        {
+            get => _G;
+            set
+            {
+                _G = value;
+                OnPropertyChanged(nameof(G));
+            }
+        }
+
+        private STATE _MyState;
+        public STATE MyState
+        {
+            get => _MyState;
+            set
+            {
+                _MyState = value;
+                OnPropertyChanged(nameof(MyState));
+            }
+        }
+
+        private STATE _YourState;
+        public STATE YourState
+        {
+            get => _YourState;
+            set
+            {
+                _YourState = value;
+                OnPropertyChanged(nameof(YourState));
+            }
+        }
+
         #endregion
     }
 

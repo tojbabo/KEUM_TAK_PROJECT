@@ -3,15 +3,34 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:VM="clr-namespace:CLIENT_wpf.VIEWMODEL"
         mc:Ignorable="d"
-        Title="방 목록" Height="450" Width="800" ResizeMode="NoResize"
+        xmlns:converter="clr-namespace:CLIENT_wpf.VAL"
+        Title="{Binding Title}" Height="494" Width="832" ResizeMode="NoResize"
         Closing="Window_Closing">
-
+    <Window.Resources>
+        <converter:MCC x:Key="Converter"></converter:MCC>
+    </Window.Resources>
     <Grid>
+
+        <Button HorizontalAlignment="Left" BorderThickness="0" Margin="60.5,37,0,0" VerticalAlignment="Top" Width="27" Height="27" 
+                Click="Click_F5" ToolTip="새로고침">
+            <Button.Background>
+                <SolidColorBrush Opacity="0"/>
+            </Button.Background>
+            <Image Source="/__resource/refresh.png"/>
+        </Button>
+        <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100,37,0,0" BorderThickness="0" Width="27" Height="27" 
+                Click="Click_Setting" ToolTip="연결관리" >
+            <Button.Background>
+                <SolidColorBrush Opacity="0"/>
+            </Button.Background>
+            <Image Source="/__resource/Setting_Icon.png"/>
+        </Button>
+
+
+
         <ListView 
-            x:Name="ListView" HorizontalAlignment="Left" 
-            Height="286" Margin="49,109,0,0" VerticalAlignment="Top" Width="705" MouseDoubleClick="ListView_DoubleClick" ItemsSource="{Binding List }">
+            x:Name="ListView" Margin="40,90,40,50"  Width="705" MouseDoubleClick="ListView_DoubleClick" ItemsSource="{Binding List }">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="방 번호" Width="80" DisplayMemberBinding="{Binding id}" />
@@ -21,11 +40,38 @@
             </ListView.View>
 
         </ListView>
-        <Button x:Name="btn" Content="참가" HorizontalAlignment="Left" Height="37" Margin="653,54,0,0" VerticalAlignment="Top" Width="101" Click="Click_Join"/>
-        <Button Content="방만들기" HorizontalAlignment="Left" Height="37" Margin="547,54,0,0" VerticalAlignment="Top" Width="101" Click="Click_MakingRoom"/>
-        <TextBox x:Name="TB_IP" Text="{Binding IP}" HorizontalAlignment="Left" Height="23" Margin="128,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" />
-        <Button Content="새로고침" HorizontalAlignment="Left" Margin="49,54,0,0" VerticalAlignment="Top" Width="74" Height="37" Click="Click_F5"/>
-        <Button x:Name="BTN_CONNECT" Content="연결요청" HorizontalAlignment="Left" Height="39" Margin="49,10,0,0" VerticalAlignment="Top" Width="74" RenderTransformOrigin="-0.044,0.491"  Click="Click_CONNECT"/>
+        <Button x:Name="btn" Content="참가" HorizontalAlignment="Right" Height="37" Margin="0,21,60.5,0" VerticalAlignment="Top" Width="101" Click="Click_Join"/>
+        <Button Content="방만들기" HorizontalAlignment="Left" Height="37" Margin="549,21,0,0" VerticalAlignment="Top" Width="101" Click="Click_MakingRoom"/>
+
+        <Ellipse Fill="Red" HorizontalAlignment="Left" Height="15" Margin="161,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding R, Converter={StaticResource Converter}}" />
+        <Ellipse Fill="Orange" HorizontalAlignment="Left" Height="15" Margin="181,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding Y, Converter={StaticResource Converter}}" />
+        <Ellipse Fill="Green" HorizontalAlignment="Left" Height="15" Margin="201,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding G, Converter={StaticResource Converter}}" />
+
+
+        <Grid x:Name="Grid_Setting"  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="132,55,0,0" Width="243" Background="DarkGray" Opacity="0.8" Height="123" Visibility="Hidden" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="IP"  VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" Margin="5"  Foreground="White" />
+            <TextBlock Text="PORT" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Margin="5" Foreground="White" />
+            <TextBlock Text="NAME" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" Margin="5" Foreground="White"/>
+            <TextBox Text="{Binding IP}" Grid.Column="1" Grid.Row="0" Margin="2"/>
+            <TextBox Text="{Binding PORT}" Grid.Column="1" Grid.Row="1" Margin="2"/>
+            <TextBox Text="{Binding NAME}"  Grid.Column="1" Grid.Row="2" Margin="2"/>
+
+            
+            <Button  Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3"
+                Content="{Binding IsConnect, Converter={StaticResource Converter}}"  Click="Click_CONNECT" />
+
+        </Grid>
 
     </Grid>
 </Window>

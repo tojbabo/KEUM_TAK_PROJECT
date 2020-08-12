@@ -20,10 +20,11 @@ namespace CLIENT_wpf.WINDOWS
     public partial class PasswdWindow : Window
     {
         public DataGetEventHandler DataSendEvent;
-        
-        public PasswdWindow()
+
+        public PasswdWindow(string title="DEBUG")
         {
             InitializeComponent();
+            _Window.Title = title;
         }       
         
         private void Click_OK(object sender, RoutedEventArgs e)

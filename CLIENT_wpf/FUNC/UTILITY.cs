@@ -1,4 +1,5 @@
-﻿using CLIENT_wpf.CLASS;
+﻿
+using CLIENT_wpf.VAL;
 using CLIENT_wpf.VIEWMODEL;
 using System;
 using System.Collections.Generic;
@@ -83,9 +84,11 @@ namespace CLIENT_wpf.FUNC
                 CTRL.DATA.PORT = Token_Get_Num(File_string, "port:");
                 CTRL.DATA.IP = Token_Get_Str(File_string, "ip:");
                 CTRL.DATA.Fps = Token_Get_Num(File_string, "fps:");
+                CTRL.DATA.NAME = Token_Get_Str(File_string, "name:");
                 CTRL.DATA.AutoConnect = (Token_Get_Num(File_string, "auto_connect:") == 1) ? true : false;
 
                 Console.WriteLine($"----------------- setting [{path}] -----------------");
+                Console.WriteLine($"--- user name     is : {CTRL.DATA.NAME}");
                 Console.WriteLine($"--- server ip     is : {CTRL.DATA.IP}");
                 Console.WriteLine($"--- server port   is : {CTRL.DATA.PORT}");
                 Console.WriteLine($"--- frame per sec is : {CTRL.DATA.Fps}");
@@ -97,6 +100,7 @@ namespace CLIENT_wpf.FUNC
                 Console.WriteLine("파일 읽기 실패. config.txt 파일 필요. 기본 정보 대체 ");
 
                 Console.WriteLine($"----------------- setting  [기본정보] -----------------");
+                Console.WriteLine($"--- user name     is : {CTRL.DATA.NAME}");
                 Console.WriteLine($"--- server ip     is : {CTRL.DATA.IP}");
                 Console.WriteLine($"--- server port   is : {CTRL.DATA.PORT}");
                 Console.WriteLine($"--- frame per sec is : {CTRL.DATA.Fps}");

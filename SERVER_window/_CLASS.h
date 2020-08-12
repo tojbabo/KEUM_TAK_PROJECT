@@ -133,6 +133,11 @@ public:
 	string Get_State();
 	// 방에 접근
 	int Enter(char* room_password);
+	// 방에 비밀번호를 입력해야하는지 체크
+	bool IsFree() {
+		if (passwd == "") return true;
+		return false;
+	}
 	// 방에서 나감
 	int Exit();
 	// 해당 방 정보보기
@@ -155,6 +160,8 @@ public:
 	ROOM Create_Room(char* RequestMessage);
 	// 방에 접근 가능한지 여부 체크
 	void IsEnterRoom(SOCKET sock, char* str);
+	// 클라이언트로부터 비밀번호 요청
+	void RequestPasswd(SOCKET sock, ROOM room);
 	// 해당 방 탐색
 	list<ROOM>::iterator Search_Room(int Room_ID);
 	// 방 삭제

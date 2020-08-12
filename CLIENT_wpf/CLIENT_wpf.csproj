@@ -91,11 +91,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MODEL\STATE.cs" />
+    <Compile Include="VAL\MCC.cs" />
     <Compile Include="VAL\DLL.cs" />
-    <Compile Include="VAL\VAL.cs" />
+    <Compile Include="VAL\CONSTANTS.cs" />
     <Compile Include="FUNC\EMOTICON.cs" />
     <Compile Include="FUNC\PROTOCOL.cs" />
     <Compile Include="FUNC\UTILITY.cs" />
+    <Compile Include="VAL\SCC.cs" />
     <Compile Include="VIEWMODEL\CTRL.cs" />
     <Compile Include="VAL\_DATA.cs" />
     <Compile Include="VAL\_MOTHER.cs" />
@@ -148,7 +151,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
@@ -180,6 +183,18 @@
     <Resource Include="__resource\Neutral.PNG" />
     <Resource Include="__resource\Sad.PNG" />
     <Resource Include="__resource\Surprise.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="__resource\lena.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="__resource\refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="__resource\Setting_Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="d\haarcascade_frontalface_alt.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
