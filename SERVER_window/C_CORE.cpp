@@ -6,9 +6,14 @@ void CORE::Notify_Enter(SOCKET sock, ROOM r) {
 	// 포트 번호 부여
 	//_System_Msg_Send(sock, "Enter the room.");
 	char msg[BUF_SIZE];
-	sprintf(msg, "#,%d,%s,%d\n",r.Get_ID(), r.Get_TITLE(), r.Get_PORT());
-	send(sock, msg, strlen(msg), 0);
 
+	//sprintf(msg, "#,%d,%s,%d\n",r.Get_ID(), r.Get_TITLE(), r.Get_PORT());
+
+	r.SetMan(r.Get_PORT());
+	strcpy(msg, r.Get_State().c_str());
+	msg[0] = '#';
+
+	send(sock, msg, strlen(msg), 0);
 }
 
 // 방 번호 생성 후 반환
@@ -40,6 +45,7 @@ void CORE::Response_List(SOCKET sock) {
 	}
 	buf = total.c_str();
 
+
 	send(sock, buf, strlen(buf), 0);
 }
 
@@ -56,7 +62,9 @@ ROOM CORE::Create_Room(char* str) {
 
 	char* ptr = strtok(str, ",");
 	ptr = strtok(NULL, ",");
-	sscanf(ptr, "%s", _title);
+	//sscanf(ptr, "%s", _title);
+	strcpy(_title, ptr);
+
 	ptr = strtok(NULL, ",");
 	if (ptr[0] == '@') {
 		sprintf(_passwd, "");
@@ -67,29 +75,7 @@ ROOM CORE::Create_Room(char* str) {
 	string passwd(_passwd);
 	string title(_title);
 
-	if (room_num > RoomList.back().Get_ID() || RoomList.size() == 0) {
-		temp = new ROOM(room_num, 1, title, passwd);
-		RoomList.push_back(*temp);
-		temp->Show();
-	}
-	else {
-		list<ROOM>::iterator ptr;
-		for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++) {
-			if (ptr->Get_ID() < room_num) {
-				continue;
-			}
-			else if (ptr->Get_ID() == room_num) {
-				continue;
-			}
-			else {
-				cout << "생성중" << endl;
-				temp = new ROOM(room_num, 0, title, passwd);
-				RoomList.insert(ptr, *temp);
-				temp->Show();
-				break;
-			}
-		}
-	}
+	temp = new ROOM(room_num, 1, title, passwd);
 	if (temp != NULL) {
 		ptr = strtok(NULL, ","); // 화 1
 		temp->emo[0] = atoi(ptr);
@@ -106,6 +92,27 @@ ROOM CORE::Create_Room(char* str) {
 		ptr = strtok(NULL, ","); // 놀 7
 		temp->emo[6] = atoi(ptr);
 	}
+	
+
+	// 새로 생성된 방이 뒤로 붙어야 할떄
+	if (room_num > RoomList.back().Get_ID() || RoomList.size() == 0) {
+		RoomList.push_back(*temp);
+	}
+
+	// 새로 생성된 방이 중간에 붙어야 할때
+	else {
+		list<ROOM>::iterator ptr;
+		for (ptr = RoomList.begin(); ptr != RoomList.end(); ptr++) {
+			if (ptr->Get_ID() > room_num) {
+				temp = new ROOM(room_num, 1, title, passwd);
+				RoomList.insert(ptr, *temp);
+				break;
+			}
+		}
+	}
+
+	temp->Show();
+	
 	return *temp;
 }
 

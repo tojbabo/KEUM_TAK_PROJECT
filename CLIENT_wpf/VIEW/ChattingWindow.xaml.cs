@@ -10,15 +10,14 @@ using OpenCvSharp.Extensions;
 using System.Net.Sockets;
 using System.Windows.Threading;
 using System.Threading;
-
-using CLIENT_wpf.WINDOWS;
 using CLIENT_wpf.FUNC;
 using CLIENT_wpf.VIEWMODEL;
 using CLIENT_wpf.VAL;
 using System.Drawing;
 using System.Windows.Shapes;
+using System.Windows.Automation.Peers;
 
-namespace CLIENT_wpf
+namespace CLIENT_wpf.VIEW
 {
 
     public partial class ChattingWindow : System.Windows.Window
@@ -27,6 +26,7 @@ namespace CLIENT_wpf
         public DataGetEventHandler DataSendEvent;
         string MsgToParents="";
 
+        ROOM Room;
 
         bool isRun = true;
 
@@ -59,12 +59,18 @@ namespace CLIENT_wpf
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
         }
 
-        public ChattingWindow(String port, String name="DEBUG")
-        { 
+        public ChattingWindow(String port, String name = "DEBUG", ROOM room = null)
+        {
             InitializeComponent();
             forDEBUG.Visibility = Visibility.Collapsed;
             CTRL.DATA.Title = name;
             TBX_PORT.Text = port;
+
+            if (room != null)
+            {
+                Room = room;
+                Room.Show();
+            }
 
             this.DataContext = CTRL.DATA;
             EMO = new EMOTICON();
@@ -73,6 +79,29 @@ namespace CLIENT_wpf
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             Connect_to_Server();
         }
+
+        public ChattingWindow(ROOM room)
+        {
+            InitializeComponent();
+            forDEBUG.Visibility = Visibility.Collapsed;
+            
+            if (room != null)
+            {
+                Room = room;
+                //Room.Show();
+            }
+
+            CTRL.DATA.Title = Room.title;
+            TBX_PORT.Text = Room.man;
+
+            this.DataContext = CTRL.DATA;
+            EMO = new EMOTICON();
+            EMO_my = -1;
+            EMO_you = -1;
+            CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
+            Connect_to_Server();
+        }
+
 
         // 종료 시 처리할 작업들
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -153,9 +182,7 @@ namespace CLIENT_wpf
         private void Button_Click(object sender, RoutedEventArgs e)
         {
         }
-        private void Button_Click_change(object sender, RoutedEventArgs e)
-        {
-        }
+
         private void Button_Click_test(object sender,RoutedEventArgs e)
         {
             byte[] buf = new byte[CONSTANTS.BUF_SZ];
@@ -164,32 +191,17 @@ namespace CLIENT_wpf
             buf = Encoding.Default.GetBytes(data);
             sock.Send(buf);
         }
-        // CONNECT 버튼 클릭시
+
         private void CLICK_CONNECT(object sender, RoutedEventArgs e)
         {
             Connect_to_Server();
         }
+        // --------------------------------------------------------------------- 여기까지 디버그용
         private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
         {
-            /* 
-            StartWindow SW = new StartWindow();
-            System.Windows.Window.GetWindow(this).Close();
-            SW.Show();*/
-
-            /*
             Console.WriteLine("ChattingWindow -> StartWindow");
             System.Windows.Window.GetWindow(this).Close();
-
-            /**/
-            // 서버로부터 내 얼굴 받아보기
-            byte[] buf = new byte[CONSTANTS.BUF_SZ];
-
-            String data = "$" + ID.ToString();
-            buf = Encoding.Default.GetBytes(data);
-            sock.Send(buf);
-
         }
-        // --------------------------------------------------------------------- 여기까지 디버그용
 
 
         // 서버로 메시지 보내는 함수
@@ -267,6 +279,8 @@ namespace CLIENT_wpf
         private void MSG_CHECKING(String data)
         {
             Console.Write("☆[ChattingWindow] "+ data);
+            
+            // 내 아이디와 포트 할당 #,ID,PORT
             if (data[0] == '#')
             {
                 // 내 아이디와 포트 할당
@@ -289,7 +303,8 @@ namespace CLIENT_wpf
                     }
                 }));
             }
-
+            
+            // 다른 유저 아이디와 포트 할당 $,ID,PORT
             else if (data[0] == '$')
             {
                 // 다른 유저 아이디 와 포트 할당
@@ -304,6 +319,8 @@ namespace CLIENT_wpf
                 sock.Send(buf);
                 //PORT 요청 작업
             }
+            
+            // Thread 연결할 포트 할당 @,PORT
             else if (data[0] == '@')
             {
                 // @Thread 연결할 port 할당 받음
@@ -322,6 +339,8 @@ namespace CLIENT_wpf
                 }
 
             }
+            
+            // 감정 인식결과 수신 &,ID,EMOTION
             else if (data[0] == '&')
             {
                 var token = data.Split(',');
@@ -340,6 +359,8 @@ namespace CLIENT_wpf
                     EMO_you = emotion;
                 }
             }
+            
+            // [시스템 메시지]-강제퇴장 
             else if (data[0] == '*')
             {
                 var token = data.Split(',');
@@ -354,6 +375,8 @@ namespace CLIENT_wpf
                     }));
                 }
             }
+            
+            // 일반 채팅
             else
             {   // 일반 메시지
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
@@ -376,6 +399,7 @@ namespace CLIENT_wpf
             CTRL.ConnectionStateChecking(CONSTANTS.STATE_CONNECTING, CTRL.DATA.MyState);
 
             Mat mat = new Mat();
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
             while (isRun)
             {
                 cap.Read(mat);
@@ -389,15 +413,14 @@ namespace CLIENT_wpf
                 if (!(DLL.DLL_IMG_SEND(b, t_ImgSend_Sock)))
                     break;
 
-                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
-                CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
-                /*
+                
                 if (EMO_my != -1)
                 {
                     //Console.WriteLine("my emotion is : " + EMO_my);
                     mat = EMO.image_conversion(mat, EMO_my);
                     CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
-                }*/
+                }
+                else CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
                 //mat = EMO.image_conversion(mat, 1);
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
@@ -410,6 +433,7 @@ namespace CLIENT_wpf
                     }
                     catch (Exception e) { }
                 }));
+                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
                 int c = Cv2.WaitKey(1000 / 20);
                 if (c != -1)
                     break;
@@ -434,8 +458,10 @@ namespace CLIENT_wpf
 
 
 
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.YourState);
             while (isRun)
             {
+
                 ptr = DLL.DLL_IMG_RECV(t_ImgRecv_Sock);
 
                 if (ptr == null)
@@ -448,8 +474,8 @@ namespace CLIENT_wpf
 
                 if (mat.Cols != 320 && mat.Rows != 240) { continue; }
 
-                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.YourState);
-                CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
+                
+                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
 
 
                 if (EMO_you != -1)
@@ -457,6 +483,7 @@ namespace CLIENT_wpf
                     mat = EMO.image_conversion(mat, EMO_you);
                     CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
                 }
+                else CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.YourState);
 
                 Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(delegate
                 {

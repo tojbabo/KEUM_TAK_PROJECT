@@ -142,6 +142,8 @@ public:
 	int Exit();
 	// 해당 방 정보보기
 	void Show();
+
+	void SetMan(int num) { person_num = num; }
 };
 
 class CORE {

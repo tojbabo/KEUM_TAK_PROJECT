@@ -92,6 +92,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="MODEL\STATE.cs" />
+    <Compile Include="VAL\CLASS.cs" />
     <Compile Include="VAL\MCC.cs" />
     <Compile Include="VAL\DLL.cs" />
     <Compile Include="VAL\CONSTANTS.cs" />
@@ -102,6 +103,9 @@
     <Compile Include="VIEWMODEL\CTRL.cs" />
     <Compile Include="VAL\_DATA.cs" />
     <Compile Include="VAL\_MOTHER.cs" />
+    <Compile Include="VIEW\DetailWindow.xaml.cs">
+      <DependentUpon>DetailWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="VIEW\MakingWindow.xaml.cs">
       <DependentUpon>MakingWindow.xaml</DependentUpon>
     </Compile>
@@ -123,6 +127,10 @@
       <DependentUpon>ChattingWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="VIEW\DetailWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="VIEW\MakingWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -194,7 +202,7 @@
     <Resource Include="__resource\Setting_Icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="d\haarcascade_frontalface_alt.xml" />
+    <Resource Include="__resource\haarcascade_frontalface_alt.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

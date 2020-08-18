@@ -1,0 +1,74 @@
+﻿<Window x:Class="CLIENT_wpf.VIEW.DetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CLIENT_wpf.VIEW"
+        mc:Ignorable="d"
+        Title="디테일" Height="292.25" Width="304.291">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1.5*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="0.8*"/>
+        </Grid.RowDefinitions>
+        <Grid  Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="방 번호" Grid.Row="0" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="제목" Grid.Row="1" Grid.Column="0" Margin="5"/>
+            <TextBlock Text="참여 인원" Grid.Row="2" Grid.Column="0" Margin="5"/>
+
+            <TextBox x:Name="TBX_ID" Text="{Binding id}" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Margin="3,2,1,2"/>
+            <TextBox Text="{Binding title}" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding man}" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Angry" Grid.Row="0" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Disgust" Grid.Row="1" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Fear" Grid.Row="2" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Happy" Grid.Row="3" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Netural" Grid.Row="0" Grid.Column="2"  Margin="5"/>
+            <TextBlock Text="Sad" Grid.Row="1" Grid.Column="2"  Margin="5"/>
+            <TextBlock Text="Surprise" Grid.Row="2" Grid.Column="2"  Margin="5"/>
+
+
+            <TextBox Text="{Binding EAgry}" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EDigu}" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EFear}" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EHapy}" Grid.Row="3" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ENtur}" Grid.Row="0" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ESad}" Grid.Row="1" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ESprs}" Grid.Row="2" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="입장" Grid.Column="0" Margin="5" Click="Button_Click" />
+            <Button Content="취소" Grid.Column="1" Margin="5"/>
+        </Grid>
+    </Grid>
+</Window>

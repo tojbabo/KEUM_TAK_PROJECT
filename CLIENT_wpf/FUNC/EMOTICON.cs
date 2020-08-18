@@ -47,14 +47,14 @@ namespace CLIENT_wpf.FUNC
             catch (Exception e) { Console.WriteLine(e.Message); }
             
         */
-           /* String filenameFaceCascade = "C:/Users/OJJJ/Source/Repos/tojbabo/KEUM_TAK_PROJECT/CLIENT_wpf/d/haarcascade_frontalface_alt.xml";
-            
+            String filenameFaceCascade = dir+"haarcascade_frontalface_alt.xml";
+
             faceCascade = new CascadeClassifier();
             if (!faceCascade.Load(filenameFaceCascade))
             {
                 Console.WriteLine("error");
                 return;
-            }*/
+            }
         }
 
         public Mat image_conversion(Mat img, int num)
@@ -82,12 +82,12 @@ namespace CLIENT_wpf.FUNC
                 y = faces[0].Location.Y;
                 w = faces[0].BottomRight.X - x;
                 h = faces[0].BottomRight.Y - y;
-               
+               /*
                 foreach (var item in faces)
                 {
                     Cv2.Rectangle(img, item, Scalar.Red); // add rectangle to the image
-                }
-/*
+                }*/
+
                 Mat tmp = new Mat();
                 Cv2.Resize(emoticon[num], tmp, new Size(size, size));       // 이모티콘 사이즈 변환
 
@@ -120,7 +120,7 @@ namespace CLIENT_wpf.FUNC
 
                         img.Set<Vec3b>(j, i, pt);
                     }
-                }*/
+                }
             }
 
             return img;

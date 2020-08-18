@@ -2,8 +2,8 @@
 using namespace cv;
 using namespace std;
 
-#define DLL_VER "1.6.1"
-#define RECENT " - 출력문 정리 / 한글 깨짐 처리 / 각종 예외 처리 중"
+#define DLL_VER "1.7.0"
+#define RECENT " - AI와 통합중"
 
 void OJJJ_Memset(SOCKADDR_IN *adr, const char* ip, int port) {
 	memset(adr, 0, sizeof(*adr));

@@ -102,8 +102,8 @@ namespace CLIENT_wpf.VAL
         #endregion
 
         #region Property_Data
-        private List<DATA> _List;
-        public List<DATA> List
+        private List<ROOM> _List;
+        public List<ROOM> List
         {
             get => _List;
             set
@@ -189,12 +189,5 @@ namespace CLIENT_wpf.VAL
         }
 
         #endregion
-    }
-
-    public class DATA
-    {
-        public int id { get; set; }
-        public string title { get; set; }
-        public string man { get; set; }
     }
 }

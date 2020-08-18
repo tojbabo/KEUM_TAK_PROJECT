@@ -1,9 +1,9 @@
-﻿<Window x:Class="CLIENT_wpf.WINDOWS.MakingWindow"
+﻿<Window x:Class="CLIENT_wpf.VIEW.MakingWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CLIENT_wpf.WINDOWS"
+        xmlns:local="clr-namespace:CLIENT_wpf.VIEW"
         mc:Ignorable="d"
         Title="방 만들기" Height="382.375" Width="279.875" ResizeMode="NoResize">
 

@@ -46,10 +46,48 @@ LPCTSTR Make_Shared_Memory(HANDLE h) {
 	return pBuf;
 }
 
-
 void Shared_Clear(LPCTSTR* m, HANDLE* h ,int num) {
 	for (int i = 0; i < num; i++) {
 		UnmapViewOfFile(m[i]);
 		CloseHandle(h[i]);
 	}
+}
+
+
+LPCSTR CreateMemory(HANDLE* h, char* szName) {
+	//TCHAR szName[] = TEXT(memory);
+	LPCSTR SM;
+
+	*h = CreateFileMapping(
+		INVALID_HANDLE_VALUE,    // use paging file
+		NULL,                    // default security
+		PAGE_READWRITE,          // read/write access
+		0,                       // maximum object size (high-order DWORD)
+		size1,	                 // maximum object size (low-order DWORD)
+		szName);                 // name of mapping object
+
+	if (*h == NULL)
+	{
+		_tprintf(TEXT("Could not create file mapping object (%d).\n"),
+			GetLastError());
+		return NULL;
+	}
+
+	SM = (LPTSTR)MapViewOfFile(*h,   // handle to map object
+		FILE_MAP_ALL_ACCESS,				 // read/write permission
+		0,
+		0,
+		size1);
+
+	if (SM == NULL)
+	{
+		_tprintf(TEXT("Could not map view of file (%d).\n"),
+			GetLastError());
+
+		CloseHandle(*h);
+
+		return NULL;
+	}
+
+	return SM;
 }

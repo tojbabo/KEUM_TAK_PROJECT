@@ -1,9 +1,9 @@
-﻿<Window x:Class="CLIENT_wpf.WINDOWS.PasswdWindow"
+﻿<Window x:Class="CLIENT_wpf.VIEW.PasswdWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CLIENT_wpf.WINDOWS" x:Name="_Window"
+        xmlns:local="clr-namespace:CLIENT_wpf.VIEW" x:Name="_Window"
         mc:Ignorable="d"
         Title="PasswdWindow" Height="138.605" Width="243.125">
     <Grid>

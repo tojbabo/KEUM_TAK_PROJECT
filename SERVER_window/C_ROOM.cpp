@@ -10,7 +10,7 @@ ROOM::ROOM() {
 
 	// ¹æ »ý¼º
 ROOM::ROOM(int id, int num, string name, string pass) {
-	cout<<"passwd is : "<<pass<<endl;
+	//cout<<"passwd is : "<<pass<<endl;
 	room_port = 9001 + (id-1) * 100;
 	room_id = id;
 	person_num = num;
@@ -25,7 +25,11 @@ int ROOM::Get_PORT() { return room_port; }
 string ROOM::Get_TITLE() { return title; }
 
 string ROOM::Get_State() {
-	string temp ="!,"+ to_string(room_id) + "," + title + "," + to_string(person_num) + "\n";
+	string temp ="!,"+ to_string(room_id) + "," + title + "," + to_string(person_num)  
+		+ "," + to_string(emo[0]) + "," + to_string(emo[1]) + "," + to_string(emo[2]) 
+		+ "," + to_string(emo[3]) + "," + to_string(emo[4]) + "," + to_string(emo[5])
+		+ "," + to_string(emo[6]) +"\n";
+
 	return temp;
 }
 
@@ -58,5 +62,7 @@ void ROOM::Show() {
 	cout << "room title  : " << title << endl;
 	cout << "room passwd : " << passwd << endl;
 	cout << "room port   : " << room_port << endl;
+	printf("room emo    : [%d/%d/%d/%d/%d/%d/%d]\n",
+		emo[0], emo[1], emo[2], emo[3], emo[4], emo[5], emo[6]);
 	cout << "============================" << endl;
 }

@@ -27,13 +27,14 @@ int LOGIC_watting(int PORT) {
 	FD_ZERO(&read);
 	FD_SET(sock, &read);
 
-	char temp1[] = "@,첫번째_방,,@,0,0,0,0,0,0,0";
-	char temp2[] = "@,욕설_금지방,,@,0,0,0,0,0,0,0";
-	char temp3[] = "@,ㅋㅋㅋ크루킄ㅋㅋ,,@,0,0,0,0,0,0,0";
-	char temp4[] = "@,외로운_사람만,,@,0,0,0,0,0,0,0";
-	char temp5[] = "@,18男_메이플_여친괌,,@,0,0,0,0,0,0,0";
-	char temp6[] = "@,니들은_이런거_배우지마라,,@,0,0,0,0,0,0,0";
-	char temp7[] = "@,운세_봐드립니다.,,@,0,0,0,0,0,0,0";
+	/*
+	char temp1[] = "@,첫번째_방,,@,1,2,3,4,5,6,7\n";
+	char temp2[] = "@,욕설_금지방,,@,2,4,6,8,10,12,14\n";
+	char temp3[] = "@,ㅋㅋㅋ크루킄ㅋㅋ,,@,3,6,9,12,15,18,21\n";
+	char temp4[] = "@,외로운_사람만,,@,4,8,12,16,20,24,28\n";
+	char temp5[] = "@,18男_메이플_여친괌,,@,5,10,15,20,25,30,35\n";
+	char temp6[] = "@,니들은_이런거_배우지마라,,@,6,12,18,24,30,36,42\n";
+	char temp7[] = "@,운세_봐드립니다.,,@,7,14,21,28,35,42,49\n";
 	core.Create_Room(temp1);
 	core.Create_Room(temp2);
 	core.Create_Room(temp3);
@@ -41,6 +42,7 @@ int LOGIC_watting(int PORT) {
 	core.Create_Room(temp5);
 	core.Create_Room(temp6);
 	core.Create_Room(temp7);
+	*/
 
 	int re;
 	char Socket_Buffer[BUF_SIZE];
@@ -111,7 +113,7 @@ int LOGIC_watting(int PORT) {
 								room.emo[3], room.emo[4], room.emo[5], room.emo[6],room.Get_TITLE());
 							
 							cout << "자식 프로세스 생성 ~!!~!"<<endl;
-							ShellExecute(GetDesktopWindow(), _T("open"), _T("temp.exe"),MessageToChild, 0, SW_SHOWDEFAULT); 
+							ShellExecute(GetDesktopWindow(), _T("open"), _T("child.exe"),MessageToChild, 0, SW_SHOWDEFAULT); 
 
 							core.LOCK();
 							core.Notify_Enter(read.fd_array[i], room);
@@ -124,7 +126,6 @@ int LOGIC_watting(int PORT) {
 						// #,RoomID,PASSWD  - 방 참여
 						else if (Socket_Buffer[0] == '#') {												
 							core.IsEnterRoom(read.fd_array[i],Socket_Buffer);
-							
 						}
 
 						// $,RoomID - 방에서 사용자 나옴
@@ -141,7 +142,7 @@ int LOGIC_watting(int PORT) {
 							core.UNLOCK();
 						}
 
-						// ^,Roomid - 로그인 하려는 방 선택
+						// ^,Roomid - 접속 하려는 방 선택
 						else if (Socket_Buffer[0] == '^') {												
 							int id;
 							sscanf(Socket_Buffer, "^,%d", &id);

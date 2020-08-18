@@ -9,8 +9,9 @@ using System.Windows.Threading;
 using CLIENT_wpf.FUNC;
 using CLIENT_wpf.VIEWMODEL;
 using CLIENT_wpf.VAL;
+using CLIENT_wpf.VIEW;
 
-namespace CLIENT_wpf.WINDOWS
+namespace CLIENT_wpf.VIEW
 {
 
     public delegate void DataGetEventHandler(string item);
@@ -21,9 +22,11 @@ namespace CLIENT_wpf.WINDOWS
         #region 멤버 변수
         Thread Msg_recv_thread;
         Socket sock;
+
         PasswdWindow PW;
         MakingWindow MW;
         ChattingWindow CW;
+        DetailWindow DW;
 
         int Current_room_number = -1;
         public DataPushEventHandler DataSendEvent;
@@ -42,7 +45,7 @@ namespace CLIENT_wpf.WINDOWS
             UTILITY.Read_File();
 
             this.DataContext = CTRL.DATA;
-            CTRL.DATA.List = new List<DATA>();
+            CTRL.DATA.List = new List<ROOM>();
             CTRL.DATA.Title = "대기 방";
 
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
@@ -105,7 +108,7 @@ namespace CLIENT_wpf.WINDOWS
         {
             if (ListView.SelectedItem != null)
             {
-                int id = ((DATA)ListView.SelectedItem).id;
+                int id = ((ROOM)ListView.SelectedItem).id;
                 byte[] buf = Encoding.Default.GetBytes($"^,{id}\n");
                 sock.Send(buf);
             }
@@ -134,7 +137,7 @@ namespace CLIENT_wpf.WINDOWS
 
         private void RequestRoomList()
         {
-            CTRL.DATA.List = new List<DATA>();
+            CTRL.DATA.List = new List<ROOM>();
             Thread.Sleep(200);
             byte[] buf = Encoding.Default.GetBytes("!request\n");
             sock.Send(buf);
@@ -175,13 +178,18 @@ namespace CLIENT_wpf.WINDOWS
 
         private void ListView_DoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (ListView.SelectedItems != null)
+            if (ListView.SelectedItem != null)
             {
-                int id = ((DATA)ListView.SelectedItem).id;
-                byte[] buf = Encoding.Default.GetBytes($"^,{id}\n");
-                sock.Send(buf);
-            }
+                int id = ((ROOM)ListView.SelectedItem).id;
 
+                DW = new DetailWindow((ROOM)ListView.SelectedItem);
+                this.DataSendEvent += new DataPushEventHandler(DW.Recv_From_Parent);
+                DW.DataSendEvent += new DataGetEventHandler(this.Recv_From_DetailWindow);
+                DW.Show();
+
+                //byte[] buf = Encoding.Default.GetBytes($"^,{id}\n");
+                //sock.Send(buf);
+            }
         } 
 
         #endregion
@@ -243,10 +251,19 @@ namespace CLIENT_wpf.WINDOWS
             {
                 var token = data.Split(',');
 
-                int.TryParse(token[1], out int ID);
-                String TITLE = token[2];
-                String PERSON = token[3];
-                CTRL.DATA.List.Add(new DATA() { id = ID, title = TITLE, man = PERSON });
+                CTRL.DATA.List.Add(new ROOM()
+                {
+                    id = Convert.ToInt32(token[1]),
+                    title = token[2],
+                    man = token[3],
+                    EAgry = Convert.ToInt32(token[4]),
+                    EDigu = Convert.ToInt32(token[5]),
+                    EFear = Convert.ToInt32(token[6]),
+                    EHapy = Convert.ToInt32(token[7]),
+                    ENtur = Convert.ToInt32(token[8]),
+                    ESad = Convert.ToInt32(token[9]),
+                    ESprs = Convert.ToInt32(token[10]),
+                });
             }
 
             // @,roomID - 해당 방의 비밀번호 요청
@@ -268,16 +285,34 @@ namespace CLIENT_wpf.WINDOWS
             // #,roomTITLE,roomPORT - 방에 접근하시오
             else if (data[0] == '#')
             {
+                Console.WriteLine("방에 입장 하겠음다.");
                 var token = data.Split(',');
 
+
+                ROOM r = new ROOM(){
+                    id = Convert.ToInt32(token[1]),
+                    title = token[2],
+                    man = token[3],
+                    EAgry = Convert.ToInt32(token[4]),
+                    EDigu = Convert.ToInt32(token[5]),
+                    EFear = Convert.ToInt32(token[6]),
+                    EHapy = Convert.ToInt32(token[7]),
+                    ENtur = Convert.ToInt32(token[8]),
+                    ESad = Convert.ToInt32(token[9]),
+                    ESprs = Convert.ToInt32(token[10]),
+                };
+
+                /*
                 int.TryParse(token[1], out Current_room_number);
                 String title = token[2];
                 String PORT = token[3];
+                */
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
                     _Window_Close();
-                    CW = new ChattingWindow(PORT, title);
+                    //CW = new ChattingWindow(PORT, title,(ROOM)ListView.SelectedItem);
+                    CW = new ChattingWindow(r);
                     this.DataSendEvent += new DataPushEventHandler(CW.Recv_From_Parent);
                     CW.DataSendEvent += new DataGetEventHandler(this.Recv_From_ChattingWindow);
                     CW.Show();
@@ -298,13 +333,20 @@ namespace CLIENT_wpf.WINDOWS
         #region 자식 프로세스 관련
         private void Recv_From_MakingWindow(string item)
         {
-            byte[] buf = Encoding.Default.GetBytes(item);
-            sock.Send(buf);
+            if (sock == null)
+            {
+                MessageBox.Show("서버에 먼저 연결하세요","Error");
+            }
+            else
+            {
+                byte[] buf = Encoding.Default.GetBytes(item);
+                sock.Send(buf);
+            }
         }
 
         private void Recv_From_PasswdWindow(string passwd)
         {
-            int id = ((DATA)ListView.SelectedItem).id;
+            int id = ((ROOM)ListView.SelectedItem).id;
             byte[] buf = Encoding.Default.GetBytes("#," + id + "," + passwd + "\n");
             Console.WriteLine("★" + "#," + id + "," + passwd + "\n");
 
@@ -330,6 +372,12 @@ namespace CLIENT_wpf.WINDOWS
 
             if (CTRL.DATA.AutoConnect) Init_window(msg);
             else CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
+        }
+
+        private void Recv_From_DetailWindow(string id)
+        {
+            byte[] buf = Encoding.Default.GetBytes($"^,{id}\n");
+            sock.Send(buf);
         }
         #endregion
     }

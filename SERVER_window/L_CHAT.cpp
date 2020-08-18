@@ -10,6 +10,7 @@ Mat MATS[MAXIMUM_USER];
 int isSAVE[MAXIMUM_USER] = { NOT_SAVED };
 
 bool isREAD = true;
+bool RUNNER = true;
 int EMOTION[MAXIMUM_USER];
 
 COMMAND_CENTER* cmd_ctr;
@@ -42,7 +43,7 @@ void Thread_Recv_TCP(int port, int index) {
 
 #pragma endregion
 
-	while (1) {
+	while (RUNNER) {
 #pragma region 통신
 		
 		try {
@@ -150,7 +151,7 @@ void Thread_Send_TCP(int port, int index) {
 
 #pragma endregion
 
-	while (1) {
+	while (RUNNER) {
 #pragma region 통신
 
 		if (isSAVE[index] == INTERRUPT) {
@@ -214,6 +215,10 @@ void Thread_Send_TCP(int port, int index) {
 }
 void OJJJ_Thread_AI(int PORT) {
 
+	ShellExecute(GetDesktopWindow(), _T("open"), _T("AI.exe"), "KEY1", 0, SW_SHOWDEFAULT);
+
+#pragma region 기본 셋팅 & 변수 선언
+
 	int id = (PORT - 9000 + 100) / 100;
 	char Process_number[] = "00";
 	char Control_file[10];
@@ -226,14 +231,12 @@ void OJJJ_Thread_AI(int PORT) {
 	//sprintf(Control_file, "C%s", Process_number);
 	sprintf(Control_file, "KEY1");																		// 공유메모리 - 제어파일 이름
 
-	HANDLE C_h = File_Mapping(Control_file);
-	LPCTSTR C_Sbuf = Make_Shared_Memory(C_h);
+	//HANDLE C_h = File_Mapping(Control_file);
+	//LPCTSTR C_Sbuf = Make_Shared_Memory(C_h);
+	HANDLE C_h;
+	LPCTSTR C_Sbuf = CreateMemory(&C_h, Control_file);
+
 	Mat temp;
-
-
-	CopyMemory((PVOID)C_Sbuf, "3god", strlen("3god"));
-	//cout << "-------------------------control file open " << endl;
-
 	vector<uchar>encoded;
 	vector < int > compression_params;
 
@@ -243,32 +246,45 @@ void OJJJ_Thread_AI(int PORT) {
 
 	USER* user;
 
+#pragma region 사용자 공유메모리 생성부
 	for (int i = 0; i < MAXIMUM_USER; i++) {
 		sprintf(Control_file, "I%s_%d", Process_number, i);												// 사용자 할당 파일 [ 프로세스 이름_사용자 인덱스 ]
-		h[i] = File_Mapping(Control_file);
-		Sbuf[i] = Make_Shared_Memory(h[i]);
+		//cout << "사용자 기본 파일 선언 ["<<i<<"]";
+		Sbuf[i] = CreateMemory(&h[i], Control_file);
+		
+		//h[i] = File_Mapping(Control_file);
+		//Sbuf[i] = Make_Shared_Memory(h[i]);
 		wasSAVE[i] = false;
 	}
+
+#pragma endregion
+
+#pragma endregion
+
+	CopyMemory((PVOID)C_Sbuf, "3start", strlen("3start"));
 
 	int size;
 	char MSG[20];
 
-	while (1) {
+	while (RUNNER) {
 		
 		char str[20];
 		strncpy(str, (char*)C_Sbuf, 20);
 		if (isREAD) {																					// 감정을 읽어야 하는 경우
+			//cout << "감정 초기화 초기화.....\n";
 			for (int i = 0; i < MAXIMUM_USER; i++) {
 				EMOTION[i] = -1;																		// 모든 감정을 -1(기본 데이터)로 변경
 			}
 		}
-		//cout << str << endl;
 
 		// 1 - 내가 메모리에 이미지를 썼을때
 		// 2 - 새로운 사용자가 들어왔음을 알렸을때
 		// 3 - 대기
 		// 0 - 감정 결과가 나왔을때
+		// 9 - 종료하라고 알림
 		if (C_Sbuf[0] == '0') {
+			//cout << "공유메모리 - 0 [감정이 인식되어 처리]\n";
+			//cout << "인식 결과 : " << C_Sbuf << endl;
 
 			char* ptr = strtok(str, ",");																// 문자열에서
 			ptr = strtok(NULL, ",");																	// 감정상태
@@ -276,16 +292,23 @@ void OJJJ_Thread_AI(int PORT) {
 				if (ptr == NULL || ptr[0] == '-')																// 배열에 저장
 					break;
 
-				//cout << cmd_ctr.Get_user(i).get_id()<< " is : " << ptr << endl;
-				sscanf(ptr, "%d", &EMOTION[i]);
+				int temp;
+
+				sscanf(ptr, "%d", &temp);
+				
+				if (temp == 7 || temp == 8) temp = -1;
+
+				EMOTION[i] = temp;
+
 				ptr = strtok(NULL, ",");
 			}
 			CopyMemory((PVOID)C_Sbuf, "3", strlen("3"));
+			//cout << "공유메모리 트리거 3으로 변경\n";
 			isREAD = false;																				// 감정 읽었음 으로 변경
 		}
 		else {
+			//cout << "공유 메모리 - 0아님 [AI의 응답을 기다리는 중]\n";
 			Sleep(1000);
-			//CopyMemory((PVOID)C_Sbuf, "0", strlen("0"));
 			continue;
 		}
 
@@ -295,11 +318,13 @@ void OJJJ_Thread_AI(int PORT) {
 			if (wasSAVE[i] == false && isSAVE[i] == SAVED) {											// 이전까지 수신안된 이미지가 수신된 경우
 				wasSAVE[i] = true;																		// 수신 되었음으로 변경
 				sprintf(MSG, "2,I%s_%d", Process_number, i);											// AI에게 새로운 메모리 주소 알림
+				//cout << "AI에게 사용자 인식 중 ..... [" << i << "]\n";
 				CopyMemory((PVOID)C_Sbuf, MSG, strlen(MSG));
 				//cout << "[shared memory] new client write" << endl;
 				break;
 			}
 			else if (isSAVE[i] == SAVED) {																// 수신되는 이미지가 존재할 경우
+				//printf("사용자 [%d]의 이미지가 존재. 인식을 요청함\n");
 				user = &cmd_ctr->Get_user_idx(i);
 				try {
 					user->lock.read_lock();
@@ -308,8 +333,6 @@ void OJJJ_Thread_AI(int PORT) {
 
 					size = 1 + (encoded.size() - 1);
 					if (temp.size().width == 0) {
-						//cout << "sz is small" << endl;
-						//CopyMemory((PVOID)C_Sbuf, "0,1,2,-", strlen("0,1,2,-"));
 						continue;
 					}
 
@@ -319,24 +342,25 @@ void OJJJ_Thread_AI(int PORT) {
 					imencode(".jpg", temp, encoded, compression_params);
 
 					CopyMemory((PVOID)Sbuf[i], &encoded[0], size);										// 공유메모리에 이미지 데이터 적음
-
-
-
 					CopyMemory((PVOID)C_Sbuf, "1", strlen("1"));										// 이미지를 썼다고 알림
-					cout << "[share memroy] write image" << endl;
+
+					//cout << "[share memroy] write image" << endl;
 
 					waitKey(FRAME_INTERVAL);
 				}
 				catch (Exception e) {
-					cout << "something was wrong" << endl;
+					//cout << "something was wrong" << endl;
 					continue;
 				}
 			}
 
 		}
-		if (i == MAXIMUM_USER)
-			Sleep(1000);
+
+//		if (i == MAXIMUM_USER)
+//			Sleep(1000);
 	}
+
+	CopyMemory((PVOID)C_Sbuf, "9,", strlen("9,"));
 	Shared_Clear(Sbuf, h, MAXIMUM_USER);																// 공유 메모리 정리
 }
 
@@ -354,7 +378,7 @@ int LOGIC_chatting(int PORT,int* opt) {
 	cout << "[EVENT] 슬픔 : " << opt[5] << endl;
 	cout << "[EVENT] 놀람 : " << opt[6] << endl;
 
-	//thread t_ai = thread(OJJJ_Thread_AI, PORT);
+	thread t_ai = thread(OJJJ_Thread_AI, PORT);
 
 	cmd_ctr = new COMMAND_CENTER(PORT);
 
@@ -403,15 +427,17 @@ int LOGIC_chatting(int PORT,int* opt) {
 			if (!isREAD) {																		// 감정을 읽은 경우
 				char temp_msg[5];
 				for (int j = 0; j < MAXIMUM_USER; j++) {
-					if (EMOTION[j] != -1&&cmd_ctr->Get_user_idx(j).get_id()!=-1) {					// 감정이 인식되고 사용자가 접속되어 있는 경우
-						if (opt[EMOTION[j]] == 1) {
+					if (/*EMOTION[j] != -1&&*/cmd_ctr->Get_user_idx(j).get_id()!=-1) {					// 감정이 인식되고 사용자가 접속되어 있는 경우
+						
+
+						/*if (opt[EMOTION[j]] == 1) {
 							// * : 강제퇴장
 							// 특정 사용자의 감정이
 							// 방 설정된 이벤트 ( 1 : 강퇴 )일 경우
 							// 강제 퇴장 시킴
 							cmd_ctr->Get_user_idx(j).Send_Msg((char*)"*,1\n");
 							continue;
-						}
+						}*/
 
 						
 						sprintf(temp_msg, "&,%d,%d\n", 
@@ -466,6 +492,7 @@ int LOGIC_chatting(int PORT,int* opt) {
 
 						if (cmd_ctr->User_Num() == 0) {
 							cout << "모든 사용자가 나감" << endl << "프로세스 종료됨" << endl;
+							RUNNER = false;
 							Sleep(3000);
 							return 999;
 						}

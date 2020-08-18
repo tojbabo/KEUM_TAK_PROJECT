@@ -1,4 +1,4 @@
-﻿<Window x:Class="CLIENT_wpf.WINDOWS.StartWindow"
+﻿<Window x:Class="CLIENT_wpf.VIEW.StartWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -43,9 +43,9 @@
         <Button x:Name="btn" Content="참가" HorizontalAlignment="Right" Height="37" Margin="0,21,60.5,0" VerticalAlignment="Top" Width="101" Click="Click_Join"/>
         <Button Content="방만들기" HorizontalAlignment="Left" Height="37" Margin="549,21,0,0" VerticalAlignment="Top" Width="101" Click="Click_MakingRoom"/>
 
-        <Ellipse Fill="Red" HorizontalAlignment="Left" Height="15" Margin="161,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding R, Converter={StaticResource Converter}}" />
-        <Ellipse Fill="Orange" HorizontalAlignment="Left" Height="15" Margin="181,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding Y, Converter={StaticResource Converter}}" />
-        <Ellipse Fill="Green" HorizontalAlignment="Left" Height="15" Margin="201,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding G, Converter={StaticResource Converter}}" />
+        <Ellipse ToolTip="연결 안됨" Fill="Red" HorizontalAlignment="Left" Height="15" Margin="161,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding R, Converter={StaticResource Converter}}" />
+        <Ellipse ToolTip="연결 시도 중" Fill="Orange" HorizontalAlignment="Left" Height="15" Margin="181,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding Y, Converter={StaticResource Converter}}" />
+        <Ellipse ToolTip="연결 상태 좋음" Fill="Green" HorizontalAlignment="Left" Height="15" Margin="201,55,0,0"  VerticalAlignment="Top" Width="15" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding G, Converter={StaticResource Converter}}" />
 
 
         <Grid x:Name="Grid_Setting"  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="132,55,0,0" Width="243" Background="DarkGray" Opacity="0.8" Height="123" Visibility="Hidden" >

@@ -1,8 +1,8 @@
 #ifndef HEADER
 #define HEADER
 
-#define VERSION "1.3.1"
-#define COMMENT "대기방 - 채팅방 변환 안정화"
+#define VERSION "1.4.0"
+#define COMMENT "최종 발표 전 - AI 통신 안정화"
 
 
 #include <WinSock2.h>
