@@ -3,6 +3,7 @@
 ### AI
   - Face Tracking
   - Emotion Recognition
+  - Model Making
     
 ### Face_Recognition folder
   - 얼굴인식 모듈
