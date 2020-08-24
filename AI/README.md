@@ -7,6 +7,9 @@ Setting 은 아래와 같이 변경
 학습 데이터 : Train(25709), Validation(3589), Test(3590) 으로 재구성  
 #### 재구성 효과 : Train(95%), Test(63%) -> Train(67%), Test(65%) = Overfitting 완화  
 
+##### Check
+1. Model 정확도 개선 필요  
+
 ### Hyper Parameter Setting 
 Epochs ( 150 -> 200 )  
 Learning Rate ( 0.001 -> 0.01 )  
@@ -22,7 +25,7 @@ Optimizer ( Momentum -> Adam )
     - 하이퍼 파라미터 튜닝  
     - epoch 수 수정 
     
-##### 수정 사항
+##### Check
 1. 얼굴 인식률 늘릴 것  
 2. 화면 좌우 반전  
 3. 감정 전체 목록처럼 나오게  
