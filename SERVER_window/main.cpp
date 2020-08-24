@@ -11,8 +11,13 @@ int main(int num, char* args[]) {
 	int opt[7] = { 0,0,0,0,0,0,0 };
 
 	system("title 부모 프로세스");
+	cout << "ip : " << IP << endl;
+	cout << "port : " << port << endl;
 
-	if (num <= 1) cout << "default\n";
+	if (num <= 1) {
+		cout << "default\n";
+		return LOGIC_watting(port);
+	}
 	else { 
 		char title[50];
 		sscanf(args[1], "%d", &port);
@@ -25,15 +30,6 @@ int main(int num, char* args[]) {
 		sscanf(args[8], "%d", &opt[6]);
 		sprintf(title, "title %s", args[9]);
 		system(title);
+		return LOGIC_chatting(port, opt);
 	}
-	
-	cout << "ip : " << IP << endl;
-	cout << "port : " << port << endl;
-
-	//부모
-	//return LOGIC_watting(port);
-	//자식
-	//
-	return LOGIC_chatting(port,opt);
-
 }

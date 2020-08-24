@@ -10,6 +10,8 @@ using CLIENT_wpf.FUNC;
 using CLIENT_wpf.VIEWMODEL;
 using CLIENT_wpf.VAL;
 using CLIENT_wpf.VIEW;
+using OpenCvSharp;
+using System.Windows.Media;
 
 namespace CLIENT_wpf.VIEW
 {
@@ -17,7 +19,7 @@ namespace CLIENT_wpf.VIEW
     public delegate void DataGetEventHandler(string item);
     public delegate void DataPushEventHandler(string value);
 
-    public partial class StartWindow : Window
+    public partial class StartWindow : System.Windows.Window
     {
         #region 멤버 변수
         Thread Msg_recv_thread;
@@ -74,7 +76,6 @@ namespace CLIENT_wpf.VIEW
             {
                 byte[] buf = Encoding.Default.GetBytes(msg);
                 sock.Send(buf);
-
             }
 
             CTRL.ConnectionStateChange(CONSTANTS.STATE_CONNECTING);
@@ -301,7 +302,7 @@ namespace CLIENT_wpf.VIEW
                     ESad = Convert.ToInt32(token[9]),
                     ESprs = Convert.ToInt32(token[10]),
                 };
-
+                Current_room_number = r.id;
                 /*
                 int.TryParse(token[1], out Current_room_number);
                 String title = token[2];
@@ -363,9 +364,9 @@ namespace CLIENT_wpf.VIEW
                 var token = a.Split(',');
                 MessageBox.Show(token[0],token[1],MessageBoxButton.OK,MessageBoxImage.Warning);
             }
-            if (Current_room_number != -1 && CTRL.DATA.AutoConnect)
+            if (Current_room_number != -1)
             {
-                msg = $"$,{Current_room_number}";
+                msg = $"$,{Current_room_number}\n";
                 Current_room_number = -1;
             }
             CTRL.DATA.Title = "대기 방";

@@ -113,7 +113,7 @@ int LOGIC_watting(int PORT) {
 								room.emo[3], room.emo[4], room.emo[5], room.emo[6],room.Get_TITLE());
 							
 							cout << "자식 프로세스 생성 ~!!~!"<<endl;
-							ShellExecute(GetDesktopWindow(), _T("open"), _T("child.exe"),MessageToChild, 0, SW_SHOWDEFAULT); 
+							ShellExecute(GetDesktopWindow(), _T("open"), _T("SERVER_window.exe"),MessageToChild, 0, SW_SHOWDEFAULT); 
 
 							core.LOCK();
 							core.Notify_Enter(read.fd_array[i], room);
@@ -129,7 +129,7 @@ int LOGIC_watting(int PORT) {
 						}
 
 						// $,RoomID - 방에서 사용자 나옴
-						else if (Socket_Buffer[0] == '$') {												
+						else if (Socket_Buffer[0] == '$') {
 							int fromWhere;
 							sscanf(Socket_Buffer, "$,%d", &fromWhere);
 							int num = core.Search_Room(fromWhere)->Exit();

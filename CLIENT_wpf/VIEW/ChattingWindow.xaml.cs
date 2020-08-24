@@ -29,6 +29,7 @@ namespace CLIENT_wpf.VIEW
         ROOM Room;
 
         bool isRun = true;
+        bool isBlack = false;
 
         int ID;
         int PORT;
@@ -38,11 +39,12 @@ namespace CLIENT_wpf.VIEW
 
         VideoCapture cap;
 
-        EMOTICON EMO;
+        EVENT EMO;
 
         Socket sock = null;
 
         Thread T_msg_recv;
+
         #endregion
 
         #region 윈도우 관련
@@ -53,10 +55,11 @@ namespace CLIENT_wpf.VIEW
             CTRL.initProperty();
 
             this.DataContext = CTRL.DATA;
-            EMO = new EMOTICON();
-            EMO_my = -1;
-            EMO_you = -1;
+            EMO = new EVENT();
+            EMO_my = 7;
+            EMO_you = 7;
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
+            CTRL.DATA.TestEmo = -1;
         }
 
         public ChattingWindow(String port, String name = "DEBUG", ROOM room = null)
@@ -69,13 +72,14 @@ namespace CLIENT_wpf.VIEW
             if (room != null)
             {
                 Room = room;
+                Room.InitializeEmo();
                 Room.Show();
             }
 
             this.DataContext = CTRL.DATA;
-            EMO = new EMOTICON();
-            EMO_my = -1;
-            EMO_you = -1;
+            EMO = new EVENT();
+            EMO_my = 7;
+            EMO_you = 7;
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             Connect_to_Server();
         }
@@ -88,6 +92,7 @@ namespace CLIENT_wpf.VIEW
             if (room != null)
             {
                 Room = room;
+                Room.InitializeEmo();
                 //Room.Show();
             }
 
@@ -95,9 +100,9 @@ namespace CLIENT_wpf.VIEW
             TBX_PORT.Text = Room.man;
 
             this.DataContext = CTRL.DATA;
-            EMO = new EMOTICON();
-            EMO_my = -1;
-            EMO_you = -1;
+            EMO = new EVENT();
+            EMO_my = 7;
+            EMO_you = 7;
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             Connect_to_Server();
         }
@@ -181,6 +186,49 @@ namespace CLIENT_wpf.VIEW
         // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+
+            Thread tt = new Thread(() => ForTheTest());
+            tt.Start();
+
+        }
+        private void ForTheTest()
+        {
+            cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
+            cap.FrameWidth = CONSTANTS.frameWidth;
+            cap.FrameHeight = CONSTANTS.frameHeight;
+            cap.Open(0);
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_CONNECTING, CTRL.DATA.MyState);
+
+            Mat mat = new Mat();
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
+            while (isRun)
+            {
+                cap.Read(mat);
+                Cv2.Resize(mat, mat, new OpenCvSharp.Size(CONSTANTS.frameWidth, CONSTANTS.frameHeight));
+
+
+                if (CTRL.DATA.TestEmo != -1)
+                {
+                    mat = EMO.image_conversion(mat, CTRL.DATA.TestEmo);
+                }
+                else CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
+                Console.WriteLine($"data is : {CTRL.DATA.TestEmo}");
+               
+
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    try
+                    {
+                        WriteableBitmap wb = new WriteableBitmap(mat.Cols, mat.Rows, 96, 96, PixelFormats.Bgr24, null);
+                        image.Source = wb;
+                        WriteableBitmapConverter.ToWriteableBitmap(mat, wb);
+                    }
+                    catch (Exception e) { }
+                }));
+                int c = Cv2.WaitKey(1000 / 20);
+                if (c != -1)
+                    break;
+            }
         }
 
         private void Button_Click_test(object sender,RoutedEventArgs e)
@@ -197,29 +245,37 @@ namespace CLIENT_wpf.VIEW
             Connect_to_Server();
         }
         // --------------------------------------------------------------------- 여기까지 디버그용
+
+
         private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("ChattingWindow -> StartWindow");
             System.Windows.Window.GetWindow(this).Close();
         }
 
+        private void BTN_BLKOUT_Click(object sender, RoutedEventArgs e)
+        {
+            isBlack = UTILITY.bool_change(isBlack);
+        }
 
         // 서버로 메시지 보내는 함수
         private void BTN_MSG_SEND_Click(object sender, RoutedEventArgs e)
         {
-            TBX_INPUT.Focus();
-            byte[] buf = new byte[CONSTANTS.BUF_SZ];
-
-            buf = Encoding.Default.GetBytes(TBX_INPUT.Text + "\n");
-            sock.Send(buf);
-
-
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+            if (TBX_INPUT.Text != "")
             {
-                TBX_INPUT.Text = "";
-            }));
+                TBX_INPUT.Focus();
+                byte[] buf = new byte[CONSTANTS.BUF_SZ];
 
+                buf = Encoding.Default.GetBytes(TBX_INPUT.Text + "\n");
+                sock.Send(buf);
+
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    TBX_INPUT.Text = "";
+                }));
+            }
         }
+
         // 엔터로 메시지 전송
         private void TBX_INPUT_KeyDown(object sender, KeyEventArgs e)
         {
@@ -367,7 +423,7 @@ namespace CLIENT_wpf.VIEW
                 int.TryParse(token[1], out int Event);
                 if (Event == 1)
                 {
-                    MsgToParents = "[룰 위반]퇴장 당했습니다. ,웃지마";
+                    MsgToParents = "[룰 위반]퇴장 당했습니다. ," + token[2];
                     Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                     {
                         this.Hide();
@@ -382,6 +438,7 @@ namespace CLIENT_wpf.VIEW
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
                     TBX_MESSAGE.AppendText(data);
+                    TBX_MESSAGE.ScrollToEnd();
                 }));
             }
         }
@@ -405,19 +462,35 @@ namespace CLIENT_wpf.VIEW
                 cap.Read(mat);
                 Cv2.Resize(mat, mat, new OpenCvSharp.Size(CONSTANTS.frameWidth, CONSTANTS.frameHeight));
 
+
+                if (isBlack) mat.SetTo(0);
+
                 size = mat.Channels() * mat.Cols * mat.Rows;
 
+               
                 var b = new byte[size];
                 System.Runtime.InteropServices.Marshal.Copy(mat.Data, b, 0, size);
 
                 if (!(DLL.DLL_IMG_SEND(b, t_ImgSend_Sock)))
-                    break;
+                    continue;
 
                 
-                if (EMO_my != -1)
+                if (EMO_my != 7)
                 {
-                    //Console.WriteLine("my emotion is : " + EMO_my);
-                    mat = EMO.image_conversion(mat, EMO_my);
+                    Console.WriteLine("my emotion is : " + EMO_my);
+                    int temp;
+
+
+                    if(Room.EMO[EMO_my] == 3)
+                    {
+                        temp = EMO_my;
+                    }else
+                    {
+                        temp = Room.EMO[EMO_my];
+                    }
+                    Console.WriteLine("temp is : " + temp);
+
+                    mat = EMO.image_conversion(mat, temp);
                     CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
                 }
                 else CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
@@ -478,7 +551,7 @@ namespace CLIENT_wpf.VIEW
                 //CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
 
 
-                if (EMO_you != -1)
+                if (EMO_you != 7)
                 {
                     mat = EMO.image_conversion(mat, EMO_you);
                     CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
@@ -504,6 +577,7 @@ namespace CLIENT_wpf.VIEW
             DLL.dll_Free_Socket(t_ImgRecv_Sock);
         }
         #endregion
+
     }
 }
   

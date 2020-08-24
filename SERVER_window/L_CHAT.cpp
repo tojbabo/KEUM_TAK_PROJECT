@@ -2,16 +2,17 @@
 #include "_CLASS.h"
 #include "_LOGIC.h"
 #include "_SHARED.h"
+#include "_AI.h"
 
 using namespace cv;
 using namespace std;
 
 Mat MATS[MAXIMUM_USER];
 int isSAVE[MAXIMUM_USER] = { NOT_SAVED };
+int EMOTICON[MAXIMUM_USER];
 
 bool isREAD = true;
 bool RUNNER = true;
-int EMOTION[MAXIMUM_USER];
 
 COMMAND_CENTER* cmd_ctr;
 
@@ -54,9 +55,14 @@ void Thread_Recv_TCP(int port, int index) {
 					continue;
 				}
 				else if (recvMsgSize == -1 || recvMsgSize == 0) {
-					cout << "[RECEIVER] Disconnected -> end" << endl;
-					isSAVE[index] = INTERRUPT;
-					return;
+					cout << "[RECEIVER] Disconnected -> 패킷 사이즈 받는 중 끊어짐 발견 [size : " << recvMsgSize << "]" << endl;
+					recvMsgSize = recv(sock_, buffer, BUF_LEN, 0);
+					if (recvMsgSize == -1 || recvMsgSize == 0) {
+						cout << "[RECEIVER] Disconnected -> 찐 종료 [size : " << recvMsgSize << "]" << endl;
+						system("pause");
+						isSAVE[index] = INTERRUPT;
+						return;
+					}
 				}
 			} while (recvMsgSize > sizeof(int));
 			total_pack = ((int*)buffer)[0];
@@ -70,10 +76,14 @@ void Thread_Recv_TCP(int port, int index) {
 				recvMsgSize = recv(sock_, buffer, BUF_LEN, 0);
 				//cout << "recv msg : <" << recvMsgSize << "/" << img_sz << "> ...........["<<index<<"] ";
 				if (recvMsgSize == -1 || recvMsgSize == 0) {
-					cout << "[RECEIVER] Disconnected" << endl;
-					isSAVE[index] = INTERRUPT;
-					free(longbuf);
-					return;
+					cout << "[RECEIVER] Disconnected -> 이미지 받는 중 끊어짐 발견 [size : "<<recvMsgSize<<"]" << endl;
+					if (recvMsgSize == -1 || recvMsgSize == 0) {
+						cout << "[RECEIVER] Disconnected -> 찐 종료 [size : " << recvMsgSize << "]" << endl;
+						system("pause");
+						isSAVE[index] = INTERRUPT;
+						free(longbuf);
+						return;
+					}
 				}
 				else if (max_sz + recvMsgSize < img_sz) {
 					//cout << "데이터 계속 받는 중" << endl;
@@ -189,7 +199,11 @@ void Thread_Send_TCP(int port, int index) {
 			msg_len = send(sock_, (char*)ibuf, sizeof(int), 0);
 			if (msg_len == 0 || msg_len == -1) {
 				cout << "[SENDER] Disconnected" << endl;
-				return;
+				if (msg_len == 0 || msg_len == -1) {
+					cout << "[SENDER ]찐 종료" << endl;
+
+					return;
+				}
 			}
 
 			//puts("packet size send");
@@ -198,13 +212,16 @@ void Thread_Send_TCP(int port, int index) {
 				msg_len = send(sock_, (char*)&encoded[i * PACK_SIZE], PACK_SIZE, 0);
 				if (msg_len == 0 || msg_len == -1) {
 					cout << "[SENDER] Disconnected" << endl;
-					return;
+					if (msg_len == 0 || msg_len == -1) {
+						cout << "[SENDER ]찐 종료" << endl;
+
+						return;
+					}
 				}
 				//printf("send packet data %d\n", i);
 			}
 			waitKey(1000 / 20);
 		}
-
 #pragma endregion
 		catch (exception e) {
 			cout << "catch somthing" << endl;
@@ -215,7 +232,6 @@ void Thread_Send_TCP(int port, int index) {
 }
 void OJJJ_Thread_AI(int PORT) {
 
-	ShellExecute(GetDesktopWindow(), _T("open"), _T("AI.exe"), "KEY1", 0, SW_SHOWDEFAULT);
 
 #pragma region 기본 셋팅 & 변수 선언
 
@@ -228,11 +244,11 @@ void OJJJ_Thread_AI(int PORT) {
 
 
 	sprintf(Process_number, "%d%d", a, b);																// 프로세스 이름 설정
-	//sprintf(Control_file, "C%s", Process_number);
-	sprintf(Control_file, "KEY1");																		// 공유메모리 - 제어파일 이름
+	sprintf(Control_file, "C%s", Process_number);														// 공유메모리 - 제어파일 이름
+	//sprintf(Control_file, "KEY1");								
 
-	//HANDLE C_h = File_Mapping(Control_file);
-	//LPCTSTR C_Sbuf = Make_Shared_Memory(C_h);
+	ShellExecute(GetDesktopWindow(), _T("open"), _T("AI.exe"), Control_file, 0, SW_SHOWDEFAULT);
+
 	HANDLE C_h;
 	LPCTSTR C_Sbuf = CreateMemory(&C_h, Control_file);
 
@@ -247,13 +263,11 @@ void OJJJ_Thread_AI(int PORT) {
 	USER* user;
 
 #pragma region 사용자 공유메모리 생성부
+
 	for (int i = 0; i < MAXIMUM_USER; i++) {
 		sprintf(Control_file, "I%s_%d", Process_number, i);												// 사용자 할당 파일 [ 프로세스 이름_사용자 인덱스 ]
 		//cout << "사용자 기본 파일 선언 ["<<i<<"]";
 		Sbuf[i] = CreateMemory(&h[i], Control_file);
-		
-		//h[i] = File_Mapping(Control_file);
-		//Sbuf[i] = Make_Shared_Memory(h[i]);
 		wasSAVE[i] = false;
 	}
 
@@ -270,13 +284,13 @@ void OJJJ_Thread_AI(int PORT) {
 		
 		char str[20];
 		strncpy(str, (char*)C_Sbuf, 20);
+		/*
 		if (isREAD) {																					// 감정을 읽어야 하는 경우
-			//cout << "감정 초기화 초기화.....\n";
 			for (int i = 0; i < MAXIMUM_USER; i++) {
 				EMOTION[i] = -1;																		// 모든 감정을 -1(기본 데이터)로 변경
 			}
 		}
-
+		*/
 		// 1 - 내가 메모리에 이미지를 썼을때
 		// 2 - 새로운 사용자가 들어왔음을 알렸을때
 		// 3 - 대기
@@ -296,9 +310,8 @@ void OJJJ_Thread_AI(int PORT) {
 
 				sscanf(ptr, "%d", &temp);
 				
-				if (temp == 7 || temp == 8) temp = -1;
-
-				EMOTION[i] = temp;
+				if (temp == 8) temp = 7;
+				EMOTICON[i] = temp;
 
 				ptr = strtok(NULL, ",");
 			}
@@ -318,7 +331,7 @@ void OJJJ_Thread_AI(int PORT) {
 			if (wasSAVE[i] == false && isSAVE[i] == SAVED) {											// 이전까지 수신안된 이미지가 수신된 경우
 				wasSAVE[i] = true;																		// 수신 되었음으로 변경
 				sprintf(MSG, "2,I%s_%d", Process_number, i);											// AI에게 새로운 메모리 주소 알림
-				//cout << "AI에게 사용자 인식 중 ..... [" << i << "]\n";
+				cout << "AI에게 사용자 인식 중 ..... " << MSG << " \n";
 				CopyMemory((PVOID)C_Sbuf, MSG, strlen(MSG));
 				//cout << "[shared memory] new client write" << endl;
 				break;
@@ -359,24 +372,29 @@ void OJJJ_Thread_AI(int PORT) {
 //		if (i == MAXIMUM_USER)
 //			Sleep(1000);
 	}
-
+	
+	// 공유 메모리 정리
 	CopyMemory((PVOID)C_Sbuf, "9,", strlen("9,"));
-	Shared_Clear(Sbuf, h, MAXIMUM_USER);																// 공유 메모리 정리
+	Shared_Clear(Sbuf, h, MAXIMUM_USER);																
+
+	UnmapViewOfFile(C_Sbuf);
+	CloseHandle(C_h);
+
 }
 
 // TCP - SELECT 기능 함수
-int LOGIC_chatting(int PORT,int* opt) {
+int LOGIC_chatting(int PORT,int* EventOption) {
 
 #pragma region 기본 출력문 & 변수 선언 및 초기화
 	cout << endl << "----------------------------------" << endl;
 	cout << "[F_CHAT.cpp] START<자식>" << endl;
-	cout << "[EVENT] 화남 : " << opt[0] << endl;
-	cout << "[EVENT] 역겸 : " << opt[1] << endl;
-	cout << "[EVENT] 공포 : " << opt[2] << endl;
-	cout << "[EVENT] 행복 : " << opt[3] << endl;
-	cout << "[EVENT] 자연 : " << opt[4] << endl;
-	cout << "[EVENT] 슬픔 : " << opt[5] << endl;
-	cout << "[EVENT] 놀람 : " << opt[6] << endl;
+	cout << "[EVENT] 화남 : " << EventOption[0] << endl;
+	cout << "[EVENT] 역겸 : " << EventOption[1] << endl;
+	cout << "[EVENT] 공포 : " << EventOption[2] << endl;
+	cout << "[EVENT] 행복 : " << EventOption[3] << endl;
+	cout << "[EVENT] 자연 : " << EventOption[4] << endl;
+	cout << "[EVENT] 슬픔 : " << EventOption[5] << endl;
+	cout << "[EVENT] 놀람 : " << EventOption[6] << endl;
 
 	thread t_ai = thread(OJJJ_Thread_AI, PORT);
 
@@ -408,8 +426,9 @@ int LOGIC_chatting(int PORT,int* opt) {
 	printf("서버 열고 기다리는 중 \n");
 	printf("IP : %s \nPORT : %d\n", IP, PORT);
 
-	for (int i = 0; i < MAXIMUM_USER; i++)
-		EMOTION[i] = -1;
+	for (int i = 0; i < MAXIMUM_USER; i++) {
+		EMOTICON[i] = 7;
+	}
 
 #pragma endregion
 
@@ -425,23 +444,29 @@ int LOGIC_chatting(int PORT,int* opt) {
 		
 		if (re == 0) {																			// timeout -> emotion notify
 			if (!isREAD) {																		// 감정을 읽은 경우
-				char temp_msg[5];
+				char temp_msg[10];
 				for (int j = 0; j < MAXIMUM_USER; j++) {
-					if (/*EMOTION[j] != -1&&*/cmd_ctr->Get_user_idx(j).get_id()!=-1) {					// 감정이 인식되고 사용자가 접속되어 있는 경우
+					if (cmd_ctr->Get_user_idx(j).get_id()!=-1) {					// 감정이 인식되고 사용자가 접속되어 있는 경우
+						int emo = EMOTICON[j];
+						printf("[%d]의 감정은 <%d>\n", j, emo);
+						
+						// 서버에서 처리할 수 있는 감정이벤트 - 감정이 인식될 때
+						if (emo != 7) {
+
+							if (EventOption[emo] == EVENT_KICK) {
+								// * : 강제퇴장
+								// 특정 사용자의 감정이
+								// 방 설정된 이벤트 ( 1 : 강퇴 )일 경우
+								// 강제 퇴장 시킴
+								cmd_ctr->Get_user_idx(j).Send_Msg((char*)"*,1,나가\n");
+								continue;
+							}
 						
 
-						/*if (opt[EMOTION[j]] == 1) {
-							// * : 강제퇴장
-							// 특정 사용자의 감정이
-							// 방 설정된 이벤트 ( 1 : 강퇴 )일 경우
-							// 강제 퇴장 시킴
-							cmd_ctr->Get_user_idx(j).Send_Msg((char*)"*,1\n");
-							continue;
-						}*/
+						}		
 
-						
 						sprintf(temp_msg, "&,%d,%d\n", 
-							cmd_ctr->Get_user_idx(j).get_id(), EMOTION[j]);							// 인식된 특정 사용자의 감정을 전체 사용자에게 알림
+							cmd_ctr->Get_user_idx(j).get_id(), emo);							// 인식된 특정 사용자의 감정을 전체 사용자에게 알림
 						for (int k = 0; k < read.fd_count; k++) {
 							cmd_ctr->Get_user_idx(k).Send_Msg(temp_msg);
 						}
@@ -486,6 +511,7 @@ int LOGIC_chatting(int PORT,int* opt) {
 					if (len == 0 || len == -1) {
 						FD_CLR(read.fd_array[i], &read);
 						// 쓰레드 종료 만들기
+						system("pause");
 
 						cmd_ctr->DisConnected_Client(read.fd_array[i]);
 						printf("[MAIN]User Disconnected :            %d.....[%d]\n", read.fd_array[i], cmd_ctr->User_Num());
@@ -527,7 +553,17 @@ int LOGIC_chatting(int PORT,int* opt) {
 							cmd_ctr->Input_name(user_name, read.fd_array[i]);
 						}
 						else {
-							sprintf(msg, "[%s]%s", cmd_ctr->Get_Name(read.fd_array[i]), Socket_Buffer);
+							int emo = EMOTICON[cmd_ctr->Get_index(read.fd_array[i])];
+							//int emo = EMOTICON[i - 1];
+							//printf("[%d]의 감정은 <%d>이다.\n", i, emo);
+							if (emo != 7) {
+								if (EventOption[emo] == EVENT_CHATFILTER) {
+									cout << "필터링 됩니다.\n";
+									sprintf(msg, "[%s] %s\n", cmd_ctr->Get_Name(read.fd_array[i]), ChatFilter(strlen(Socket_Buffer)));
+								}
+							}
+							else sprintf(msg, "[%s] %s", cmd_ctr->Get_Name(read.fd_array[i]), Socket_Buffer);
+
 							for (int i = 1; i < read.fd_count; i++) {
 								send(read.fd_array[i], msg, strlen(msg), 0);
 							}

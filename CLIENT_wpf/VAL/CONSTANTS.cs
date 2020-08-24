@@ -24,5 +24,8 @@ namespace CLIENT_wpf.VAL
         public const int STATE_BAD = 4;
         public const int STATE_SOSO = 5;
         public const int STATE_GOOD = 6;
+
+        public const int EVENT_BLKCOUT = 3;
+
     }
 }

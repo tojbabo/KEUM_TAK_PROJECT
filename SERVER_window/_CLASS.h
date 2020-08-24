@@ -51,6 +51,7 @@ public:
 class USER {
 	int id;
 	int port;
+	int emotion;
 	THREAD_* head;
 	char name[20];
 public:
@@ -108,6 +109,7 @@ public:
 	// 유저 인덱스 혹은 아이디로 유저 객체 가져옴
 	USER Get_user_idx(int Client_idx);
 	USER Get_user_id(int Client_id);
+
 };
 
 class ROOM {

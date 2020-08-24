@@ -96,7 +96,7 @@
     <Compile Include="VAL\MCC.cs" />
     <Compile Include="VAL\DLL.cs" />
     <Compile Include="VAL\CONSTANTS.cs" />
-    <Compile Include="FUNC\EMOTICON.cs" />
+    <Compile Include="FUNC\EVENT.cs" />
     <Compile Include="FUNC\PROTOCOL.cs" />
     <Compile Include="FUNC\UTILITY.cs" />
     <Compile Include="VAL\SCC.cs" />

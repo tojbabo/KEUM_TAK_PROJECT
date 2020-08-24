@@ -78,7 +78,24 @@ namespace CLIENT_wpf.VIEW
         }
         void add_items()
         {
-            Items = new List<item>() { new item() { name = "없음", val = "0" }, new item() { name = "강퇴", val="1" }, };
+            Items = new List<item>() {
+                new item() { name = "없음", val = "0" },
+                new item() { name = "강퇴", val = "1" },
+                new item() { name = "필터링", val = "2" },
+                new item() { name = "스티커", val = "3" },
+
+
+                new item() { name = "붉은 얼굴", val = "7" },
+                new item() { name = "푸른 얼굴", val = "8" },
+                new item() { name = "빅 헤드", val = "9" },
+                new item() { name = "모자이크", val = "10" },
+                new item() { name = "사륜안", val = "11" },
+                new item() { name = "180도 회전", val = "12" },
+                new item() { name = "빅 아이", val = "13" },
+                new item() { name = "ㅃㅏ직", val = "14" },
+                new item() { name = "눙물", val = "15" },
+                new item() { name = "Rose", val = "16" },
+            };
         }
         String get_reuslt()
         {

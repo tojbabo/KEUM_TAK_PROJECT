@@ -6,19 +6,42 @@ using System.Threading.Tasks;
 
 namespace CLIENT_wpf.VAL
 {
+/*
+0 : 화난 이모티콘 스티커
+1 : 역겹 이모티콘 스티커
+2 : 공포 이모티콘 스티커
+3 : 행복 이모티콘 스티커
+4 : 슬픔 이모티콘 스티커
+5 : 놀람 이모티콘 스티커
+6 : 무표정 이모티콘 스티커
+
+7 : 빨간얼굴
+8 : 파란얼굴
+9 : 큰 얼굴
+10 : 모자이크
+11 : 빨간눈
+12 : 180도 회전
+13 : 큰 눈
+14 : 빠직 스티커
+15 : 눈물 스티커
+16 : 사실은 오래전부터 당신같은 남자를 기다려왔다우
+*/
     public class ROOM
     {
         public int id { get; set; }
         public string title { get; set; }
         public string man { get; set; }
 
-        public int EAgry { get; set; }
-        public int EDigu { get; set; }
-        public int EFear { get; set; }
-        public int EHapy { get; set; }
-        public int ENtur { get; set; }
+        public int EAgry { get; set; }  // 3
+        public int EDigu { get; set; } // 4
+        public int EFear { get; set; } // 8
+        public int EHapy { get; set; }  //0
+        public int ENtur { get; set; }  // 1
         public int ESad { get; set; }
         public int ESprs { get; set; }
+
+        public int[] EMO = new int[7];
+
 
         public void Show()
         {
@@ -34,6 +57,16 @@ namespace CLIENT_wpf.VAL
             Console.WriteLine($"------- Sad Event      : {ESad}");
             Console.WriteLine($"------- Surprise Event : {ESprs}");
             Console.WriteLine($"---------------------------------------");
+        }
+        public void InitializeEmo()
+        {
+            EMO[0] = EAgry;
+            EMO[1] = EDigu;
+            EMO[2] = EFear;
+            EMO[3] = EHapy;
+            EMO[4] = ENtur;
+            EMO[5] = ESad;
+            EMO[6] = ESprs;
         }
     }
 }

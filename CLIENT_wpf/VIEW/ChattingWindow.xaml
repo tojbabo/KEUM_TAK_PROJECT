@@ -16,7 +16,7 @@
         <Image x:Name="image" Height="240" Width="320" Margin="33,28,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Image x:Name="image2" Height="240" Width="320" Margin="33,280,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Button Content="나가기" HorizontalAlignment="Left" Margin="33,525,0,0" VerticalAlignment="Top" Width="126" Click="BTN_EXIT_Click" Height="43"/>
-        <Button Content="화면 가리기" HorizontalAlignment="Left" Margin="227,525,0,0" VerticalAlignment="Top" Width="126" Click="Button_Click_test" Height="43"/>
+        <Button Content="화면 가리기" HorizontalAlignment="Left" Margin="227,525,0,0" VerticalAlignment="Top" Width="126" Click="BTN_BLKOUT_Click" Height="43"/>
 
 
         <Ellipse ToolTip="연결 안됨" Fill="Red" HorizontalAlignment="Left" Height="16" Margin="405,31,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding R, Converter={StaticResource Converter}}" />
@@ -47,11 +47,12 @@
             </Grid.RowDefinitions>
             <Button Content="TEST" Click="Button_Click_test"  Grid.Column="0" Grid.Row="1"/>
             <Button Content="YES SHOW"  Click="Button_Click"  Grid.Column="1" Grid.Row="1"/>
-            <Button Content="NEW"   Click="Button_Click"  Grid.Column="2" Grid.Row="1"/>
+            <Button Content="EVENT TEST"   Click="Button_Click"  Grid.Column="2" Grid.Row="1"/>
             <Button Content="{Binding IsConnect, Converter={StaticResource Converter}}"  Click="CLICK_CONNECT" Grid.Column="3" Grid.Row="1"/>
             <TextBox Height="23" Text="{Binding IP}"   Grid.Column="0" Grid.Row="0"/>
             <TextBox Height="23" x:Name="TBX_PORT" Text="9000" Grid.Column="1" Grid.Row="0"/>
             <TextBox Height="23" TextWrapping="Wrap" Text="{Binding NAME}"  Grid.Column="2" Grid.Row="0"/>
+            <TextBox Name="EMO_TEST" Height="23" TextWrapping="Wrap" Text="{Binding TestEmo}"  Grid.Column="3" Grid.Row="0"/>
         </Grid>
     </Grid>
 </Window>

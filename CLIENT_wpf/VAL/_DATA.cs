@@ -188,6 +188,17 @@ namespace CLIENT_wpf.VAL
             }
         }
 
+        private int _TestEmo;
+        public int TestEmo
+        {
+            get => _TestEmo;
+            set
+            {
+                _TestEmo = value;
+                OnPropertyChanged(nameof(TestEmo));
+            }
+        }
+
         #endregion
     }
 }
