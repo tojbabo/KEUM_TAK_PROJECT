@@ -5,17 +5,17 @@ ImagePreprocessing : Blurring, Rotation 추가
 Setting 은 아래와 같이 변경  
 모델 정확도 : 63% -> 65%  
 학습 데이터 : Train(25709), Validation(3589), Test(3590) 으로 재구성  
-#### 재구성 효과 : Train(95%), Test(63%) -> Train(67%), Test(65%) = Overfitting 완화  
+##### 재구성 효과 : Train(95%), Test(63%) -> Train(67%), Test(65%) = Overfitting 완화  
 
-##### Check
-1. Model 정확도 개선 필요  
-
-### Hyper Parameter Setting 
+#### Hyper Parameter Setting 
 Epochs ( 150 -> 200 )  
 Learning Rate ( 0.001 -> 0.01 )  
 Batch size ( 128 )  
 Activation Function ( ReLU )  
 Optimizer ( Momentum -> Adam )  
+
+##### Check
+1. Model 정확도 개선 필요  
 
 # 2020-03-03
 
