@@ -6,7 +6,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1234792C-A8CD-4AA1-88B9-8C4F2514A060}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>CLIENT_wpf</RootNamespace>
     <AssemblyName>CLIENT_wpf</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -93,13 +93,15 @@
     </ApplicationDefinition>
     <Compile Include="MODEL\STATE.cs" />
     <Compile Include="VAL\CLASS.cs" />
-    <Compile Include="VAL\MCC.cs" />
+    <Compile Include="VAL\Converter\ECC.cs" />
+    <Compile Include="VAL\Converter\EMOCC.cs" />
+    <Compile Include="VAL\Converter\MCC.cs" />
     <Compile Include="VAL\DLL.cs" />
     <Compile Include="VAL\CONSTANTS.cs" />
     <Compile Include="FUNC\EVENT.cs" />
     <Compile Include="FUNC\PROTOCOL.cs" />
     <Compile Include="FUNC\UTILITY.cs" />
-    <Compile Include="VAL\SCC.cs" />
+    <Compile Include="VAL\Converter\SCC.cs" />
     <Compile Include="VIEWMODEL\CTRL.cs" />
     <Compile Include="VAL\_DATA.cs" />
     <Compile Include="VAL\_MOTHER.cs" />
@@ -203,6 +205,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="__resource\haarcascade_frontalface_alt.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="__resource\question.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

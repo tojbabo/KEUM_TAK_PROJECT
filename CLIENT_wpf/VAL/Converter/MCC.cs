@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace CLIENT_wpf.VAL
+namespace CLIENT_wpf.VAL.Converter
 {
     // Main Connection Converter : 주 연결 관리
     public class MCC : IValueConverter

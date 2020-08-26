@@ -73,9 +73,9 @@
         <CheckBox x:Name="E2" Content="Disgust" HorizontalAlignment="Left" Margin="34,98,0,0" VerticalAlignment="Top"  Checked="E2_Checked" Unchecked="E2_Checked"/>
         <CheckBox x:Name="E3" Content="Fear" HorizontalAlignment="Left" Margin="34,126,0,0" VerticalAlignment="Top"  Checked="E3_Checked" Unchecked="E3_Checked"/>
         <CheckBox x:Name="E4" Content="Happy" HorizontalAlignment="Left" Margin="34,154,0,0" VerticalAlignment="Top" Checked="E4_Checked" Unchecked="E4_Checked"/>
-        <CheckBox x:Name="E5" Content="Neutral" HorizontalAlignment="Left" Margin="34,182,0,0" VerticalAlignment="Top"  Checked="E5_Checked" Unchecked="E5_Checked"/>
-        <CheckBox x:Name="E6" Content="Sad" HorizontalAlignment="Left" Margin="34,210,0,0" VerticalAlignment="Top"  Checked="E6_Checked" Unchecked="E6_Checked"/>
-        <CheckBox x:Name="E7" Content="Suprise" HorizontalAlignment="Left" Margin="34,238,0,0" VerticalAlignment="Top" Checked="E7_Checked" Unchecked="E7_Checked"/>
+        <CheckBox x:Name="E5" Content="Sad" HorizontalAlignment="Left" Margin="34,182,0,0" VerticalAlignment="Top"  Checked="E5_Checked" Unchecked="E5_Checked"/>
+        <CheckBox x:Name="E6" Content="Suprise" HorizontalAlignment="Left" Margin="34,210,0,0" VerticalAlignment="Top"  Checked="E6_Checked" Unchecked="E6_Checked"/>
+        <CheckBox x:Name="E7" Content="Netureal" HorizontalAlignment="Left" Margin="34,238,0,0" VerticalAlignment="Top" Checked="E7_Checked" Unchecked="E7_Checked"/>
 
 
     </Grid>

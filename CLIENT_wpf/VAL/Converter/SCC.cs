@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace CLIENT_wpf.VAL
+namespace CLIENT_wpf.VAL.Converter
 {
     // Sub Connection Converter : 서브 연결 관리
     public class SCC : IValueConverter

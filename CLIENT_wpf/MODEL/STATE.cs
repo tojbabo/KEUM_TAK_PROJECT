@@ -1,9 +1,4 @@
 ﻿using CLIENT_wpf.VAL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CLIENT_wpf.MODEL
 {
@@ -28,6 +23,17 @@ namespace CLIENT_wpf.MODEL
             {
                 _State = value;
                 OnPropertyChanged(nameof(State));
+            }
+        }
+
+        private int _Emo = -1;
+        public int Emo
+        {
+            get => _Emo;
+            set
+            {
+                _Emo = value;
+                OnPropertyChanged(nameof(Emo));
             }
         }
 

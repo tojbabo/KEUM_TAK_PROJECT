@@ -2,7 +2,7 @@
 #include <tchar.h>
 
 
-#define size1 230400+10
+#define size1 30000
 #define size2 921600+10
 
 using namespace std;

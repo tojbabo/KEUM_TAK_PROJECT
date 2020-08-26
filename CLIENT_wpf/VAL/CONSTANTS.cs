@@ -26,6 +26,10 @@ namespace CLIENT_wpf.VAL
         public const int STATE_GOOD = 6;
 
         public const int EVENT_BLKCOUT = 3;
+        public const int EVENT_STICKER = 4;
+        public const int EVENT_NONE = -1;
+
+
 
     }
 }

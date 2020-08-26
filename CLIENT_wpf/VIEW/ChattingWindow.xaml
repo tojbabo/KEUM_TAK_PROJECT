@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" Height="626.403" Width="1047.039"
         Title="{Binding Title}"  ResizeMode="NoResize"
-        xmlns:converter="clr-namespace:CLIENT_wpf.VAL"
+        xmlns:converter="clr-namespace:CLIENT_wpf.VAL.Converter"
         Closing="Window_Closing">
     <Window.Resources>
         <converter:MCC x:Key="Converter"></converter:MCC>
         <converter:SCC x:Key="Checking"></converter:SCC>
+        <converter:ECC x:Key="EConverter"></converter:ECC>
+        <converter:EMOCC x:Key="EmoConverter"></converter:EMOCC>
     </Window.Resources>
     <Grid >
 
@@ -17,22 +19,27 @@
         <Image x:Name="image2" Height="240" Width="320" Margin="33,280,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         <Button Content="나가기" HorizontalAlignment="Left" Margin="33,525,0,0" VerticalAlignment="Top" Width="126" Click="BTN_EXIT_Click" Height="43"/>
         <Button Content="화면 가리기" HorizontalAlignment="Left" Margin="227,525,0,0" VerticalAlignment="Top" Width="126" Click="BTN_BLKOUT_Click" Height="43"/>
+        <Button HorizontalAlignment="Left" BorderThickness="0" Margin="998,10,0,0" VerticalAlignment="Top" Width="25" Height="25" ToolTip="설정확인" Click="BTN_Setting_Show">
+            <Button.Background>
+                <SolidColorBrush Opacity="0"/>
+            </Button.Background>
+            <Image Source="/__resource/question.png"/>
+        </Button>
+
+        <Ellipse ToolTip="연결 안됨" Fill="Red" HorizontalAlignment="Left" Height="16" Margin="405,45,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding R, Converter={StaticResource Converter}}" />
+        <Ellipse ToolTip="연결 시도 중" Fill="Orange" HorizontalAlignment="Left" Height="16" Margin="425,45,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding Y, Converter={StaticResource Converter}}" />
+        <Ellipse ToolTip="연결 상태 좋음" Fill="Green" HorizontalAlignment="Left" Height="16" Margin="445,45,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding G, Converter={StaticResource Converter}}" />
 
 
-        <Ellipse ToolTip="연결 안됨" Fill="Red" HorizontalAlignment="Left" Height="16" Margin="405,31,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding R, Converter={StaticResource Converter}}" />
-        <Ellipse ToolTip="연결 시도 중" Fill="Orange" HorizontalAlignment="Left" Height="16" Margin="425,31,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding Y, Converter={StaticResource Converter}}" />
-        <Ellipse ToolTip="연결 상태 좋음" Fill="Green" HorizontalAlignment="Left" Height="16" Margin="445,31,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Opacity="{Binding G, Converter={StaticResource Converter}}" />
 
-
-
-        <TextBox x:Name="TBX_MESSAGE" Margin="404,55,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="619" Height="465" VerticalAlignment="Top" IsReadOnly="True"/>
+        <TextBox x:Name="TBX_MESSAGE" Margin="404,69,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" Width="619" Height="451" VerticalAlignment="Top" IsReadOnly="True"/>
         <TextBox x:Name="TBX_INPUT" HorizontalAlignment="Left" Height="43" Margin="404,525,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="483" KeyDown="TBX_INPUT_KeyDown"/>
         <Button Content="SEND" HorizontalAlignment="Left" Margin="892,525,0,0" VerticalAlignment="Top" Width="131" Click="BTN_MSG_SEND_Click" Height="43"/>
 
-        <TextBlock HorizontalAlignment="Left" Height="22" Margin="471,28,0,0" Text="{Binding Title}" VerticalAlignment="Top" Width="552" Background="#dddddd" Padding="10,3,0,0"/>
-        
-        <Ellipse Fill="{Binding MyState.State, Converter={StaticResource Checking}}" HorizontalAlignment="Left" Height="16" Margin="358,252,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Visibility="{Binding MyState.Connection, Converter={StaticResource Checking}}" />
-        <Ellipse Fill="{Binding YourState.State, Converter={StaticResource Checking}}" HorizontalAlignment="Left" Height="16" Margin="358,504,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Visibility="{Binding YourState.Connection, Converter={StaticResource Checking}}" />
+        <TextBlock HorizontalAlignment="Left" Height="22" Margin="471,42,0,0" Text="{Binding Title}" VerticalAlignment="Top" Width="552" Background="#dddddd" Padding="10,3,0,0"/>
+
+        <Ellipse Fill="{Binding MyState.State, Converter={StaticResource Checking}}" ToolTip="{Binding MyState.Emo, Converter={StaticResource EmoConverter} }" HorizontalAlignment="Left" Height="16" Margin="358,252,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Visibility="{Binding MyState.Connection, Converter={StaticResource Checking}}" />
+        <Ellipse Fill="{Binding YourState.State, Converter={StaticResource Checking}}" ToolTip="{Binding YourState.Emo, Converter={StaticResource EmoConverter}}" HorizontalAlignment="Left" Height="16" Margin="358,504,0,0"  VerticalAlignment="Top" Width="16" Stroke="Black" StrokeThickness="0.2" Visibility="{Binding YourState.Connection, Converter={StaticResource Checking}}" />
 
         <Grid x:Name="forDEBUG" Margin="405,450,18,77">
             <Grid.ColumnDefinitions>
@@ -54,5 +61,39 @@
             <TextBox Height="23" TextWrapping="Wrap" Text="{Binding NAME}"  Grid.Column="2" Grid.Row="0"/>
             <TextBox Name="EMO_TEST" Height="23" TextWrapping="Wrap" Text="{Binding TestEmo}"  Grid.Column="3" Grid.Row="0"/>
         </Grid>
+
+        <Grid Margin="670,32,35,442" Background="White" Opacity="0.8" Name="Grid_opt"  Visibility="Hidden">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Angry" Grid.Row="0" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Disgust" Grid.Row="1" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Fear" Grid.Row="2" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Happy" Grid.Row="3" Grid.Column="0"  Margin="5"/>
+            <TextBlock Text="Netural" Grid.Row="0" Grid.Column="2"  Margin="5"/>
+            <TextBlock Text="Sad" Grid.Row="1" Grid.Column="2"  Margin="5"/>
+            <TextBlock Text="Surprise" Grid.Row="2" Grid.Column="2"  Margin="5"/>
+
+
+            <TextBox Text="{Binding EAgry, Converter={StaticResource EConverter}}" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EDigu, Converter={StaticResource EConverter}}" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EFear, Converter={StaticResource EConverter}}" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EHapy, Converter={StaticResource EConverter}}" Grid.Row="3" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ENtur, Converter={StaticResource EConverter}}" Grid.Row="0" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ESad, Converter={StaticResource EConverter}}" Grid.Row="1" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ESprs, Converter={StaticResource EConverter}}" Grid.Row="2" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+        </Grid>
+
+
     </Grid>
 </Window>

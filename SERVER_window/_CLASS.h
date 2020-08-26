@@ -9,11 +9,11 @@
 using namespace std;
 
 class THREAD_ {
-	thread t;
 	int data[2];
 public:
+	thread t;
 	THREAD_* link;
-	THREAD_() { link = NULL; }
+
 	thread* get_thread(int Client_ONE, int Client_TWO) {
 		data[0] = Client_ONE;
 		data[1] = Client_TWO;
@@ -52,7 +52,8 @@ class USER {
 	int id;
 	int port;
 	int emotion;
-	THREAD_* head;
+	bool Runner;
+	THREAD_ head;
 	char name[20];
 public:
 	RW_LOCK lock;
@@ -67,29 +68,36 @@ public:
 	void release_thread();
 	// 유저의 아이디 반환
 	int get_id() { return id; }
+
+	void setting_user(int id_, int port_) {
+		id = id_;
+		port = port_;
+		Runner = true;
+	}
+
 	// 유저 아이디 설정
-	void set_id(int ID) { id = ID; }
+	void set_id(int ID) { id = ID; Runner = true; }
 	// 유저의 다음 포트 가져옴
 	int get_port(int dx=0) { 
 		port += dx;
 		return port; }
 	// 유저 포트 설정
 	void set_port(int PORT) { port = PORT; }
-	// 유저 기본 정보 입력
-	void input_data(int user_id, int user_port);
 	// 유저 이름 정보 가져옴
 	char* get_name() { return name; }
 	// 유저 이름 설정
 	void set_name(char* user_name);
 	// 유저에게 메시지 전달
 	void Send_Msg(char* msg_to_user);
+
+	bool getRunner() { return Runner; }
 };
 
 class COMMAND_CENTER {
 protected:
 	USER users[MAXIMUM_USER];
 public:
-	COMMAND_CENTER(int port = 9010);
+
 	// 새로 연결된 클라이언트에게 id와 포트번호를 통지하고 저장을 하는 함수
 	int Connect_New_Client(int new_client_id);
 	// 클라이언트가 종료될 때
@@ -107,8 +115,10 @@ public:
 	// 유저 이름 반환
 	char* Get_Name(int client_id);
 	// 유저 인덱스 혹은 아이디로 유저 객체 가져옴
-	USER Get_user_idx(int Client_idx);
-	USER Get_user_id(int Client_id);
+	USER* Get_user_idx(int Client_idx);
+	USER* Get_user_id(int Client_id);
+
+	void Setting_User(int port);
 
 };
 

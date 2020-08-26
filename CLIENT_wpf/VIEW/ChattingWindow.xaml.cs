@@ -34,8 +34,6 @@ namespace CLIENT_wpf.VIEW
         int ID;
         int PORT;
 
-        int EMO_my;
-        int EMO_you;
 
         VideoCapture cap;
 
@@ -56,8 +54,6 @@ namespace CLIENT_wpf.VIEW
 
             this.DataContext = CTRL.DATA;
             EMO = new EVENT();
-            EMO_my = 7;
-            EMO_you = 7;
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             CTRL.DATA.TestEmo = -1;
         }
@@ -78,8 +74,6 @@ namespace CLIENT_wpf.VIEW
 
             this.DataContext = CTRL.DATA;
             EMO = new EVENT();
-            EMO_my = 7;
-            EMO_you = 7;
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
             Connect_to_Server();
         }
@@ -93,17 +87,20 @@ namespace CLIENT_wpf.VIEW
             {
                 Room = room;
                 Room.InitializeEmo();
-                //Room.Show();
+                Room.Show();
             }
 
             CTRL.DATA.Title = Room.title;
             TBX_PORT.Text = Room.man;
 
             this.DataContext = CTRL.DATA;
+
+            Grid_opt.DataContext = room;
+
             EMO = new EVENT();
-            EMO_my = 7;
-            EMO_you = 7;
             CTRL.ConnectionStateChange(CONSTANTS.STATE_DISCONNECT);
+            CTRL.DATA.MyState.Emo = -1;
+            CTRL.DATA.YourState.Emo = -1;
             Connect_to_Server();
         }
 
@@ -120,6 +117,12 @@ namespace CLIENT_wpf.VIEW
             UTILITY.Release_thread(T_msg_recv);
             if (sock != null)
             {
+                byte[] buf;
+                buf = Encoding.Default.GetBytes("&,\n");
+                sock.Send(buf);
+
+
+
                 sock.Shutdown(SocketShutdown.Both);
                 sock.Close();
                 T_msg_recv.Join();
@@ -185,7 +188,10 @@ namespace CLIENT_wpf.VIEW
         #region UI 이벤트
         // SHOW 버튼 클릭시 (테스트용)
         private void Button_Click(object sender, RoutedEventArgs e)
-        {
+        {/*
+            byte[] buf;
+            buf = Encoding.Default.GetBytes("&,\n");
+            sock.Send(buf);*/
 
             Thread tt = new Thread(() => ForTheTest());
             tt.Start();
@@ -246,6 +252,13 @@ namespace CLIENT_wpf.VIEW
         }
         // --------------------------------------------------------------------- 여기까지 디버그용
 
+
+        private void BTN_Setting_Show(object sender, RoutedEventArgs e) {
+            if(Grid_opt.Visibility == Visibility.Visible)
+                Grid_opt.Visibility = Visibility.Hidden;
+            else
+                Grid_opt.Visibility = Visibility.Visible;
+        }
 
         private void BTN_EXIT_Click(object sender, RoutedEventArgs e)
         {
@@ -406,13 +419,13 @@ namespace CLIENT_wpf.VIEW
 
                 if (id == ID)
                 {
-                    Console.WriteLine("My emotion : " + emotion);
-                    EMO_my = emotion;
+                    //Console.WriteLine("My emotion : " + emotion);
+                    CTRL.DATA.MyState.Emo = emotion;
                 }
                 else
                 {
-                    Console.WriteLine("your emotion : " + emotion);
-                    EMO_you = emotion;
+                    //Console.WriteLine("your emotion : " + emotion);
+                    CTRL.DATA.YourState.Emo = emotion;
                 }
             }
             
@@ -431,6 +444,12 @@ namespace CLIENT_wpf.VIEW
                     }));
                 }
             }
+
+            // 유저 퇴장
+            else if(data[0] == '!')
+            {
+
+            }
             
             // 일반 채팅
             else
@@ -447,6 +466,8 @@ namespace CLIENT_wpf.VIEW
         {
             Console.WriteLine("[ChattingWindow]샌드 스레드 실행");
             
+            int event_temp;
+            int emo_temp;
             int size;
 
             cap = VideoCapture.FromCamera(CaptureDevice.Any, 0);
@@ -456,7 +477,6 @@ namespace CLIENT_wpf.VIEW
             CTRL.ConnectionStateChecking(CONSTANTS.STATE_CONNECTING, CTRL.DATA.MyState);
 
             Mat mat = new Mat();
-            CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
             while (isRun)
             {
                 cap.Read(mat);
@@ -474,27 +494,34 @@ namespace CLIENT_wpf.VIEW
                 if (!(DLL.DLL_IMG_SEND(b, t_ImgSend_Sock)))
                     continue;
 
-                
-                if (EMO_my != 7)
+
+                emo_temp = CTRL.DATA.MyState.Emo;
+                if (emo_temp != CONSTANTS.EVENT_NONE)
                 {
-                    Console.WriteLine("my emotion is : " + EMO_my);
-                    int temp;
-
-
-                    if(Room.EMO[EMO_my] == 3)
+                    event_temp = Room.EMO[CTRL.DATA.MyState.Emo];
+                    // 해당 감정에 이벤트가 없을 경우
+                    if (event_temp == 0 || event_temp == 1 || event_temp == 2)
+                    { }
+                    // 해당 감정 이벤트가 블락일 경우
+                    else if (event_temp == CONSTANTS.EVENT_BLKCOUT)
                     {
-                        temp = EMO_my;
-                    }else
-                    {
-                        temp = Room.EMO[EMO_my];
+                        mat.SetTo(0);
                     }
-                    Console.WriteLine("temp is : " + temp);
-
-                    mat = EMO.image_conversion(mat, temp);
+                    // 해당 감정 이벤트가 스티커일 경우
+                    else if (event_temp == CONSTANTS.EVENT_STICKER)
+                    {
+                        mat = EMO.image_conversion(mat, emo_temp);
+                    }
+                    // 그 외의 경우
+                    else
+                    {
+                        mat = EMO.image_conversion(mat, event_temp);
+                    }
                     CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
                 }
                 else CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.MyState);
-                //mat = EMO.image_conversion(mat, 1);
+
+
 
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -506,7 +533,6 @@ namespace CLIENT_wpf.VIEW
                     }
                     catch (Exception e) { }
                 }));
-                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.MyState);
                 int c = Cv2.WaitKey(1000 / 20);
                 if (c != -1)
                     break;
@@ -524,17 +550,17 @@ namespace CLIENT_wpf.VIEW
         private void THREAD_IMG_RECV(int t_ImgRecv_Sock)
         {
             Console.WriteLine("[ChattingWindow]리시브 스레드 실행");
+            CTRL.ConnectionStateChecking(CONSTANTS.STATE_CONNECTING, CTRL.DATA.YourState);
             
+            int event_temp;
+            int emo_temp;
+
             Mat mat;
             IntPtr ptr;
-            CTRL.ConnectionStateChecking(CONSTANTS.STATE_CONNECTING, CTRL.DATA.YourState);
 
 
-
-            CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.YourState);
             while (isRun)
             {
-
                 ptr = DLL.DLL_IMG_RECV(t_ImgRecv_Sock);
 
                 if (ptr == null)
@@ -547,14 +573,30 @@ namespace CLIENT_wpf.VIEW
 
                 if (mat.Cols != 320 && mat.Rows != 240) { continue; }
 
-                
-                //CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
-
-
-                if (EMO_you != 7)
+                emo_temp = CTRL.DATA.YourState.Emo;
+                if (emo_temp != CONSTANTS.EVENT_NONE)
                 {
-                    mat = EMO.image_conversion(mat, EMO_you);
+                    event_temp = Room.EMO[emo_temp];
+                    // 해당 감정에 이벤트가 없을 경우
+                    if (event_temp == 0 || event_temp == 1 || event_temp == 2)
+                    { }
+                    // 해당 감정 이벤트가 블락일 경우
+                    else if (event_temp == CONSTANTS.EVENT_BLKCOUT)
+                    {
+                        mat.SetTo(0);
+                    }
+                    // 해당 감정 이벤트가 스티커일 경우
+                    else if (event_temp == CONSTANTS.EVENT_STICKER)
+                    {
+                        mat = EMO.image_conversion(mat, emo_temp);
+                    }
+                    // 그 외의 경우
+                    else
+                    {
+                        mat = EMO.image_conversion(mat, event_temp);
+                    }
                     CTRL.ConnectionStateChecking(CONSTANTS.STATE_GOOD, CTRL.DATA.YourState);
+
                 }
                 else CTRL.ConnectionStateChecking(CONSTANTS.STATE_SOSO, CTRL.DATA.YourState);
 

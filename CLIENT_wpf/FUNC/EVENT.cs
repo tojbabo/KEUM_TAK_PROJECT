@@ -65,14 +65,18 @@ namespace CLIENT_wpf.FUNC
             if (faces.Length == 0) { } //Console.WriteLine("No Face In Images");
             else
             {
-                x = faces[0].Location.X;
-                y = faces[0].Location.Y;
-                w = faces[0].BottomRight.X - x;
-                h = faces[0].BottomRight.Y - y;
+                x = faces[0].Location.X - 20;
+                if (x < 0) x = 0;
+                y = faces[0].Location.Y - 20;
+                if (y < 0) y = 0;
+                w = faces[0].BottomRight.X - x + 40;
+                if (x + w > img.Width) w = img.Width - x;
+                h = faces[0].BottomRight.Y - y + 40;
+                if (y + h > img.Height) h = img.Height - y;
 
                 Mat cut = img.SubMat(new Rect(x, y, w, h));
                 Rect[] eyes = eyeCascade.DetectMultiScale(cut);
-                if (eyes.Length == 0) Console.WriteLine("No eyes In Image");
+                if (eyes.Length == 0) { } //Console.WriteLine("No eyes In Image");
 
                 Mat YCrCb = new Mat();
                 Cv2.CvtColor(cut, YCrCb, ColorConversionCodes.BGR2YCrCb);

@@ -1,12 +1,5 @@
 #include "_CLASS.h"
 
-	
-COMMAND_CENTER::COMMAND_CENTER(int port) {
-	for (int i = 0; i < MAXIMUM_USER; i++) {
-		users[i].input_data(-1, port + (i * 10) + 1);
-	}
-}
-
 	// 새로 연결된 클라이언트에게 id와 포트번호를 통지하고 저장을 하는 함수
 int COMMAND_CENTER::Connect_New_Client(int client_id) {
 	//int i = Get_blank_index();
@@ -72,6 +65,7 @@ void COMMAND_CENTER::Check_Client(int target, int port) {
 		}
 	}
 }
+
 void  COMMAND_CENTER::Input_name(char* name, int id) {
 	int index = Get_index(id);
 	users[index].set_name(name);
@@ -97,10 +91,16 @@ char* COMMAND_CENTER::Get_Name(int id) {
 	
 	return temp;
 }
-USER COMMAND_CENTER::Get_user_idx(int index) {
-	return users[index];
+USER* COMMAND_CENTER::Get_user_idx(int index) {
+	return &users[index];
 }
 
-USER COMMAND_CENTER::Get_user_id(int id) {
-	return users[Get_index(id)];
+USER* COMMAND_CENTER::Get_user_id(int id) {
+	return &users[Get_index(id)];
+}
+
+void COMMAND_CENTER::Setting_User(int port) {
+	for (int i = 0; i < MAXIMUM_USER; i++) {
+		users[i].setting_user(-1, port + (i * 10) + 1);
+	}
 }

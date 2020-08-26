@@ -4,8 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CLIENT_wpf.VIEW"
+        xmlns:converter="clr-namespace:CLIENT_wpf.VAL.Converter"
         mc:Ignorable="d"
         Title="디테일" Height="292.25" Width="304.291">
+    <Window.Resources>
+        <converter:ECC x:Key="Converter"></converter:ECC>
+    </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="1.5*"/>
@@ -53,13 +57,13 @@
             <TextBlock Text="Surprise" Grid.Row="2" Grid.Column="2"  Margin="5"/>
 
 
-            <TextBox Text="{Binding EAgry}" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Margin="2"/>
-            <TextBox Text="{Binding EDigu}" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="2"/>
-            <TextBox Text="{Binding EFear}" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Margin="2"/>
-            <TextBox Text="{Binding EHapy}" Grid.Row="3" Grid.Column="1" IsReadOnly="True" Margin="2"/>
-            <TextBox Text="{Binding ENtur}" Grid.Row="0" Grid.Column="4" IsReadOnly="True" Margin="2"/>
-            <TextBox Text="{Binding ESad}" Grid.Row="1" Grid.Column="4" IsReadOnly="True" Margin="2"/>
-            <TextBox Text="{Binding ESprs}" Grid.Row="2" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EAgry, Converter={StaticResource Converter}}" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EDigu, Converter={StaticResource Converter}}" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EFear, Converter={StaticResource Converter}}" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding EHapy, Converter={StaticResource Converter}}" Grid.Row="3" Grid.Column="1" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ENtur, Converter={StaticResource Converter}}" Grid.Row="0" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ESad, Converter={StaticResource Converter}}" Grid.Row="1" Grid.Column="4" IsReadOnly="True" Margin="2"/>
+            <TextBox Text="{Binding ESprs, Converter={StaticResource Converter}}" Grid.Row="2" Grid.Column="4" IsReadOnly="True" Margin="2"/>
 
         </Grid>
         <Grid Grid.Row="2">

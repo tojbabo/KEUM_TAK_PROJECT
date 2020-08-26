@@ -32,11 +32,11 @@ namespace CLIENT_wpf.VAL
         public string title { get; set; }
         public string man { get; set; }
 
-        public int EAgry { get; set; }  // 3
-        public int EDigu { get; set; } // 4
-        public int EFear { get; set; } // 8
-        public int EHapy { get; set; }  //0
-        public int ENtur { get; set; }  // 1
+        public int EAgry { get; set; } 
+        public int EDigu { get; set; } 
+        public int EFear { get; set; } 
+        public int EHapy { get; set; }  
+        public int ENtur { get; set; } 
         public int ESad { get; set; }
         public int ESprs { get; set; }
 
@@ -53,9 +53,9 @@ namespace CLIENT_wpf.VAL
             Console.WriteLine($"------- Disgust Event  : {EDigu}");
             Console.WriteLine($"------- Fear Event     : {EFear}");
             Console.WriteLine($"------- Happy Event    : {EHapy}");
-            Console.WriteLine($"------- Neture Event   : {ENtur}");
             Console.WriteLine($"------- Sad Event      : {ESad}");
             Console.WriteLine($"------- Surprise Event : {ESprs}");
+            Console.WriteLine($"------- Neture Event   : {ENtur}");
             Console.WriteLine($"---------------------------------------");
         }
         public void InitializeEmo()
@@ -64,9 +64,9 @@ namespace CLIENT_wpf.VAL
             EMO[1] = EDigu;
             EMO[2] = EFear;
             EMO[3] = EHapy;
-            EMO[4] = ENtur;
-            EMO[5] = ESad;
-            EMO[6] = ESprs;
+            EMO[4] = ESad;
+            EMO[5] = ESprs;
+            EMO[6] = ENtur;
         }
     }
 }

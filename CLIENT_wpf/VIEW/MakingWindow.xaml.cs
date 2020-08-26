@@ -82,7 +82,8 @@ namespace CLIENT_wpf.VIEW
                 new item() { name = "없음", val = "0" },
                 new item() { name = "강퇴", val = "1" },
                 new item() { name = "필터링", val = "2" },
-                new item() { name = "스티커", val = "3" },
+                new item() { name = "블랙", val = "3" },
+                new item() { name = "스티커", val = "4" },
 
 
                 new item() { name = "붉은 얼굴", val = "7" },

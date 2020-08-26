@@ -71,6 +71,7 @@ ROOM CORE::Create_Room(char* str) {
 	}
 	else {
 		sscanf(ptr, "%s", _passwd);
+		ptr = strtok(NULL, ",");
 	}
 	string passwd(_passwd);
 	string title(_title);
@@ -85,11 +86,11 @@ ROOM CORE::Create_Room(char* str) {
 		temp->emo[2] = atoi(ptr);
 		ptr = strtok(NULL, ","); // Çà 4
 		temp->emo[3] = atoi(ptr);
-		ptr = strtok(NULL, ","); // ÀÚ 5
+		ptr = strtok(NULL, ","); // ½½ 5
 		temp->emo[4] = atoi(ptr);
-		ptr = strtok(NULL, ","); // ½½ 6
+		ptr = strtok(NULL, ","); // ³î 6
 		temp->emo[5] = atoi(ptr);
-		ptr = strtok(NULL, ","); // ³î 7
+		ptr = strtok(NULL, ","); // ÀÚ 7
 		temp->emo[6] = atoi(ptr);
 	}
 	

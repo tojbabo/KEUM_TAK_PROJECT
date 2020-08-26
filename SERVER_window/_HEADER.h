@@ -1,7 +1,7 @@
 #ifndef HEADER
 #define HEADER
 
-#define VERSION "1.4.0"
+#define VERSION "1.4.1"
 #define COMMENT "최종 발표 전 - AI 통신 안정화"
 
 
@@ -36,7 +36,7 @@
 //#define IP "220.149.128.87"
 //#define PORT 9000
 
-#define MAXIMUM_USER 4
+#define MAXIMUM_USER 2
 
 // ^ : 클라이언트의 이름 지정
 // $ : 새로운 접속에 대한 신호 - 새로운 접속 / 새로 연결된 클라이언트에 대한 요청

@@ -4,18 +4,21 @@
 using namespace std;
 
 int main(int num, char* args[]) {
-
+	
 	cout << VERSION << endl;
 	cout << COMMENT << endl;
 	int port = 9000;
 	int opt[7] = { 0,0,0,0,0,0,0 };
 
 	system("title 부모 프로세스");
-	cout << "ip : " << IP << endl;
-	cout << "port : " << port << endl;
+
+
+	//return LOGIC_chatting(port, opt);
 
 	if (num <= 1) {
-		cout << "default\n";
+		//cout << " port 입력 >> ";
+		//cin >> port;
+
 		return LOGIC_watting(port);
 	}
 	else { 
