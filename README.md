@@ -1,5 +1,8 @@
 # KEUM_TAK_PROJECT
+서버 클라이언트 통합
+#
 프로젝트 속성 - 구성 속성 - 디버깅 - 환경 <PATH=C:\Temp\opencv\build\x64\vc15\bin;%PATH%> 내용을 추가해 주어야 한다.
+
 #
 # - 0818
  - 서버와 AI연동 완료
