@@ -7,5 +7,6 @@
   
 인공지능  
 [artificail_intelligence]  :https://github.com/tojbabo/KEUM_TAK_PROJECT/tree/artificial_intelligence  
-  
+
+- 감정인식 개발자 모드 화면  
 ![image](https://user-images.githubusercontent.com/35211944/104085616-47501480-5294-11eb-8890-5450c1863011.png)
