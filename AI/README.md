@@ -1,4 +1,7 @@
 신경망 훈련을위한 데이터 세트는 Kaggle에서 호스팅되는 Carrier and Courville Facial Expression Dataset에서 가져 왔습니다.
+  
+# 네트워크 구성도    
+![image](https://user-images.githubusercontent.com/35211944/104085742-1c19f500-5295-11eb-92af-880ef0598f79.png)
 
 # 2020-07-20
 ImagePreprocessing : Blurring, Rotation 추가  
